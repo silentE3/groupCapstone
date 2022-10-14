@@ -12,9 +12,7 @@ file1.close();
 #This part consists of printing out every single line at once.
 print(content)
 
-#This part consists of printing out every single line in the content(list) by index
+#This part consists of printing out a specific line in the content(list) by index
 print(content[0])
-print(content[1])
-print(content[2])
 
 
