@@ -1,3 +1,0 @@
-Hello there!!
-This is a test text file for Task 16.
-The total number of lines should be 3.
