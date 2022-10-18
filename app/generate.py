@@ -7,6 +7,9 @@ from typing import List
 
 
 class UserRecord:
+    """
+    Describes a single record in the ingested dataset
+    """
     asurite = str
     preferred_students = List[str]
     disliked_students = List[str]
