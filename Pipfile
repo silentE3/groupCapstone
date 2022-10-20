@@ -9,10 +9,12 @@ pylint = "*"
 "pytest.cov" = "*"
 pytest-cov = "*"
 click = "*"
+pytest-mock = "*"
 
 [dev-packages]
 yapf = "*"
 pandas = "*"
+autopep8 = "*"
 
 [requires]
 python_version = "3.10"
