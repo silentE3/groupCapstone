@@ -25,7 +25,7 @@ class UserRecord:
 def format_records_as_table(records: list[UserRecord]) -> list[list[str]]:
     """
     takes in a list of user records
-    and generates a 2d array that can be used for output to a csv file.
+    and generates a 2d array(list) that can be used for output to a csv file.
 
     ### Rows
     1: asurite

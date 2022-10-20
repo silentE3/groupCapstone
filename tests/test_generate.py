@@ -28,14 +28,18 @@ def test_format_records_as_table():
     tests formatting a list of userrecords as a table
     '''
 
-    records = [generate.UserRecord("zach", ['charlie'], ['john'],
+    records = [generate.UserRecord("zach", ['charlie', 'carl'], ['john'],
                                    {
                                     1: ["tuesday"], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [], 8: []
                                    })]
     table = generate.format_records_as_table(records)
-    assert table[0][0] == 'zach'
-    assert table[0][1] == 'tuesday'
-    assert table[0][9] == 'charlie'
+    assert table[0][0] == 'zach' # asurite set correctly
+    assert table[0][1] == 'tuesday' # availability mapped correctly
+    assert table[0][2] == '' # empty availability set correct
+    assert table[0][9] == 'charlie' # preferred person set correct
+    assert table[0][10] == 'carl'
+
+    assert table[0][14] == 'john' # disliked person set correctly
 
 
 def test_get_random_availability():
