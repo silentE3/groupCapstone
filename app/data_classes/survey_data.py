@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import timeslot
+
 
 @dataclass
 class SurveyData:
@@ -8,5 +8,5 @@ class SurveyData:
     timezone: str
     preffered_students: list[str]
     disliked_students: list[str]
-    availability: list[timeslot.TimeSlot]
+    availability: dict[str, bool]
 

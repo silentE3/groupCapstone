@@ -1,8 +1,10 @@
 from dataclasses import dataclass
+from typing import TypedDict
 
 @dataclass
-class Config:
+class GroupingConfig(TypedDict):
     """Data class for configuration information"""
+    class_name: str
     student_id_field_name: str
     timezone_field_name: str
     preferred_students_field_names: list[str]

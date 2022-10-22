@@ -5,7 +5,7 @@ import click
 from app import generate
 from app.file import output
 
-@click.group("gen")
+@click.command("gen")
 @click.option('--filename', default="dataset.csv")
 @click.option('--count', default=20)
 def gen(filename: str, count: int):

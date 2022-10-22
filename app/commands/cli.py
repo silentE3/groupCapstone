@@ -1,7 +1,7 @@
 '''
 cli contains the main group for commands
 '''
-import imp
+
 import click
 from app.commands import gen
 from app.commands import grouping
