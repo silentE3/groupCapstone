@@ -1,5 +1,6 @@
+# pylint: skip-file
+'''Class for survey data'''
 from dataclasses import dataclass
-
 
 @dataclass
 class SurveyData:
@@ -9,4 +10,3 @@ class SurveyData:
     preferred_students: list[str]
     disliked_students: list[str]
     availability: dict[str, list[str]]
-

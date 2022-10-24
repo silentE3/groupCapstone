@@ -1,5 +1,7 @@
-from app.commands import gen
+'''Test for the gen command'''
 from click.testing import CliRunner
+from app.commands import gen
+
 
 def test_gen(mocker):
   '''
@@ -10,5 +12,4 @@ def test_gen(mocker):
   mocker.patch('app.generate.format_records_as_table')
   mocker.patch('app.file.output.output_to_csv')
   res = runner.invoke(gen.gen, ['--filename', 'test.csv', '--count', '10'])
-  
   assert res.exit_code == 0

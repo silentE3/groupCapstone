@@ -1,4 +1,4 @@
-"""This will read in the survey data from the dataset CSV file and parse it based on the 
+"""This will read in the survey data from the dataset CSV file and parse it based on the
 grouping config. The first line of the dataset data is assumed to be header data."""
 
 import csv

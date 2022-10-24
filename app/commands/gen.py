@@ -22,6 +22,3 @@ def gen(filename: str, count: int):
         'disliked 1', 'disliked 2', 'disliked 3'
     ]
     output.output_to_csv(headers, body, filename)
-
-
-
