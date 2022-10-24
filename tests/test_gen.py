@@ -9,6 +9,6 @@ def test_gen(mocker):
   mocker.patch('app.generate.generate_random_user_records')
   mocker.patch('app.generate.format_records_as_table')
   mocker.patch('app.file.output.output_to_csv')
-  res = runner.invoke(gen.gen, ['dataset', '--filename', 'test.csv', '--count', '10'])
+  res = runner.invoke(gen.gen, ['--filename', 'test.csv', '--count', '10'])
   
   assert res.exit_code == 0

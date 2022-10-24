@@ -17,7 +17,7 @@ class SurveyDataReader():
         '''
         loads the data from the survey
         '''
-        with open(data_file_path, 'r', encoding='utf-8') as data_file:
+        with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
             reader = csv.DictReader(data_file)
             surveys: list[survey_data.SurveyData] = []
             for row in reader:
