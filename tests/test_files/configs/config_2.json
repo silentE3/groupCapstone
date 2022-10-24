@@ -1,0 +1,11 @@
+{
+    "class_name" : "SER401",
+    "student_id_field_name" : "ASUrite ID",
+    "timezone_field_name" : "Timezone",
+    "preferred_students_field_names" : ["Preferred Student 1","Preferred Student 2","Preferred Student 3","Preferred Student 4","Preferred Student 5"],
+    "disliked_students_field_names": ["Disliked Student 1","Disliked Student 2","Disliked Student 3"],
+    "availability_field_names": [ "Sunday - 0:00 AM - 3:00 AM", "Sunday - 3:00 AM - 6:00 AM", "Sunday - 6:00 AM - 9:00 AM", "Sunday - 9:00 AM - 12:00 PM", "Sunday - 12:00 PM - 3:00 PM", "Sunday - 3:00 PM - 6:00 PM", "Sunday - 6:00 PM - 9:00 PM", "Sunday - 9:00 PM - 12:00 PM", "Monday - 0:00 AM - 3:00 AM", "Monday - 3:00 AM - 6:00 AM", "Monday - 6:00 AM - 9:00 AM", "Monday - 9:00 AM - 12:00 PM", "Monday - 12:00 PM - 3:00 PM", "Monday - 3:00 PM - 6:00 PM", "Monday - 6:00 PM - 9:00 PM", "Monday - 9:00 PM - 12:00 PM", "Tuesday - 0:00 AM - 3:00 AM", "Tuesday - 3:00 AM - 6:00 AM", "Tuesday - 6:00 AM - 9:00 AM", "Tuesday - 9:00 AM - 12:00 PM", "Tuesday - 12:00 PM - 3:00 PM", "Tuesday - 3:00 PM - 6:00 PM", "Tuesday - 6:00 PM - 9:00 PM", "Tuesday - 9:00 PM - 12:00 PM", "Wednesday - 0:00 AM - 3:00 AM", "Wednesday - 3:00 AM - 6:00 AM", "Wednesday - 6:00 AM - 9:00 AM", "Wednesday - 9:00 AM - 12:00 PM", "Wednesday - 12:00 PM - 3:00 PM", "Wednesday - 3:00 PM - 6:00 PM", "Wednesday - 6:00 PM - 9:00 PM", "Wednesday - 9:00 PM - 12:00 PM", "Thursday - 0:00 AM - 3:00 AM", "Thursday - 3:00 AM - 6:00 AM", "Thursday - 6:00 AM - 9:00 AM", "Thursday - 9:00 AM - 12:00 PM", "Thursday - 12:00 PM - 3:00 PM", "Thursday - 3:00 PM - 6:00 PM", "Thursday - 6:00 PM - 9:00 PM", "Thursday - 9:00 PM - 12:00 PM", "Friday - 0:00 AM - 3:00 AM", "Friday - 3:00 AM - 6:00 AM", "Friday - 6:00 AM - 9:00 AM", "Friday - 9:00 AM - 12:00 PM", "Friday - 12:00 PM - 3:00 PM", "Friday - 3:00 PM - 6:00 PM", "Friday - 6:00 PM - 9:00 PM", "Friday - 9:00 PM - 12:00 PM", "Saturday - 0:00 AM - 3:00 AM", "Saturday - 3:00 AM - 6:00 AM", "Saturday - 6:00 AM - 9:00 AM", "Saturday - 9:00 AM - 12:00 PM", "Saturday - 12:00 PM - 3:00 PM", "Saturday - 3:00 PM - 6:00 PM", "Saturday - 6:00 PM - 9:00 PM", "Saturday - 9:00 PM - 12:00 PM" ],
+    "min_group_size": 4,
+    "max_group_size": 6,
+    "grouping_passes": 2
+}

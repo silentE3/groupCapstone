@@ -5,16 +5,10 @@ import click
 from app import generate
 from app.file import output
 
-@click.group("gen")
-def gen():
-    '''
-    commands for generating datasets
-    '''
-
-@gen.command("dataset")
+@click.command("gen")
 @click.option('--filename', default="dataset.csv")
 @click.option('--count', default=20)
-def dataset(filename: str, count: int):
+def gen(filename: str, count: int):
     '''
     dataset generates a new sample dataset containing
     the necessary criteria to use for running the algorithm
