@@ -2,10 +2,7 @@
 entrypoint to the application
 """
 
-def start():
-    """
-    serves as the entrypoint for this application
-    """
-    print("made it here")
+from app.commands import cli
 
-start()
+if __name__ == '__main__':
+    cli.cli()

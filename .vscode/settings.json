@@ -2,7 +2,13 @@
   "python.testing.pytestArgs": [
     "tests"
   ],
-  "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
-  "python.formatting.provider": "yapf"
+  "python.linting.enabled": true,
+  "python.testing.unittestEnabled": false,
+<<<<<<< .merge_file_yYQ8AQ
+  "pylint.importStrategy": "fromEnvironment"
+=======
+  "pylint.importStrategy": "fromEnvironment",
+  "python.analysis.typeCheckingMode": "basic"
+>>>>>>> .merge_file_CVN6OI
 }
