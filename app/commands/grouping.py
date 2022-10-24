@@ -2,7 +2,9 @@
 group contains all the commands for reading in the .csv data files and generating groups.
 Also includes reading in the configuration file.
 '''
+import os
 import click
+from app.data_classes.survey_data import SurveyData
 from app.file import read_config, read_dataset
 
 
@@ -14,8 +16,25 @@ def group(datafile: str, outputfile: str, configfile: str):
     '''
     commands for reading input and config
     '''
+
+    if not os.path.exists(datafile):
+        raise click.BadOptionUsage('--datafile',
+                                   f'no datafile found in the given path: "{datafile}"')
+
+    if not os.path.exists(configfile):
+        raise click.BadOptionUsage(
+            '--configfile', f'no config file found in the given path "{configfile}"')
+
     config_data = read_config.read_config_json(configfile)
-    surveys = read_dataset.load_survey_data_csv(datafile, config_data)
-    print(f"Surveys loaded: {len(surveys)}.")
-    print(surveys)
+    reader = read_dataset.SurveyDataReader(config_data)
+
+    data = reader.load(datafile)
+
+    row: SurveyData
+    for row in data:
+        print(row.student_id)
+        print(row.availability)
+        print(row.disliked_students)
+        print(row.preferred_students)
+
     print(outputfile)

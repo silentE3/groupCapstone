@@ -13,3 +13,4 @@ class GroupingConfig(TypedDict):
     min_group_size: int
     max_group_size: int
     grouping_passes: int
+    
