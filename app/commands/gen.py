@@ -5,6 +5,7 @@ import click
 from app import generate
 from app.file import output
 
+<<<<<<< .merge_file_Kta8I7
 @click.group("gen")
 def gen():
     '''
@@ -15,6 +16,12 @@ def gen():
 @click.option('--filename', default="dataset.csv")
 @click.option('--count', default=20)
 def dataset(filename: str, count: int):
+=======
+@click.command("gen")
+@click.option('--filename', default="dataset.csv")
+@click.option('--count', default=20)
+def gen(filename: str, count: int):
+>>>>>>> .merge_file_Hfh9M8
     '''
     dataset generates a new sample dataset containing
     the necessary criteria to use for running the algorithm

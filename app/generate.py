@@ -2,7 +2,11 @@
 generate contains the methods to generate a dataset for use in the application
 """
 
+<<<<<<< .merge_file_HoZhwr
 from dataclasses import dataclass
+=======
+from dataclasses import dataclass, field
+>>>>>>> .merge_file_1uRzGY
 from random import randint
 
 
@@ -11,6 +15,7 @@ class UserRecord:
     """
     Describes a single record in the ingested dataset
     """
+<<<<<<< .merge_file_HoZhwr
     def __init__(self,
                  asurite: str = "",
                  preferred_students: list[str] = None,
@@ -20,6 +25,12 @@ class UserRecord:
         self.preferred_students = preferred_students
         self.disliked_students = disliked_students
         self.days_available_by_time = days_available_by_time
+=======
+    asurite: str = field(default_factory=str)
+    preferred_students: list[str] = field(default_factory=list)
+    disliked_students: list[str] = field(default_factory=list)
+    days_available_by_time: dict[int, list[str]] = field(default_factory=dict)
+>>>>>>> .merge_file_1uRzGY
 
 
 def format_records_as_table(records: list[UserRecord]) -> list[list[str]]:
@@ -27,7 +38,11 @@ def format_records_as_table(records: list[UserRecord]) -> list[list[str]]:
     takes in a list of user records
     and generates a 2d array(list) that can be used for output to a csv file.
 
+<<<<<<< .merge_file_HoZhwr
     ### Rows
+=======
+    # Rows
+>>>>>>> .merge_file_1uRzGY
     1: asurite
     2-10: availability - 8 fields for 3 hour increments during the day
     11-15: preferred students - 5 fields for up to 5 preferred students
