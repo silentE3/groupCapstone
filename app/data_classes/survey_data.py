@@ -10,3 +10,4 @@ class SurveyData:
     preferred_students: list[str]
     disliked_students: list[str]
     availability: dict[str, list[str]]
+    
