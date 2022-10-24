@@ -1,4 +1,4 @@
-# pylint: skip-file
+
 '''Class for survey data'''
 from dataclasses import dataclass
 

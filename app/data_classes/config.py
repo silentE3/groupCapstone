@@ -1,4 +1,4 @@
-# pylint: skip-file
+
 '''Class for the config information'''
 from dataclasses import dataclass
 from typing import TypedDict
