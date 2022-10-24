@@ -1,0 +1,8 @@
+The agreed upon architectural design choices are as follows:
+
+A single command line application that will perform both grouping and scoring functions
+The application will accept command line arguments and will not request any input from the user while running
+The application will read settings from a config file (other than what is specified at the command line)
+The application will be programmed in Python
+We will use the Click Python package to create the command line interface
+We will use pyinstaller to package the tool for distribution and installation
