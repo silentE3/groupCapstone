@@ -1,0 +1,7 @@
+For the output CSV file, the layout will consist of the following the columns (in that order): Group ID, Team Member # (each in a different column), 
+Disliked pairings, Overlapping Time Slots, and Number of prefered pairs.
+
+For Group ID, it will have the group number which will point to the topic assigned to the group.
+For Team Members, each column will have the name of each member of the group.
+For the Disliked pairings column, I would suggest that having a list of pairings that have a dislike for a group member (if any) and put them on
+one line separated by /. For each pairing, it will 
