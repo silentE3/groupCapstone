@@ -38,3 +38,4 @@ def group(datafile: str, outputfile: str, configfile: str):
         print(row.preferred_students)
 
     print(outputfile)
+

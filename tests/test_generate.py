@@ -39,7 +39,7 @@ def test_format_records_as_table():
     assert table[0][9] == 'charlie' # preferred person set correct
     assert table[0][10] == 'carl'
 
-    assert table[0][14] == 'john' # disliked person set correctly
+    assert table[0][14] == 'john' # disliked person set correctly45
 
 
 def test_get_random_availability():

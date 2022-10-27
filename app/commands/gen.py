@@ -4,6 +4,8 @@ gen contains all of the commands in the gen subgroup
 import click
 from app import generate
 from app.file import output
+from app.algorithm import ga, models
+
 
 @click.command("gen")
 @click.option('--filename', default="dataset.csv")
@@ -21,4 +23,12 @@ def gen(filename: str, count: int):
         'preferred 2', 'preferred 3', 'preferred 4', 'preferred 5',
         'disliked 1', 'disliked 2', 'disliked 3'
     ]
+
+    groups = ga.grouping_algorithm(user_records, 4)
+    for g in groups:
+        print()
+        print(f"meets availability: {g.meets_availability_requirement()}")
+        print(f"meets dislike requirement: {models.meets_dislike_requirement(g.members)}")
+        for u in g.members:
+            print(u.asurite)
     output.output_to_csv(headers, body, filename)
