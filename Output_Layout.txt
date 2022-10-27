@@ -11,4 +11,6 @@ one line separated by /. For each pairing, it will have the ASURITE ID/name of a
 For Overlapping Time Slots, I would suggest having a list of time slots in which all members are available. Each entry in the list will have the day followed by the 
 actual time slot. Each entry will be separated by /.
 
-For number of prefered pairs, the column will have the total number of prefered pairs made by the team members in the group.
+For number of prefered pairs, the column will have the total number of prefered pairs made by the team members in the group. I would suggest having the total number of prefered pairs 
+or having the total number and a list of the prefered pairs. For the list, it will have the pairs look like this (ex: (A1 A4)).
+
