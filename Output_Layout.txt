@@ -1,4 +1,4 @@
-For the output CSV file, the layout will consist of the following the columns (in that order): Group ID, Team Member # (each in a different column), 
+For the output CSV file, the layout will consist of the following columns (in this order): Group ID, Team Member # (each in a different column), 
 Disliked pairings, Overlapping Time Slots, and Number of prefered pairs.
 
 For Group ID, the column will have the group number which will point to the topic assigned to the group.
@@ -8,9 +8,24 @@ For Team Members, each column will have the name/ASURITE ID of each member of th
 For the Disliked pairings column, I would suggest having a list of pairings that have a dislike for a group member (if any) and put them on
 one line separated by /. For each pairing, it will have the ASURITE ID/name of a team member + "dislikes " + ASURITE ID/name of a team member the first one dislikes.
 
-For Overlapping Time Slots, I would suggest having a list of time slots in which all members are available. Each entry in the list will have the day followed by the 
+For Overlapping Time Slots column, I would suggest having a list of time slots in which all members are available. Each entry in the list will have the day followed by the 
 actual time slot. Each entry will be separated by /.
 
-For number of prefered pairs, the column will have the total number of prefered pairs made by the team members in the group. I would suggest having the total number of prefered pairs 
-or having the total number and a list of the prefered pairs. For the list, it will have the pairs look like this (ex: (A1 A4)).
+For number of prefered pairs column, the column will have the total number of prefered pairs made by the team members in the group. I would suggest having the total number of prefered pairs 
+or having the total number and a list of the prefered pairs. For the list, it will have the total number of pairs followed by the pairs that look like this (ex: (A1 A4)).
 
+
+For the Output Excel file, the layout will consist of the following columns (in this order): Group ID, Team Member # (each in a different column),
+Disliked pairings (each in a different column), Overlapping Time Slots (each in a different column), and Number of prefered pairs.
+
+For Group ID, the column will have the group number which will point to the topic assigned to the group.
+
+For Team Members, each column will have the name/ASURITE ID of each member of the group.
+
+For the Disliked pairings columns, I would suggest having each column consist of one of the pairings that have a dislike for a group member (if any). 
+For each pairing, it will have the ASURITE ID/name of a team member + "dislikes " + ASURITE ID/name of a team member the first one dislikes.
+
+For Overlapping Time Slots columns, I would suggest having each column specify the Time slot in terms of the hours and list out the days people are available at that time.
+
+For number of prefered pairs column, the column will have the total number of prefered pairs made by the team members in the group. I would suggest having the total number of prefered pairs 
+as the value.
