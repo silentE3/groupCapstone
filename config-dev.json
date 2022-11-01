@@ -1,0 +1,27 @@
+{
+  "class_name": "SER401",
+  "min_group_size": 4,
+  "max_group_size": 6,
+  "grouping_passes": 2,
+  "field_mappings": {
+    "student_id_field_name": "asurite",
+    "preferred_students_field_names": [
+      "preferred 1",
+      "preferred 2",
+      "preferred 3",
+      "preferred 4",
+      "preferred 5"
+    ],
+    "disliked_students_field_names": ["disliked 1", "disliked 2", "disliked 3"],
+    "availability_field_names": [
+      "0 to 3 AM",
+      "3 to 6 AM",
+      "6 to 9 AM",
+      "9 to 12 PM",
+      "12 to 3 PM",
+      "3 to 6 PM",
+      "6 to 9 PM",
+      "9 to 12 AM"
+    ]
+  }
+}

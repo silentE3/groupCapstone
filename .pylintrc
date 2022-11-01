@@ -3,3 +3,4 @@ ignore-patterns=(.)*_test\.py,test_(.)*\.py
 disable=
   too-few-public-methods,
   too-many-instance-attributes
+max-line-length=140

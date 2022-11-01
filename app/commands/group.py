@@ -4,14 +4,14 @@ Also includes reading in the configuration file.
 '''
 import os
 import click
-from app.data_classes.survey_data import SurveyData
-from app.file import read_config, read_dataset
+from app import config, load
+from app import models
 
 
 @click.command("group")
-@click.option('--datafile', default="dataset.csv", help="Enter the path to the data file.")
-@click.option('--outputfile', default="output.csv", help="Enter the path to the output file.")
-@click.option('--configfile', default="config.json", help="Enter the path to the config file.")
+@click.option('-d', '--datafile', default="dataset.csv", help="Enter the path to the data file.")
+@click.option('-o', '--outputfile', default="output.csv", help="Enter the path to the output file.")
+@click.option('-c', '--configfile', default="config.json", help="Enter the path to the config file.")
 def group(datafile: str, outputfile: str, configfile: str):
     '''
     commands for reading input and config
@@ -25,12 +25,12 @@ def group(datafile: str, outputfile: str, configfile: str):
         raise click.BadOptionUsage(
             '--configfile', f'no config file found in the given path "{configfile}"')
 
-    config_data = read_config.read_config_json(configfile)
-    reader = read_dataset.SurveyDataReader(config_data)
+    config_data: models.Configuration = config.read_json(configfile)
+    reader = load.SurveyDataReader(config_data['field_mappings'])
 
     data = reader.load(datafile)
 
-    row: SurveyData
+    row: models.SurveyRecord
     for row in data:
         print(row.student_id)
         print(row.availability)

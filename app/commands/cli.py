@@ -4,7 +4,7 @@ cli contains the main group for commands
 
 import click
 from app.commands import gen
-from app.commands import grouping
+from app.commands import group
 
 
 @click.group()
@@ -14,5 +14,5 @@ def cli():
     '''
 
 
-cli.add_command(grouping.group)
+cli.add_command(group.group)
 cli.add_command(gen.gen)
