@@ -15,14 +15,15 @@ class SurveyFieldMapping(TypedDict):
     disliked_students_field_names: list[str]
     availability_field_names: list[str]
 
+
 @dataclass
 class Configuration(TypedDict):
     """Data class for the app configuration"""
     class_name: str
-    min_group_size: int
-    max_group_size: int
+    target_group_size: int
     grouping_passes: int
     field_mappings: SurveyFieldMapping
+
 
 @dataclass
 class SurveyRecord:

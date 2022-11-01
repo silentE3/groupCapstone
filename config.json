@@ -1,7 +1,6 @@
 {
   "class_name" : "SER401",
-  "min_group_size": 4,
-  "max_group_size": 6,
+  "target_group_size": 5,
   "grouping_passes": 2,
     "field_mappings": {
       "student_id_field_name" : "Please select your ASURITE ID",

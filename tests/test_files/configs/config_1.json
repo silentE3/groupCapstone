@@ -26,7 +26,6 @@
       "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]"
     ]
   },
-  "min_group_size": 4,
-  "max_group_size": 6,
+  "target_group_size": 2,
   "grouping_passes": 2
 }
