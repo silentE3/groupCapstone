@@ -33,3 +33,11 @@ class SurveyRecord:
     preferred_students: list[str] = field(default_factory=list)
     disliked_students: list[str] = field(default_factory=list)
     availability: dict[str, list[str]] = field(default_factory=dict)
+
+@dataclass
+class GroupRecord:
+    '''
+    Class that holds group infomation for a single group
+    '''
+    group_id: str
+    

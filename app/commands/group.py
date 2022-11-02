@@ -14,9 +14,12 @@ from app import models
 @click.option('-d', '--datafile', default="dataset.csv", help="Enter the path to the data file.")
 @click.option('-o', '--outputfile', default="output.csv", help="Enter the path to the output file.")
 @click.option('-c', '--configfile', default="config.json", help="Enter the path to the config file.")
-def group(datafile: str, outputfile: str, configfile: str):
+@click.option('--v', is_flag=True, default=False, help="Perform veryification of group data and output tally.")
+@click.option('-t', '--tallyfile',  default="grouptally.csv", help="Enter the path to the group tally output file.")
+# pylint: disable=duplicate-code
+def group(datafile: str, outputfile: str, configfile: str, v: bool, tallyfile: str): # pylint: disable=invalid-name
     '''
-    commands for reading input and config
+    runs the grouping functionality
     '''
 
     if not os.path.exists(datafile):
@@ -57,6 +60,9 @@ def group(datafile: str, outputfile: str, configfile: str):
 
     print(outputfile)
 
+    if v:
+        print(f'Will verify and output tally to "{tallyfile}"')
+
 
 def get_num_groups(survey_data: list, target_group_size: int) -> int:
     '''
@@ -76,6 +82,7 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
         return -1  # not possible to adhere to the target group size +/- 1
 
     return num_groups
+
 
 
 def create_random_groups(survey_data: list,
