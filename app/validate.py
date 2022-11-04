@@ -102,3 +102,63 @@ def meets_group_availability_requirement(group: list[models.SurveyRecord], min_c
     checks if the group meets the specified availability overlap count.
     '''
     return availability_overlap_count(group) >= min_count
+
+
+def group_dislike_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[str]]:
+    '''
+    returns the occurrences where there are disliked users in a group.
+    goes through each user and returns a dict with the list of disliked users who occur in the group per user
+
+    ```
+    {'student_id': ['user_list']}
+    ```
+    '''
+
+    disliked_occurrences: dict[str, list[str]] = {}
+
+    for user in group:
+        disliked_occurrences[user.student_id] = []
+        for dislike_user in group:
+            if dislike_user.student_id in user.disliked_students:
+                disliked_occurrences[user.student_id].append(
+                    dislike_user.student_id)
+
+    return disliked_occurrences
+
+
+def group_dislikes_user(user: str, group: list[models.SurveyRecord]) -> dict[str, bool]:
+    '''
+    checks whether the user id will fit for the users in the group. Returns a dictionary for each user in the group:
+    ```
+    {"student_id": "dislikes_student? (True/False)"}
+    ```
+    '''
+    dislike_occurrences = {}
+
+    for group_user in group:
+        dislike_occurrences[group_user.student_id] = user in group_user.disliked_students
+
+    return dislike_occurrences
+
+
+def user_dislikes_group(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> list[str]:
+    '''
+    returns each user in the group that matched with the disliked users
+    '''
+    disliked_users = []
+
+    for group_user in group:
+        if group_user.student_id in user.disliked_students:
+            disliked_users.append(group_user.student_id)
+
+    return disliked_users
+
+
+def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], max_dislike_count=0):
+    '''
+    checks if the user fits under the maximum dislike count threshold for the group
+    '''
+
+    group_dislike = group_dislikes_user(user.student_id, group)
+
+    return len(user_dislikes_group(user, group)) + list(group_dislike.values()).count(True) <= max_dislike_count
