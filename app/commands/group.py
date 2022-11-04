@@ -17,7 +17,7 @@ from app import models
 @click.option('--v', is_flag=True, default=False, help="Perform veryification of group data and output tally.")
 @click.option('-t', '--tallyfile',  default="grouptally.csv", help="Enter the path to the group tally output file.")
 # pylint: disable=duplicate-code
-def group(datafile: str, outputfile: str, configfile: str, v: bool, tallyfile: str): # pylint: disable=invalid-name
+def group(datafile: str, outputfile: str, configfile: str, v: bool, tallyfile: str):  # pylint: disable=invalid-name
     '''
     runs the grouping functionality
     '''
@@ -31,25 +31,30 @@ def group(datafile: str, outputfile: str, configfile: str, v: bool, tallyfile: s
             '--configfile', f'no config file found in the given path "{configfile}"')
 
     config_data: models.Configuration = config.read_json(configfile)
-    reader = load.SurveyDataReader(config_data['field_mappings'])
+    reader: load.SurveyDataReader = load.SurveyDataReader(
+        config_data['field_mappings'])
+    data: list[models.SurveyRecord] = reader.load(datafile)
 
-    data = reader.load(datafile)
+    # Perform pre-grouping error checking
+    target_group_size: int = config_data["target_group_size"]
+    if pre_group_error_checking(target_group_size, data):
+        return  # error found -- don't continue
 
     # Determine number of groups
     num_groups: int
-    num_groups = get_num_groups(data, config_data["target_group_size"])
+    num_groups = get_num_groups(data, target_group_size)
 
     if num_groups < 0:
         print("\n**********************")
-        print("Error: Not possible to adhere to the target_group_size (+/- 1) defined" +
-              "in the config file (config.json) in use.")
+        print("Error: Not possible to adhere to the target_group_size of " + str(target_group_size) +
+              " (+/- 1) defined in the config file.")
         print("**********************\n")
         return
 
     # Create random groupings
     groups: list[list[models.SurveyRecord]]
     groups = create_random_groups(
-        data, config_data["target_group_size"], num_groups)
+        data, target_group_size, num_groups)
 
     # For now, simply print the groups to the terminal (until file output is implemented)
     for idx, grouping in enumerate(groups):
@@ -64,6 +69,28 @@ def group(datafile: str, outputfile: str, configfile: str, v: bool, tallyfile: s
         print(f'Will verify and output tally to "{tallyfile}"')
 
 
+def pre_group_error_checking(target_group_size: int, surveys_list: list[models.SurveyRecord]) -> bool:
+    '''
+    Perform pre-grouping error checking:
+    - Ensure target group size is valid
+    - Ensure the number of student surveys is valid
+    Returns True if error found, and False otherwise.
+    '''
+    # target_group_size error checking
+    if target_group_size <= 0:
+        print("\n**********************")
+        print("Error: Invalid target_group_size of " + str(target_group_size) +
+              " defined in the config file.")
+        print("**********************\n")
+        return True
+    if len(surveys_list) == 0:
+        print("\n**********************")
+        print("Error: No student surveys found in the input datafile.")
+        print("**********************\n")
+        return True
+    return False
+
+
 def get_num_groups(survey_data: list, target_group_size: int) -> int:
     '''
     Function for determining the number of groups that the students
@@ -72,7 +99,10 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
     Returns -1 if it is not possible to adhere to the target group
         size +/-1 (e.g. target = 6 with 8 total students)
     '''
-    # calculate the number of groups based on number of students and target group size
+    # calculate the number of groups based on number of students & target group size
+    if target_group_size <= 0:
+        # protection from invalid group size input
+        target_group_size = 1
     num_groups = round(len(survey_data) / target_group_size)
     num_groups = max(num_groups, 1)  # make sure at least one group
 
@@ -82,7 +112,6 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
         return -1  # not possible to adhere to the target group size +/- 1
 
     return num_groups
-
 
 
 def create_random_groups(survey_data: list,
