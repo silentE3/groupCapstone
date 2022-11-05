@@ -3,9 +3,8 @@ cli contains the main group for commands
 '''
 
 import click
-from app.commands import gen
-from app.commands import group
-from app.commands import verify
+from app.commands import generate, group, verify
+
 
 
 @click.group()
@@ -16,5 +15,5 @@ def cli():
 
 
 cli.add_command(group.group)
-cli.add_command(gen.gen)
+cli.add_command(generate.gen)
 cli.add_command(verify.verify)

@@ -1,4 +1,5 @@
-from app import models, validate
+from app import models
+from app.group import validate
 
 
 def test_user_availability():
@@ -250,7 +251,6 @@ def test_meets_availability_requirement():
     )]
 
     assert validate.meets_group_availability_requirement(group, 3)
-
 
 def test_group_dislike_occurrences():
     group = [models.SurveyRecord(

@@ -1,5 +1,6 @@
-from app import generate
 import pytest
+from app.data import generate
+
 
 def test_generate_random_user_records():
     '''

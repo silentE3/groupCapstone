@@ -1,6 +1,9 @@
+'''
+Testing loader
+'''
 from app import models
 from app import config
-from app.load import SurveyDataReader
+from app.data.load import SurveyDataReader
 
 # NOTE: These tests verify the functionality in read_dataset.py. Additionally,
 #   in the process of doing so, they also verify the functionality in read_config.py.
@@ -18,7 +21,9 @@ from app.load import SurveyDataReader
 #   in this situation.
 #
 def test_read_dataset_1():
-
+    '''
+    Read dataset 1 test
+    '''
     # *************************************************************************
     # Start by building the expected user records
     # *************************************************************************

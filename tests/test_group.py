@@ -102,6 +102,9 @@ def test_group_zero_surveys():
 
 
 def test_group_bad_datafile():
+    '''
+    Test bad data file
+    '''
     response = runner.invoke(group.group, [
                              '--datafile', './tests/test_files/test_bad_file'])
     assert response.exit_code == 2
@@ -109,6 +112,9 @@ def test_group_bad_datafile():
 
 
 def test_group_bad_configfile():
+    '''
+    Test bag config
+    '''
     response = runner.invoke(group.group, [
                              '--datafile', 'tests/test_files/survey_results/Example_Survey_Results_1.csv',
                              '--configfile', './tests/test_files/test_bad_file'

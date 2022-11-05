@@ -4,17 +4,17 @@ of a grouping
 '''
 import os
 import click
-from app.file import read_grouping, verify_grouping
-from app import config, load
-from app import models
+from app import config, models
+from app.data import load
+from app.group import verify as verify_group
 
 @click.command("verify")
-@click.option('--datafile', default="dataset.csv", help="Enter the path to the original data file.")
-@click.option('--groupfile', default="output.csv", help="Enter the path to the grouping data file.")
-@click.option('--tallyfile', default="grouptally.csv", help="Enter the path to the group tally output file.")
-@click.option('--configfile', default="config.json", help="Enter the path to the config file.")
+@click.option('-d', '--datafile', default="dataset.csv", help="Enter the path to the original data file.")
+@click.option('-g', '--groupfile', default="output.csv", help="Enter the path to the grouping data file.")
+@click.option('-r', '--groupreport', default="grouptreport.xlsx", help="Enter the path to the group report output file.")
+@click.option('-c', '--configfile', default="config.json", help="Enter the path to the config file.")
 # pylint: disable=duplicate-code
-def verify(datafile: str, groupfile: str, tallyfile: str, configfile: str):
+def verify(datafile: str, groupfile: str, groupreport: str, configfile: str):
     '''
     runs the verification functionality
     '''
@@ -38,9 +38,9 @@ def verify(datafile: str, groupfile: str, tallyfile: str, configfile: str):
     data = reader.load(datafile)
 
     # redefine the reader and read in the grouping data
-    reader = read_grouping.GroupingDataReader()
+    reader = load.GroupingDataReader()
     grouping = reader.load(groupfile)
 
     # create the verifier and run the verification
-    verifier = verify_grouping.VerifyGrouping(config_data)
-    verifier.verify(data, grouping, tallyfile)
+    verifier = verify_group.VerifyGrouping(config_data)
+    verifier.verify(data, grouping, groupreport)
