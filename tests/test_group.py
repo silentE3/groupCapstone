@@ -5,7 +5,7 @@ from tests.test_utils.helper_functions import verify_rand_groups
 
 runner = CliRunner()
 
-# These tests verify the functionality in grouping.py.
+# These tests verify the functionality in group.py.
 # HOWEVER, this is really just a placeholder at this time since this
 #   functionality (grouping) hans't truly been implemented yet. Therefore, the
 #   testing is by no means exhaustive at this time
@@ -78,7 +78,7 @@ def test_group_size_not_possible():
 def test_group_invalid_group_size():
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_6.json'])
+                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_zero_group_size.json'])
     assert response.exit_code == 0
 
     # Verify that no groups were created

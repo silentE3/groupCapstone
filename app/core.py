@@ -11,10 +11,15 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
     Function for determining the number of groups that the students
         will be seperated into based upon the number of students and
         the target group size.
+    Note: A target_group_size value <=0 will be set to 1.
+
     Returns -1 if it is not possible to adhere to the target group
         size +/-1 (e.g. target = 6 with 8 total students)
     '''
     # calculate the number of groups based on number of students and target group size
+    if target_group_size <= 0:
+        # protection from invalid group size input
+        target_group_size = 1
     num_groups = round(len(survey_data) / target_group_size)
     num_groups = max(num_groups, 1)  # make sure at least one group
 
@@ -24,6 +29,7 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
         return -1  # not possible to adhere to the target group size +/- 1
 
     return num_groups
+
 
 def pre_group_error_checking(target_group_size: int, surveys_list: list[models.SurveyRecord]) -> bool:
     '''
