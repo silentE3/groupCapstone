@@ -9,10 +9,10 @@ from app.data import load
 from app.group import verify as verify_group
 
 @click.command("verify")
-@click.option('-d', '--datafile', default="dataset.csv", help="Enter the path to the original data file.")
-@click.option('-g', '--groupfile', default="output.csv", help="Enter the path to the grouping data file.")
-@click.option('-r', '--groupreport', default="grouptreport.xlsx", help="Enter the path to the group report output file.")
-@click.option('-c', '--configfile', default="config.json", help="Enter the path to the config file.")
+@click.option('-d', '--datafile', show_default=True, default="dataset.csv", help="Enter the path to the original data file.")
+@click.option('-g', '--groupfile', show_default=True, default="output.csv", help="Enter the path to the grouping data file.")
+@click.option('-r', '--groupreport', show_default=True, default="grouptreport.xlsx", help="Enter the path to the group report output file.")
+@click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.")
 # pylint: disable=duplicate-code
 def verify(datafile: str, groupfile: str, groupreport: str, configfile: str):
     '''

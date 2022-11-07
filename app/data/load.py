@@ -25,6 +25,9 @@ class SurveyDataReader():
             for row in reader:
                 preferred_students: list[str] = []
                 disliked_students: list[str] = []
+                student_name = ""
+                student_email = ""
+                student_login = ""
                 for field in self.config['preferred_students_field_names']:
                     if row[field] != "":
                         preferred_students.append(row[field])
@@ -41,17 +44,30 @@ class SurveyDataReader():
                 if self.config.get('timezone_field_name') and row[self.config['timezone_field_name']] != '':
                     timezone = row[self.config['timezone_field_name']]
 
+                if (self.config.get("student_name_field_name") and row[self.config["student_name_field_name"]]):
+                    student_name = row[self.config["student_name_field_name"]]
+
+                if (self.config.get("student_email_field_name") and row[self.config["student_email_field_name"]]):
+                    student_email = row[self.config["student_email_field_name"]]
+
+                if (self.config.get("student_login_field_name") and row[self.config["student_login_field_name"]]):
+                    student_login = row[self.config["student_login_field_name"]]
+
                 survey = models.SurveyRecord(
-                    row[self.config['student_id_field_name']],
-                    timezone,
-                    preferred_students,
-                    disliked_students,
-                    availability
+                    student_id=row[self.config['student_id_field_name']],
+                    timezone=timezone,
+                    student_name=student_name,
+                    student_email=student_email,
+                    student_login=student_login,
+                    preferred_students=preferred_students,
+                    disliked_students=disliked_students,
+                    availability=availability
                 )
 
                 surveys.append(survey)
 
         return surveys
+
 
 class GroupingDataReader:
     '''

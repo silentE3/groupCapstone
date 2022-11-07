@@ -44,11 +44,11 @@ def test_read_dataset_1():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
         }
     user_record_1 = models.SurveyRecord(
-        student_id_1, 
-        timezone_1, 
-        preferred_students_1, 
-        disliked_students_1, 
-        availability_1
+        student_id=student_id_1, 
+        timezone=  timezone_1, 
+        preferred_students=preferred_students_1, 
+        disliked_students= disliked_students_1, 
+        availability=      availability_1
         )
     
     #Second user record -- jdoe2
@@ -67,11 +67,11 @@ def test_read_dataset_1():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
         }
     user_record_2 = models.SurveyRecord(
-        student_id_2, 
-        timezone_2, 
-        preferred_students_2,
-        disliked_students_2, 
-        availability_2
+        student_id=student_id_2, 
+        timezone=  timezone_2, 
+        preferred_students=preferred_students_2,
+        disliked_students= disliked_students_2, 
+        availability=      availability_2
         )
 
     #Third user record -- mmuster3
@@ -90,11 +90,11 @@ def test_read_dataset_1():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Friday']
     }
     user_record_3 = models.SurveyRecord(
-        student_id_3, 
-        timezone_3, 
-        preferred_students_3,
-        disliked_students_3, 
-        availability_3
+        student_id=student_id_3, 
+        timezone=  timezone_3, 
+        preferred_students=preferred_students_3,
+        disliked_students= disliked_students_3, 
+        availability=      availability_3
         )
 
     #Fourth user record -- jschmo4 (NOTE: user did not fill out survey. i.e., has no responses)
@@ -113,11 +113,11 @@ def test_read_dataset_1():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
     }
     user_record_4 = models.SurveyRecord(
-        student_id_4, 
-        timezone_4, 
-        preferred_students_4,
-        disliked_students_4, 
-        availability_4
+        student_id=student_id_4, 
+        timezone=  timezone_4, 
+        preferred_students=preferred_students_4,
+        disliked_students= disliked_students_4, 
+        availability=      availability_4
         )
 
     surveys_expected = [
@@ -176,11 +176,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Friday']
         }
     user_record_1 = models.SurveyRecord(
-        student_id_1, 
-        timezone_1, 
-        preferred_students_1, 
-        disliked_students_1, 
-        availability_1
+        student_id=student_id_1, 
+        timezone=  timezone_1, 
+        preferred_students=preferred_students_1, 
+        disliked_students= disliked_students_1, 
+        availability=      availability_1
         )
     
     #Second user record -- jdoe2
@@ -199,11 +199,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Monday']
         }
     user_record_2 = models.SurveyRecord(
-        student_id_2, 
-        timezone_2, 
-        preferred_students_2,
-        disliked_students_2, 
-        availability_2
+        student_id=student_id_2, 
+        timezone=  timezone_2, 
+        preferred_students=preferred_students_2,
+        disliked_students= disliked_students_2, 
+        availability=      availability_2
         )
 
     #Third user record -- mmuster3
@@ -222,11 +222,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Tuesday', 'Wednesday']
     }
     user_record_3 = models.SurveyRecord(
-        student_id_3, 
-        timezone_3, 
-        preferred_students_3,
-        disliked_students_3, 
-        availability_3
+        student_id=student_id_3, 
+        timezone=  timezone_3, 
+        preferred_students=preferred_students_3,
+        disliked_students= disliked_students_3, 
+        availability=      availability_3
         )
 
     #Fourth user record -- jschmo4
@@ -245,11 +245,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Tuesday']
     }
     user_record_4 = models.SurveyRecord(
-        student_id_4, 
-        timezone_4, 
-        preferred_students_4,
-        disliked_students_4, 
-        availability_4
+        student_id=student_id_4, 
+        timezone=  timezone_4, 
+        preferred_students=preferred_students_4,
+        disliked_students= disliked_students_4, 
+        availability=      availability_4
         )
 
 
@@ -269,11 +269,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Monday']
     }
     user_record_5 = models.SurveyRecord(
-        student_id_5, 
-        timezone_5, 
-        preferred_students_5,
-        disliked_students_5, 
-        availability_5
+        student_id=student_id_5, 
+        timezone=  timezone_5, 
+        preferred_students=preferred_students_5,
+        disliked_students= disliked_students_5, 
+        availability=      availability_5
         )
 
     # User record 6 -- mbrown6
@@ -292,11 +292,11 @@ def test_read_dataset_2():
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Sunday']
     }
     user_record_6 = models.SurveyRecord(
-        student_id_6, 
-        timezone_6, 
-        preferred_students_6,
-        disliked_students_6, 
-        availability_6
+        student_id=student_id_6, 
+        timezone=  timezone_6, 
+        preferred_students=preferred_students_6,
+        disliked_students= disliked_students_6, 
+        availability=      availability_6
         )
 
     surveys_expected = [
@@ -431,11 +431,11 @@ def test_read_dataset_4():
         'Saturday - 9:00 PM - 12:00 PM' : ['1']
     }
     user_record_1 = models.SurveyRecord(
-        student_id_1, 
-        timezone_1, 
-        preferred_students_1, 
-        disliked_students_1, 
-        availability_1
+        student_id=student_id_1, 
+        timezone=  timezone_1, 
+        preferred_students=preferred_students_1, 
+        disliked_students= disliked_students_1, 
+        availability=      availability_1
         )
     
     #Second user record -- A2
@@ -502,11 +502,11 @@ def test_read_dataset_4():
         'Saturday - 9:00 PM - 12:00 PM' : ['1']
     }
     user_record_2 = models.SurveyRecord(
-        student_id_2, 
-        timezone_2, 
-        preferred_students_2,
-        disliked_students_2, 
-        availability_2
+        student_id=student_id_2, 
+        timezone=  timezone_2, 
+        preferred_students=preferred_students_2,
+        disliked_students= disliked_students_2, 
+        availability=      availability_2
         )
 
     surveys_expected = [
@@ -529,4 +529,163 @@ def test_read_dataset_4():
     # *************************************************************************
 
     assert(len(surveys_result) == 2) #2 user records
+    assert(surveys_result == surveys_expected)
+
+    # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
+# stored in the test_files folder) are read and processed correctly.
+#
+# Example_Survey_Results_1 consists of 4 records, three of are which are typical
+#   records (some fields have values, others are blank) and a fourth where
+#   the user has blank responses (did not fill out the survey).
+#
+# Additionally, each field in Example_Survey_Results_1 IS enclosed in double
+#   quotes in order to verify that the program is capable of reading the file properly
+#   in this situation.
+#
+def test_read_dataset_1_all_fields():
+    '''
+    Just lie Read dataset 1 test but with all user fields
+    '''
+    # *************************************************************************
+    # Start by building the expected user records
+    # *************************************************************************
+
+    #First user record -- jsmith1
+    student_id_1 = 'jsmith1'
+    student_email_1 = "jsmith1@asu.edu"
+    student_name_1 = "John Smith"
+    student_login_1 = "jsmith_1"
+    timezone_1 = 'UTC +1'
+    preferred_students_1 = ['jdoe2 - Jane Doe']
+    disliked_students_1 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
+    availability_1 = {
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Sunday', 'Thursday', 'Friday'], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Monday'], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
+        }
+    user_record_1 = models.SurveyRecord(
+        student_id=student_id_1, 
+        timezone=  timezone_1,
+        student_email=student_email_1,
+        student_name=student_name_1,
+        student_login=student_login_1,
+        preferred_students=preferred_students_1, 
+        disliked_students= disliked_students_1, 
+        availability=      availability_1
+        )
+    
+    #Second user record -- jdoe2
+    student_id_2 = 'jdoe2'
+    timezone_2 = 'UTC +2'
+    student_email_2 = "jdoe2@asu.edu"
+    student_name_2 = "Jane Doe"
+    student_login_2 = "jdoe_2"    
+    preferred_students_2 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
+    disliked_students_2 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
+    availability_2 = {
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': ['Tuesday'], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': ['Wednesday'], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
+        }
+    user_record_2 = models.SurveyRecord(
+        student_id=student_id_2, 
+        timezone=  timezone_2, 
+        student_email=student_email_2,
+        student_name=student_name_2,
+        student_login=student_login_2,
+        preferred_students=preferred_students_2,
+        disliked_students= disliked_students_2, 
+        availability=      availability_2
+        )
+
+    #Third user record -- mmuster3
+    student_id_3 = 'mmuster3'
+    timezone_3 = 'UTC +3'
+    student_email_3 = "mmuster3@asu.edu"
+    student_name_3 = "Max Munster"
+    student_login_3 = "mmuster_3"        
+    preferred_students_3 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
+    disliked_students_3 = ['jdoe2 - Jane Doe']
+    availability_3 = {
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': ['Thursday'], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['Friday']
+    }
+    user_record_3 = models.SurveyRecord(
+        student_id=student_id_3, 
+        timezone=  timezone_3, 
+        student_email=student_email_3,
+        student_name=student_name_3,
+        student_login=student_login_3,
+        preferred_students=preferred_students_3,
+        disliked_students= disliked_students_3, 
+        availability=      availability_3
+        )
+
+    #Fourth user record -- jschmo4 (NOTE: user did not fill out survey. i.e., has no responses)
+    student_id_4 = 'jschmo4'
+    timezone_4 = ''
+    student_email_4 = ""
+    student_name_4 = ""
+    student_login_4 = ""        
+    preferred_students_4 = []
+    disliked_students_4 = []
+    availability_4 = {
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': [''], 
+        'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['']
+    }
+    user_record_4 = models.SurveyRecord(
+        student_id=student_id_4, 
+        timezone=  timezone_4, 
+        student_email=student_email_4,
+        student_name=student_name_4,
+        student_login=student_login_4,
+        preferred_students=preferred_students_4,
+        disliked_students= disliked_students_4, 
+        availability=      availability_4
+        )
+
+    surveys_expected = [
+        user_record_1,
+        user_record_2,
+        user_record_3,
+        user_record_4
+    ]
+
+    # *************************************************************************
+    # Read/process the config and survey data
+    # *************************************************************************
+    
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_1_full.json")
+    survey_reader = SurveyDataReader(config_data['field_mappings'])
+    
+    surveys_result = survey_reader.load('./tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
+    
+
+    # *************************************************************************
+    # Verify that the config and survey data was read/processed properly.
+    # *************************************************************************
+
+    assert(len(surveys_result) == 4) #4 user records
     assert(surveys_result == surveys_expected)

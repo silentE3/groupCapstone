@@ -1,0 +1,5 @@
+group id,student id,student email,student login
+group_1,jsmith1,jsmith1@asu.edu,jsmith_1
+group_1,jschmo4,,
+group_2,mmuster3,mmuster3@asu.edu,mmuster_3
+group_2,jdoe2,jdoe2@asu.edu,jdoe_2

@@ -1,8 +1,7 @@
 '''
 Contains helper functions for test scripts.
 '''
-
-
+# pylint: disable=unnecessary-dunder-call
 def verify_rand_groups(output: str, expected_num_groups: int, expected_students: list[str]):
     '''
     Helper function that verifies the following for the random student grouping:
@@ -13,6 +12,7 @@ def verify_rand_groups(output: str, expected_num_groups: int, expected_students:
     expected_num_groups: int -- The expected number of groups.
     expected_students: list[str] -- list containing the expected students' asurite.
     '''
+    # try:
 
     # Verify that all students were assigned to a group
     for student in expected_students:
@@ -23,7 +23,7 @@ def verify_rand_groups(output: str, expected_num_groups: int, expected_students:
     # Verify that ONLY the expected students were assigned to a group and only once
     student_count = 0
     group_count = 0
-    while len(output_lines) >= 1 and not ((output_lines[0]).__contains__("Group #")):
+    while len(output_lines) >= 1 and not (output_lines[0]).__contains__("Group #"):
         # get rid of any lines prior to the start of the grouping
         output_lines.pop(0)
     for line in output_lines:
@@ -46,3 +46,6 @@ def verify_rand_groups(output: str, expected_num_groups: int, expected_students:
 
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in output
+    # except AssertionError as ex:
+    #     ex_type, ex_value, ex_traceback = sys.exc_info()
+    #     print("Exception message : %s" %ex_value)

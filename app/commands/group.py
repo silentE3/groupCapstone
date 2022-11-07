@@ -6,18 +6,19 @@ Also includes reading in the configuration file.
 
 import os
 import click
-from app import config, core
+
+from app import config, core, output
 from app import models
 from app.data import load
 from app.grouping.randomizer import RandomGrouper
 
 
 @click.command("group")
-@click.option('-d', '--datafile', default="dataset.csv", help="Enter the path to the data file.")
-@click.option('-o', '--outputfile', default="output.csv", help="Enter the path to the output file.")
-@click.option('-c', '--configfile', default="config.json", help="Enter the path to the config file.")
-@click.option('--v', is_flag=True, default=False, help="Perform veryification of group data and output tally.")
-@click.option('-r', '--groupreport',  default="groupreport.xlsx", help="Enter the path to the group report output file.")
+@click.option('-d', '--datafile', show_default=True, default="dataset.csv", help="Enter the path to the data file.")
+@click.option('-o', '--outputfile', show_default=True, default="output.csv", help="Enter the path to the output file.")
+@click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.")
+@click.option('--v', is_flag=True, show_default=True, default=False, help="Perform veryification of group data and output tally.")
+@click.option('-r', '--groupreport', show_default=True, default="", help="Enter the path to the group report output file.")
 # pylint: disable=duplicate-code
 def group(datafile: str, outputfile: str, configfile: str, v: bool, groupreport: str): # pylint: disable=invalid-name
     '''
@@ -54,20 +55,27 @@ def group(datafile: str, outputfile: str, configfile: str, v: bool, groupreport:
         return
 
     # Create random groupings
-    groups: list[list[models.SurveyRecord]]
+    groups: list[models.GroupRecord]
     grouper = RandomGrouper()
     groups = grouper.create_groups(
         data, config_data["target_group_size"], num_groups)
 
     # For now, simply print the groups to the terminal (until file output is implemented)
-    for idx, grouping in enumerate(groups):
-        print("***** Group #" + str(idx + 1) + " *****")
-        for student in grouping:
+    for grouping in groups:
+        print("***** " + grouping.group_id + " *****")
+        for student in grouping.members:
             print(student.student_id)
     print("**********************")
 
     print(outputfile)
 
+    group_csv_writer = output.WriteGroupingData(config_data)
+    group_csv_writer.output_groups_csv(groups, outputfile)
+
     if v:
+        if len(groupreport) == 0:
+            # for now we are just assuming the .csv is lowercase
+            groupreport = outputfile.removesuffix(".csv") + "_report.xslx"
+
         print(f'Will verify and output report to "{groupreport}"')
         

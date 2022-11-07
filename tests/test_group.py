@@ -23,6 +23,7 @@ def test_group_1():
     expected_num_groups = 3
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
+                      
     verify_rand_groups(response.output, expected_num_groups, expected_students)
 
 
@@ -121,3 +122,14 @@ def test_group_bad_configfile():
                              ])
     assert response.exit_code == 2
     assert response.exception
+
+def test_group_verify_and_report_file_name_1():
+    '''
+    Test of grouping six students with a target group size of 2 (divides evenly).
+    '''
+
+    response = runner.invoke(group.group, [
+                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json', '--v'])
+    assert response.exit_code == 0
+
+    assert response.output.endswith('Will verify and output report to "output_report.xslx"\n')
