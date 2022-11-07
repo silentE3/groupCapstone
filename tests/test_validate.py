@@ -252,6 +252,121 @@ def test_meets_availability_requirement():
 
     assert validate.meets_group_availability_requirement(group, 3)
 
+def test_do_duplicate_users_exist():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    )]
+
+    assert not validate.duplicate_user_in_group(group)
+
+def test_do_duplicate_users_exist_2():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    )]
+
+    assert validate.duplicate_user_in_group(group)
+
+def test_do_duplicate_users_exist_in_groups():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    )]
+    group2 = [models.SurveyRecord(
+        student_id="asurite6",
+    ), models.SurveyRecord(
+        student_id="asurite7",
+    ), models.SurveyRecord(
+        student_id="asurite8",
+    ), models.SurveyRecord(
+        student_id="asurite9",
+    ), models.SurveyRecord(
+        student_id="asurite10",
+    )]
+
+    groups = [group, group2]
+
+    assert not validate.duplicate_user_in_dataset(groups)
+
+def test_do_duplicate_users_exist_in_groups_2():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    )]
+    group2 = [models.SurveyRecord(
+        student_id="asurite6",
+    ), models.SurveyRecord(
+        student_id="asurite7",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite9",
+    ), models.SurveyRecord(
+        student_id="asurite10",
+    )]
+    groups = [group, group2]
+    assert validate.duplicate_user_in_dataset(groups)
+
+def test_do_duplicate_users_exist_in_groups_3():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    )]
+    group2 = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    )]
+    group3 = [models.SurveyRecord(
+        student_id="asurite9",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite7",
+    ), models.SurveyRecord(
+        student_id="asurite8",
+    )]
+    groups = [group, group2, group3]
+    assert validate.duplicate_user_in_dataset(groups)
+    
 def test_group_dislike_occurrences():
     group = [models.SurveyRecord(
         student_id="asurite1",

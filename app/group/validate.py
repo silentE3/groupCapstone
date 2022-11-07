@@ -162,3 +162,49 @@ def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[model
     group_dislike = group_dislikes_user(user.student_id, group)
 
     return len(user_dislikes_group(user, group)) + list(group_dislike.values()).count(True) <= max_dislike_count
+
+def duplicate_user_in_group(group: list[models.SurveyRecord]) -> bool:
+    '''
+    This method checks to see if there are any duplicates in a group.
+    This will return true if there are any duplicates. False otherwise.
+    '''
+    check = False
+    state = 1
+    copy_user = []
+    for user in group:
+        for user2 in group:
+            if user.student_id == user2.student_id:
+                if state == 1:
+                    state -= 1
+                else:
+                    check = True
+                    if copy_user.count(user.student_id) == 0:
+                        copy_user.append(user.student_id)
+                    
+        state = 1
+    return check
+    
+def duplicate_user_in_dataset(groups: list[list[models.SurveyRecord]]) -> bool:
+    '''
+    This method checks to see if there are any duplicates in different groups.
+    This will return true if there are any duplicates. False otherwise.
+    '''
+    check = False
+    state = 1
+    group_list = []
+    copy_user = []
+    for group in groups:
+        for student in group:
+            group_list.append(student)
+    
+    for user in group_list:
+        for user2 in group_list:
+            if user.student_id == user2.student_id:
+                if state == 1:
+                    state -= 1
+                else:
+                    check = True
+                    if copy_user.count(user.student_id) == 0:
+                        copy_user.append(user.student_id)
+        state = 1  
+    return check
