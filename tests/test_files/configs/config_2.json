@@ -75,5 +75,10 @@
     ]
   },
   "target_group_size": 5,
-  "grouping_passes": 2
+  "grouping_passes": 2,
+  "report_fields": {
+    "show_preferred_students": false,
+    "show_disliked_students": false,
+    "show_availability_overlap": false
+  }
 }

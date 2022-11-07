@@ -1,4 +1,4 @@
-"""This will verify a list if grouping data and provide infomration
+"""This will verify a list if grouping data and provide informatation
 on the validity of each group. This tally data will then be output to a file.
 Some validation will be based off of the config file."""
 
@@ -25,7 +25,7 @@ class VerifyGrouping():
         then the list will be empty
         '''
 
-        ungrouped = list()
+        ungrouped = []
         is_grouped : bool
         for user in users:
             is_grouped = False

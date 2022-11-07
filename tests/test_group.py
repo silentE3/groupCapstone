@@ -1,3 +1,4 @@
+import os
 from click.testing import CliRunner
 import click
 from app.commands import group
@@ -17,7 +18,7 @@ def test_group_1():
     '''
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
     assert response.exit_code == 0
 
     expected_num_groups = 3
@@ -34,7 +35,7 @@ def test_group_2():
     '''
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_3.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_3.json'])
     assert response.exit_code == 0
 
     expected_num_groups = 2
@@ -50,7 +51,7 @@ def test_group_3():
     '''
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_4.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_4.json'])
     assert response.exit_code == 0
 
     expected_num_groups = 1
@@ -66,7 +67,7 @@ def test_group_size_not_possible():
     '''
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json'])
     assert response.exit_code == 0
 
     # Verify that no groups were created
@@ -79,7 +80,7 @@ def test_group_size_not_possible():
 def test_group_invalid_group_size():
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_zero_group_size.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json', '--no-verify'])
     assert response.exit_code == 0
 
     # Verify that no groups were created
@@ -92,7 +93,7 @@ def test_group_invalid_group_size():
 def test_group_zero_surveys():
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_6.csv', '--configfile', './tests/test_files/configs/config_5.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_6.csv', '--configfile', './tests/test_files/configs/config_5.json'])
     assert response.exit_code == 0
 
     # Verify that no groups were created
@@ -107,7 +108,7 @@ def test_group_bad_datafile():
     Test bad data file
     '''
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/test_bad_file'])
+                             './tests/test_files/test_bad_file'])
     assert response.exit_code == 2
     assert response.exception
 
@@ -117,7 +118,7 @@ def test_group_bad_configfile():
     Test bag config
     '''
     response = runner.invoke(group.group, [
-                             '--datafile', 'tests/test_files/survey_results/Example_Survey_Results_1.csv',
+                             'tests/test_files/survey_results/Example_Survey_Results_1.csv',
                              '--configfile', './tests/test_files/test_bad_file'
                              ])
     assert response.exit_code == 2
@@ -129,7 +130,10 @@ def test_group_verify_and_report_file_name_1():
     '''
 
     response = runner.invoke(group.group, [
-                             '--datafile', './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json', '--v'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--outputfile', 'test_verify_and_report_file_name_1.csv', '--configfile', './tests/test_files/configs/config_1.json', '--reportfile', 'test_verify_and_report_file_name_1_report.xlsx', '--verify'])
     assert response.exit_code == 0
 
-    assert response.output.endswith('Will verify and output report to "output_report.xslx"\n')
+    assert response.output.endswith(
+        'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
+    os.remove('test_verify_and_report_file_name_1_report.xlsx')
+    os.remove('test_verify_and_report_file_name_1.csv')

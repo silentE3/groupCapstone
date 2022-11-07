@@ -1,36 +1,39 @@
 {
-  "class_name" : "SER401",
-  "target_group_size": 2,
+  "class_name": "SER401",
+  "target_group_size": 5,
   "grouping_passes": 2,
-    "field_mappings": {
-      "student_id_field_name" : "Please select your ASURITE ID",
-      "student_email_field_name" : "Username",
-      "student_login_field_name": "Please enter your Github username (NOT your email address)",
-      "timezone_field_name" : "In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.",
-      "preferred_students_field_names" : [
-        "Preferred team member 1",
-        "Preferred team member 2",
-        "Preferred team member 3",
-        "Preferred team member 4",
-        "Preferred team member 5"
-      ],
-      "disliked_students_field_names": [
-        "Non-preferred student 1",
-        "Non-preferred student 2",
-        "Non-preferred student 3"
-      ],
-      "availability_field_names": [
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]",
-        "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]"
-      ]
-    },
-    "output_student_name":false,
-    "output_student_email":true,
-    "output_student_login":true
+  "field_mappings": {
+    "student_id_field_name": "Please select your ASURITE ID",
+    "timezone_field_name": "In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.",
+    "preferred_students_field_names": [
+      "Preferred team member 1",
+      "Preferred team member 2",
+      "Preferred team member 3",
+      "Preferred team member 4",
+      "Preferred team member 5"
+    ],
+    "disliked_students_field_names": [
+      "Non-preferred student 1",
+      "Non-preferred student 2",
+      "Non-preferred student 3"
+    ],
+    "availability_field_names": [
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]",
+      "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]"
+    ]
+  },
+  "report_fields": {
+    "show_preferred_students": false,
+    "show_disliked_students": false,
+    "show_availability_overlap": false
+  },
+  "output_student_name": false,
+  "output_student_email": true,
+  "output_student_login": true
 }

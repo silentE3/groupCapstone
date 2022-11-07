@@ -22,5 +22,10 @@
       "6 to 9 PM",
       "9 to 12 AM"
     ]
+  },
+  "report_fields": {
+    "show_preferred_students": false,
+    "show_disliked_students": false,
+    "show_availability_overlap": false
   }
 }
