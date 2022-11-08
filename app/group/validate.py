@@ -217,3 +217,16 @@ def duplicate_user_in_dataset(groups: list[list[models.SurveyRecord]]) -> bool:
                         copy_user.append(user.student_id)
         state = 1
     return check
+
+
+def size_limit_in_dataset(groups: list[models.GroupRecord], limit: int) -> bool:
+    '''
+    This method checks to see if all of the groups size fit in the limit of the given target +/- 1.
+    This will return true if they fit. False otherwise.
+    '''
+    size = 0
+    for group in groups:
+        size = len(group.members)
+        if size > limit + 1 or size < limit - 1:
+            return False
+    return True

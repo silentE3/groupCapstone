@@ -463,3 +463,135 @@ def test_meets_group_dislike_requirement():
 
     assert not (validate.meets_group_dislike_requirement(user, group, 1))
     assert validate.meets_group_dislike_requirement(user, group, 2)
+
+def test_size_limit():
+    user1 = models.SurveyRecord(
+        student_id="asurite1"
+    )
+    user2 = models.SurveyRecord(
+        student_id="asurite2"
+    )
+    user3 = models.SurveyRecord(
+        student_id="asurite3"
+    )
+    user4 = models.SurveyRecord(
+        student_id="asurite4"
+    )
+    group1 = models.GroupRecord(
+        group_id="group1",
+        members= [user1, user2, user3, user4]
+    )
+    group_list = [group1]
+
+    assert validate.size_limit_in_dataset(group_list,4)
+
+def test_size_limit_2():
+    user1 = models.SurveyRecord(
+        student_id="asurite1"
+    )
+    user2 = models.SurveyRecord(
+        student_id="asurite2"
+    )
+    user3 = models.SurveyRecord(
+        student_id="asurite3"
+    )
+    user4 = models.SurveyRecord(
+        student_id="asurite4"
+    )
+    user5 = models.SurveyRecord(
+        student_id="asurite5"
+    )
+    user6 = models.SurveyRecord(
+        student_id="asurite6"
+    )
+    user7 = models.SurveyRecord(
+        student_id="asurite7"
+    )
+    user8 = models.SurveyRecord(
+        student_id="asurite8"
+    )
+    group1 = models.GroupRecord(
+        group_id="group1",
+        members= [user1, user2, user3, user4]
+    )
+    group2 = models.GroupRecord(
+        group_id="group2",
+        members= [user5, user6, user7, user8]
+    )
+    group_list = [group1, group2]
+
+    assert validate.size_limit_in_dataset(group_list,4)
+
+def test_size_limit_3():
+    user1 = models.SurveyRecord(
+        student_id="asurite1"
+    )
+    user2 = models.SurveyRecord(
+        student_id="asurite2"
+    )
+    user3 = models.SurveyRecord(
+        student_id="asurite3"
+    )
+    user4 = models.SurveyRecord(
+        student_id="asurite4"
+    )
+    user5 = models.SurveyRecord(
+        student_id="asurite5"
+    )
+    user6 = models.SurveyRecord(
+        student_id="asurite6"
+    )
+    user7 = models.SurveyRecord(
+        student_id="asurite7"
+    )
+    group1 = models.GroupRecord(
+        group_id="group1",
+        members= [user1, user2, user3, user4]
+    )
+    group2 = models.GroupRecord(
+        group_id="group2",
+        members= [user5, user6]
+    )
+    group_list = [group1, group2]
+
+    assert not validate.size_limit_in_dataset(group_list,4)
+
+def test_size_limit_4():
+    user1 = models.SurveyRecord(
+        student_id="asurite1"
+    )
+    user2 = models.SurveyRecord(
+        student_id="asurite2"
+    )
+    user3 = models.SurveyRecord(
+        student_id="asurite3"
+    )
+    user4 = models.SurveyRecord(
+        student_id="asurite4"
+    )
+    user5 = models.SurveyRecord(
+        student_id="asurite5"
+    )
+    user6 = models.SurveyRecord(
+        student_id="asurite6"
+    )
+    user7 = models.SurveyRecord(
+        student_id="asurite7"
+    )
+    user8 = models.SurveyRecord(
+        student_id="asurite8"
+    )
+    user9 = models.SurveyRecord(
+        student_id="asurite9"
+    )
+    group1 = models.GroupRecord(
+        group_id="group1",
+        members= [user1, user2, user3, user4, user5, user9]
+    )
+    group2 = models.GroupRecord(
+        group_id="group2",
+        members= [user6, user7, user8]
+    )
+    group_list = [group1, group2]
+
+    assert not validate.size_limit_in_dataset(group_list,4)
