@@ -9,8 +9,7 @@ WEEK_DAYS = [
 ]
 
 
-def user_availability(user: models.SurveyRecord,
-                      group: list[models.SurveyRecord]) -> dict[str, dict[str, bool]]:
+def user_availability(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> dict[str, dict[str, bool]]:
     '''
     compares a users availability against a group and returns the resulting availability:
     ```
@@ -38,7 +37,7 @@ def user_availability(user: models.SurveyRecord,
     return user_available
 
 
-def user_matches_availability_count(user: models.SurveyRecord, group: list[models.SurveyRecord]):
+def user_matches_availability_count(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> int:
     '''
     returns how many times the user is compatible with the group
     '''
@@ -58,7 +57,7 @@ def fits_group_availability(user: models.SurveyRecord, group: list[models.Survey
     return user_matches_availability_count(user, group) >= min_count
 
 
-def group_availability(group: list[models.SurveyRecord]):
+def group_availability(group: list[models.SurveyRecord]) -> dict[str, dict[str, bool]]:
     '''
     Returns the availability of the group as a dictionary.
     Dictionary returned is the following structure:
@@ -84,7 +83,7 @@ def group_availability(group: list[models.SurveyRecord]):
     return group_available
 
 
-def availability_overlap_count(group: list[models.SurveyRecord]):
+def availability_overlap_count(group: list[models.SurveyRecord]) -> int:
     '''
     gets the number of times that the group has overlap on their availability. i.e. how many timeslot-days everyone is available
     '''
@@ -154,7 +153,7 @@ def user_dislikes_group(user: models.SurveyRecord, group: list[models.SurveyReco
     return disliked_users
 
 
-def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], max_dislike_count=0):
+def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], max_dislike_count=0) -> bool:
     '''
     checks if the user fits under the maximum dislike count threshold for the group
     '''
@@ -169,6 +168,73 @@ def meets_dislike_requirement(group: list[models.SurveyRecord], max_dislike_coun
     checks if the group meets the dislike requirements
     '''
     return len(group_dislike_occurrences(group).values()) <= max_dislike_count
+
+
+def group_like_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[str]]:
+    '''
+    returns the occurrences where there are liked users in a group.
+    goes through each user and returns a dict with the list of liked users who occur in the group per user
+
+    ```
+    {'student_id': ['user_list']}
+    ```
+    '''
+
+    liked_occurrences: dict[str, list[str]] = {}
+
+    for user in group:
+        liked_occurrences[user.student_id] = []
+        for like_user in group:
+            if like_user.student_id in user.preferred_students:
+                liked_occurrences[user.student_id].append(
+                    like_user.student_id)
+
+    return liked_occurrences
+
+
+def group_likes_user(user: str, group: list[models.SurveyRecord]) -> dict[str, bool]:
+    '''
+    checks whether the user id will fit for the users in the group. Returns a dictionary for each user in the group:
+    ```
+    {"student_id": "likes_student? (True/False)"}
+    ```
+    '''
+    like_occurrences = {}
+
+    for group_user in group:
+        like_occurrences[group_user.student_id] = user in group_user.preferred_students
+
+    return like_occurrences
+
+
+def user_likes_group(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> list[str]:
+    '''
+    returns each user in the group that matched with the liked users
+    '''
+    liked_users = []
+
+    for group_user in group:
+        if group_user.student_id in user.preferred_students:
+            liked_users.append(group_user.student_id)
+
+    return liked_users
+
+
+def meets_group_like_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], min_like_count=0) -> bool:
+    '''
+    checks if the user fits above the minimum like count threshold for the group
+    '''
+
+    group_like = group_likes_user(user.student_id, group)
+
+    return len(user_likes_group(user, group)) + list(group_like.values()).count(True) >= min_like_count
+
+
+def meets_like_requirement(group: list[models.SurveyRecord], min_like_count=0):
+    '''
+    checks if the group meets the like requirements
+    '''
+    return len(group_like_occurrences(group).values()) >= min_like_count
 
 
 def duplicate_user_in_group(group: list[models.SurveyRecord]) -> bool:

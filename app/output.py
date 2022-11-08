@@ -5,7 +5,7 @@ manages outputs for the program
 import csv
 from app import models
 
-# pylint: disable=use-list-literal
+
 class WriteSurveyData:
     '''
     This class outputs generated test survey data to a csv
@@ -48,13 +48,13 @@ class WriteGroupingData:
         Create a body from the config data
         '''
         group_id = 0
-        body = list()
+        body = []
         for group in groups:
             group_id += 1
 
             for member in group.members:
-                entry = list()
-                #group
+                entry = []
+                # group
                 entry.append(f"group_{group_id}")
                 # id
                 entry.append(member.student_id)
@@ -74,7 +74,7 @@ class WriteGroupingData:
         '''
         Create a header from the config
         '''
-        header = list()
+        header = []
 
         header.append("group id")
         header.append("student id")

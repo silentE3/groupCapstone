@@ -464,6 +464,103 @@ def test_meets_group_dislike_requirement():
     assert not (validate.meets_group_dislike_requirement(user, group, 1))
     assert validate.meets_group_dislike_requirement(user, group, 2)
 
+
+def test_group_like_occurrences():
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite5', 'asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite10']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )]
+
+    occurrences = validate.group_like_occurrences(group)
+
+    assert occurrences['asurite1'] == ['asurite2']
+    assert occurrences['asurite2'] == []
+    assert occurrences['asurite5'] == []
+
+
+def test_group_likes_user():
+    user = 'asurite2'
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite2', 'asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )]
+
+    group_likes = validate.group_likes_user(user, group)
+
+    assert group_likes['asurite1'] == True
+    assert group_likes['asurite3'] == True
+    assert group_likes['asurite4'] == False
+
+
+def test_user_likes_group():
+    user = models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2', 'asurite3', 'asurite17']
+    )
+    group = [models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite2', 'asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )]
+
+    group_likes = validate.user_likes_group(user, group)
+
+    assert len(group_likes) == 2
+
+
+def test_meets_group_like_requirement():
+    user = models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2', 'asurite3', 'asurite17']
+    )
+    group = [models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite2', 'asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )]
+
+    assert (validate.meets_group_like_requirement(user, group, 1))
+    assert not validate.meets_group_like_requirement(user, group, 3)
 def test_size_limit():
     user1 = models.SurveyRecord(
         student_id="asurite1"
