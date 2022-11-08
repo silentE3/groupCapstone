@@ -22,6 +22,7 @@ jobs:
     - name: Run linter
       run: pylint app start.py
     - name: Run tests
+      if: success() || failure()
       run: pytest tests --cov
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
