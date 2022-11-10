@@ -7,8 +7,8 @@ from app import output
 
 
 @click.command("gen")
-@click.option('--filename', show_default=True, default="dataset.csv")
-@click.option('--count', show_default=True, default=20)
+@click.option('-f', '--filename', show_default=True, default="dataset.csv")
+@click.option('-c', '--count', show_default=True, default=20)
 def gen(filename: str, count: int):
     '''
     generates a new sample dataset containing
