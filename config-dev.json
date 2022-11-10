@@ -24,8 +24,8 @@
     ]
   },
   "report_fields": {
-    "show_preferred_students": false,
-    "show_disliked_students": false,
-    "show_availability_overlap": false
+    "show_preferred_students": true,
+    "show_disliked_students": true,
+    "show_availability_overlap": true
   }
 }

@@ -16,7 +16,7 @@ def test_user_availability():
         },
     )
 
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
         availability={
             "1": ['monday', ],
@@ -38,7 +38,7 @@ def test_user_availability():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     availability = validate.user_availability(user, group)
 
@@ -60,7 +60,7 @@ def test_user_matches_availability_count():
         },
     )
 
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
         availability={
             "1": ['monday', ],
@@ -82,7 +82,7 @@ def test_user_matches_availability_count():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     match_count = validate.user_matches_availability_count(user, group)
 
@@ -103,7 +103,7 @@ def test_fits_group_availability():
         },
     )
 
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
         availability={
             "1": ['monday', ],
@@ -125,13 +125,13 @@ def test_fits_group_availability():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     assert validate.fits_group_availability(user, group, 2)
 
 
 def test_group_availability():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         availability={
             "1": ['monday'],
@@ -164,7 +164,7 @@ def test_group_availability():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     availability = validate.group_availability(group)
 
@@ -174,7 +174,7 @@ def test_group_availability():
 
 
 def test_availability_overlap_count():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         availability={
             "1": ['monday'],
@@ -207,7 +207,7 @@ def test_availability_overlap_count():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     avail_count = validate.availability_overlap_count(group)
 
@@ -215,7 +215,7 @@ def test_availability_overlap_count():
 
 
 def test_meets_availability_requirement():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         availability={
             "1": ['monday'],
@@ -248,12 +248,13 @@ def test_meets_availability_requirement():
             "6": ['thursday'],
             "7": ['friday']
         },
-    )]
+    )])
 
     assert validate.meets_group_availability_requirement(group, 3)
 
+
 def test_do_duplicate_users_exist():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -263,12 +264,13 @@ def test_do_duplicate_users_exist():
         student_id="asurite4",
     ), models.SurveyRecord(
         student_id="asurite5",
-    )]
+    )])
 
     assert not validate.duplicate_user_in_group(group)
 
+
 def test_do_duplicate_users_exist_2():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -278,12 +280,13 @@ def test_do_duplicate_users_exist_2():
         student_id="asurite4",
     ), models.SurveyRecord(
         student_id="asurite2",
-    )]
+    )])
 
     assert validate.duplicate_user_in_group(group)
 
+
 def test_do_duplicate_users_exist_in_groups():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -293,8 +296,8 @@ def test_do_duplicate_users_exist_in_groups():
         student_id="asurite4",
     ), models.SurveyRecord(
         student_id="asurite5",
-    )]
-    group2 = [models.SurveyRecord(
+    )])
+    group2 = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite6",
     ), models.SurveyRecord(
         student_id="asurite7",
@@ -304,14 +307,15 @@ def test_do_duplicate_users_exist_in_groups():
         student_id="asurite9",
     ), models.SurveyRecord(
         student_id="asurite10",
-    )]
+    )])
 
     groups = [group, group2]
 
     assert not validate.duplicate_user_in_dataset(groups)
 
+
 def test_do_duplicate_users_exist_in_groups_2():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -321,8 +325,8 @@ def test_do_duplicate_users_exist_in_groups_2():
         student_id="asurite4",
     ), models.SurveyRecord(
         student_id="asurite5",
-    )]
-    group2 = [models.SurveyRecord(
+    )])
+    group2 = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite6",
     ), models.SurveyRecord(
         student_id="asurite7",
@@ -332,12 +336,13 @@ def test_do_duplicate_users_exist_in_groups_2():
         student_id="asurite9",
     ), models.SurveyRecord(
         student_id="asurite10",
-    )]
+    )])
     groups = [group, group2]
     assert validate.duplicate_user_in_dataset(groups)
 
+
 def test_do_duplicate_users_exist_in_groups_3():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -345,8 +350,8 @@ def test_do_duplicate_users_exist_in_groups_3():
         student_id="asurite3",
     ), models.SurveyRecord(
         student_id="asurite4",
-    )]
-    group2 = [models.SurveyRecord(
+    )])
+    group2 = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -354,8 +359,8 @@ def test_do_duplicate_users_exist_in_groups_3():
         student_id="asurite6",
     ), models.SurveyRecord(
         student_id="asurite5",
-    )]
-    group3 = [models.SurveyRecord(
+    )])
+    group3 = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite9",
     ), models.SurveyRecord(
         student_id="asurite2",
@@ -363,12 +368,13 @@ def test_do_duplicate_users_exist_in_groups_3():
         student_id="asurite7",
     ), models.SurveyRecord(
         student_id="asurite8",
-    )]
+    )])
     groups = [group, group2, group3]
     assert validate.duplicate_user_in_dataset(groups)
-    
+
+
 def test_group_dislike_occurrences():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         disliked_students=['asurite2']
     ), models.SurveyRecord(
@@ -383,7 +389,7 @@ def test_group_dislike_occurrences():
         disliked_students=['asurite10']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     occurrences = validate.group_dislike_occurrences(group)
 
@@ -394,7 +400,7 @@ def test_group_dislike_occurrences():
 
 def test_group_dislikes_user():
     user = 'asurite2'
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         disliked_students=['asurite2']
     ), models.SurveyRecord(
@@ -409,7 +415,7 @@ def test_group_dislikes_user():
         disliked_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     group_dislikes = validate.group_dislikes_user(user, group)
 
@@ -423,7 +429,7 @@ def test_user_dislikes_group():
         student_id="asurite1",
         disliked_students=['asurite2', 'asurite3', 'asurite17']
     )
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
     ), models.SurveyRecord(
         student_id="asurite3",
@@ -435,7 +441,7 @@ def test_user_dislikes_group():
         disliked_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     group_dislikes = validate.user_dislikes_group(user, group)
 
@@ -447,7 +453,7 @@ def test_meets_group_dislike_requirement():
         student_id="asurite1",
         disliked_students=['asurite2', 'asurite3', 'asurite17']
     )
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
     ), models.SurveyRecord(
         student_id="asurite3",
@@ -459,14 +465,14 @@ def test_meets_group_dislike_requirement():
         disliked_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     assert not (validate.meets_group_dislike_requirement(user, group, 1))
     assert validate.meets_group_dislike_requirement(user, group, 2)
 
 
 def test_group_like_occurrences():
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         preferred_students=['asurite2']
     ), models.SurveyRecord(
@@ -481,7 +487,7 @@ def test_group_like_occurrences():
         preferred_students=['asurite10']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     occurrences = validate.group_like_occurrences(group)
 
@@ -490,9 +496,33 @@ def test_group_like_occurrences():
     assert occurrences['asurite5'] == []
 
 
+def test_meets_like_requirements():
+    group = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite5', 'asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite10']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )])
+
+
+    assert validate.meets_like_requirement(group, 3)
+    assert not validate.meets_like_requirement(group, 5)
+    assert validate.meets_like_requirement(group, 0)
+
+
 def test_group_likes_user():
     user = 'asurite2'
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
         preferred_students=['asurite2']
     ), models.SurveyRecord(
@@ -507,7 +537,7 @@ def test_group_likes_user():
         preferred_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     group_likes = validate.group_likes_user(user, group)
 
@@ -521,7 +551,7 @@ def test_user_likes_group():
         student_id="asurite1",
         preferred_students=['asurite2', 'asurite3', 'asurite17']
     )
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
     ), models.SurveyRecord(
         student_id="asurite3",
@@ -533,7 +563,7 @@ def test_user_likes_group():
         preferred_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     group_likes = validate.user_likes_group(user, group)
 
@@ -545,7 +575,7 @@ def test_meets_group_like_requirement():
         student_id="asurite1",
         preferred_students=['asurite2', 'asurite3', 'asurite17']
     )
-    group = [models.SurveyRecord(
+    group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
     ), models.SurveyRecord(
         student_id="asurite3",
@@ -557,10 +587,12 @@ def test_meets_group_like_requirement():
         preferred_students=['asurite2']
     ), models.SurveyRecord(
         student_id="asurite6",
-    )]
+    )])
 
     assert (validate.meets_group_like_requirement(user, group, 1))
     assert not validate.meets_group_like_requirement(user, group, 3)
+
+
 def test_size_limit():
     user1 = models.SurveyRecord(
         student_id="asurite1"
@@ -576,11 +608,12 @@ def test_size_limit():
     )
     group1 = models.GroupRecord(
         group_id="group1",
-        members= [user1, user2, user3, user4]
+        members=[user1, user2, user3, user4]
     )
     group_list = [group1]
 
-    assert validate.size_limit_in_dataset(group_list,4)
+    assert validate.size_limit_in_dataset(group_list, 4)
+
 
 def test_size_limit_2():
     user1 = models.SurveyRecord(
@@ -609,15 +642,16 @@ def test_size_limit_2():
     )
     group1 = models.GroupRecord(
         group_id="group1",
-        members= [user1, user2, user3, user4]
+        members=[user1, user2, user3, user4]
     )
     group2 = models.GroupRecord(
         group_id="group2",
-        members= [user5, user6, user7, user8]
+        members=[user5, user6, user7, user8]
     )
     group_list = [group1, group2]
 
-    assert validate.size_limit_in_dataset(group_list,4)
+    assert validate.size_limit_in_dataset(group_list, 4)
+
 
 def test_size_limit_3():
     user1 = models.SurveyRecord(
@@ -643,15 +677,16 @@ def test_size_limit_3():
     )
     group1 = models.GroupRecord(
         group_id="group1",
-        members= [user1, user2, user3, user4]
+        members=[user1, user2, user3, user4]
     )
     group2 = models.GroupRecord(
         group_id="group2",
-        members= [user5, user6]
+        members=[user5, user6]
     )
     group_list = [group1, group2]
 
-    assert not validate.size_limit_in_dataset(group_list,4)
+    assert not validate.size_limit_in_dataset(group_list, 4)
+
 
 def test_size_limit_4():
     user1 = models.SurveyRecord(
@@ -683,12 +718,12 @@ def test_size_limit_4():
     )
     group1 = models.GroupRecord(
         group_id="group1",
-        members= [user1, user2, user3, user4, user5, user9]
+        members=[user1, user2, user3, user4, user5, user9]
     )
     group2 = models.GroupRecord(
         group_id="group2",
-        members= [user6, user7, user8]
+        members=[user6, user7, user8]
     )
     group_list = [group1, group2]
 
-    assert not validate.size_limit_in_dataset(group_list,4)
+    assert not validate.size_limit_in_dataset(group_list, 4)

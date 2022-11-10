@@ -26,7 +26,7 @@ class ReportFormatter():
                 record.append('')
                 if self.config['show_disliked_students']:
                     record.append(
-                        ';'.join(validate.user_dislikes_group(user, group.members)))
+                        ';'.join(validate.user_dislikes_group(user, group)))
 
                 record.append('')
                 if self.config['show_preferred_students']:
@@ -68,16 +68,17 @@ class ReportFormatter():
             record = []
             record.append(idx)
 
-            record.append(validate.meets_dislike_requirement(group.members))
+            record.append(validate.meets_dislike_requirement(group))
             if self.config['show_disliked_students']:
-                record.append('')
+                record.append(
+                    ';'.join(validate.users_disliked_in_group(group)))
 
             record.append('')
             if self.config['show_preferred_students']:
                 record.append('')
 
             record.append(
-                validate.meets_group_availability_requirement(group.members))
+                validate.meets_group_availability_requirement(group))
             if self.config['show_availability_overlap']:
                 record.append('')
 

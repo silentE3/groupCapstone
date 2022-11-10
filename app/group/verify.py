@@ -26,7 +26,7 @@ class VerifyGrouping():
         '''
 
         ungrouped = []
-        is_grouped : bool
+        is_grouped: bool
         for user in users:
             is_grouped = False
             for group in groupings:

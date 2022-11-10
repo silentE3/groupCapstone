@@ -1,6 +1,7 @@
 '''
 validate is used for validating groups
 '''
+import itertools
 from app import models
 
 WEEK_DAYS = [
@@ -9,7 +10,7 @@ WEEK_DAYS = [
 ]
 
 
-def user_availability(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> dict[str, dict[str, bool]]:
+def user_availability(user: models.SurveyRecord, group: models.GroupRecord) -> dict[str, dict[str, bool]]:
     '''
     compares a users availability against a group and returns the resulting availability:
     ```
@@ -28,7 +29,7 @@ def user_availability(user: models.SurveyRecord, group: list[models.SurveyRecord
                 user_available[key][day] = False
 
     # loop through the members and set to False if it isn't met
-    for member in group:
+    for member in group.members:
         for key in member.availability.keys():
             for day in WEEK_DAYS:
                 if member.availability[key].count(day) == 0:
@@ -37,7 +38,7 @@ def user_availability(user: models.SurveyRecord, group: list[models.SurveyRecord
     return user_available
 
 
-def user_matches_availability_count(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> int:
+def user_matches_availability_count(user: models.SurveyRecord, group: models.GroupRecord) -> int:
     '''
     returns how many times the user is compatible with the group
     '''
@@ -50,14 +51,14 @@ def user_matches_availability_count(user: models.SurveyRecord, group: list[model
     return availability_count
 
 
-def fits_group_availability(user: models.SurveyRecord, group: list[models.SurveyRecord], min_count=1) -> bool:
+def fits_group_availability(user: models.SurveyRecord, group: models.GroupRecord, min_count=1) -> bool:
     '''
     checks if the user meets the specified availability overlap count for the group
     '''
     return user_matches_availability_count(user, group) >= min_count
 
 
-def group_availability(group: list[models.SurveyRecord]) -> dict[str, dict[str, bool]]:
+def group_availability(group: models.GroupRecord) -> dict[str, dict[str, bool]]:
     '''
     Returns the availability of the group as a dictionary.
     Dictionary returned is the following structure:
@@ -69,13 +70,13 @@ def group_availability(group: list[models.SurveyRecord]) -> dict[str, dict[str, 
     group_available: dict[str, dict[str, bool]] = {}
 
     # create a map with each time and set to true for every day
-    for key in group[0].availability.keys():
+    for key in group.members[0].availability.keys():
         group_available[key] = {}
         for day in WEEK_DAYS:
             group_available[key][day] = True
 
     # loop through the members and set to False if it isn't met
-    for member in group:
+    for member in group.members:
         for key in member.availability.keys():
             for day in WEEK_DAYS:
                 if member.availability[key].count(day) == 0:
@@ -83,7 +84,7 @@ def group_availability(group: list[models.SurveyRecord]) -> dict[str, dict[str, 
     return group_available
 
 
-def availability_overlap_count(group: list[models.SurveyRecord]) -> int:
+def availability_overlap_count(group: models.GroupRecord) -> int:
     '''
     gets the number of times that the group has overlap on their availability. i.e. how many timeslot-days everyone is available
     '''
@@ -96,14 +97,14 @@ def availability_overlap_count(group: list[models.SurveyRecord]) -> int:
     return availability_count
 
 
-def meets_group_availability_requirement(group: list[models.SurveyRecord], min_count=1) -> bool:
+def meets_group_availability_requirement(group: models.GroupRecord, min_count=1) -> bool:
     '''
     checks if the group meets the specified availability overlap count.
     '''
     return availability_overlap_count(group) >= min_count
 
 
-def group_dislike_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[str]]:
+def group_dislike_occurrences(group: models.GroupRecord) -> dict[str, list[str]]:
     '''
     returns the occurrences where there are disliked users in a group.
     goes through each user and returns a dict with the list of disliked users who occur in the group per user
@@ -115,9 +116,9 @@ def group_dislike_occurrences(group: list[models.SurveyRecord]) -> dict[str, lis
 
     disliked_occurrences: dict[str, list[str]] = {}
 
-    for user in group:
+    for user in group.members:
         disliked_occurrences[user.student_id] = []
-        for dislike_user in group:
+        for dislike_user in group.members:
             if dislike_user.student_id in user.disliked_students:
                 disliked_occurrences[user.student_id].append(
                     dislike_user.student_id)
@@ -125,7 +126,7 @@ def group_dislike_occurrences(group: list[models.SurveyRecord]) -> dict[str, lis
     return disliked_occurrences
 
 
-def group_dislikes_user(user: str, group: list[models.SurveyRecord]) -> dict[str, bool]:
+def group_dislikes_user(user: str, group: models.GroupRecord) -> dict[str, bool]:
     '''
     checks whether the user id will fit for the users in the group. Returns a dictionary for each user in the group:
     ```
@@ -134,26 +135,26 @@ def group_dislikes_user(user: str, group: list[models.SurveyRecord]) -> dict[str
     '''
     dislike_occurrences = {}
 
-    for group_user in group:
+    for group_user in group.members:
         dislike_occurrences[group_user.student_id] = user in group_user.disliked_students
 
     return dislike_occurrences
 
 
-def user_dislikes_group(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> list[str]:
+def user_dislikes_group(user: models.SurveyRecord, group: models.GroupRecord) -> list[str]:
     '''
     returns each user in the group that matched with the disliked users
     '''
     disliked_users = []
 
-    for group_user in group:
+    for group_user in group.members:
         if group_user.student_id in user.disliked_students:
             disliked_users.append(group_user.student_id)
 
     return disliked_users
 
 
-def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], max_dislike_count=0) -> bool:
+def meets_group_dislike_requirement(user: models.SurveyRecord, group: models.GroupRecord, max_dislike_count=0) -> bool:
     '''
     checks if the user fits under the maximum dislike count threshold for the group
     '''
@@ -163,14 +164,26 @@ def meets_group_dislike_requirement(user: models.SurveyRecord, group: list[model
     return len(user_dislikes_group(user, group)) + list(group_dislike.values()).count(True) <= max_dislike_count
 
 
-def meets_dislike_requirement(group: list[models.SurveyRecord], max_dislike_count=0):
+def users_disliked_in_group(group: models.GroupRecord) -> list[str]:
+    '''
+    loops through each group and lists all of the disliked users
+    '''
+    disliked_users = []
+
+    disliked_users = list(itertools.chain.from_iterable(
+        group_dislike_occurrences(group).values()))
+
+    return disliked_users
+
+
+def meets_dislike_requirement(group: models.GroupRecord, max_dislike_count=0):
     '''
     checks if the group meets the dislike requirements
     '''
-    return len(group_dislike_occurrences(group).values()) <= max_dislike_count
+    return len(users_disliked_in_group(group)) <= max_dislike_count
 
 
-def group_like_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[str]]:
+def group_like_occurrences(group: models.GroupRecord) -> dict[str, list[str]]:
     '''
     returns the occurrences where there are liked users in a group.
     goes through each user and returns a dict with the list of liked users who occur in the group per user
@@ -182,9 +195,9 @@ def group_like_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[s
 
     liked_occurrences: dict[str, list[str]] = {}
 
-    for user in group:
+    for user in group.members:
         liked_occurrences[user.student_id] = []
-        for like_user in group:
+        for like_user in group.members:
             if like_user.student_id in user.preferred_students:
                 liked_occurrences[user.student_id].append(
                     like_user.student_id)
@@ -192,7 +205,7 @@ def group_like_occurrences(group: list[models.SurveyRecord]) -> dict[str, list[s
     return liked_occurrences
 
 
-def group_likes_user(user: str, group: list[models.SurveyRecord]) -> dict[str, bool]:
+def group_likes_user(user: str, group: models.GroupRecord) -> dict[str, bool]:
     '''
     checks whether the user id will fit for the users in the group. Returns a dictionary for each user in the group:
     ```
@@ -201,26 +214,26 @@ def group_likes_user(user: str, group: list[models.SurveyRecord]) -> dict[str, b
     '''
     like_occurrences = {}
 
-    for group_user in group:
+    for group_user in group.members:
         like_occurrences[group_user.student_id] = user in group_user.preferred_students
 
     return like_occurrences
 
 
-def user_likes_group(user: models.SurveyRecord, group: list[models.SurveyRecord]) -> list[str]:
+def user_likes_group(user: models.SurveyRecord, group: models.GroupRecord) -> list[str]:
     '''
     returns each user in the group that matched with the liked users
     '''
     liked_users = []
 
-    for group_user in group:
+    for group_user in group.members:
         if group_user.student_id in user.preferred_students:
             liked_users.append(group_user.student_id)
 
     return liked_users
 
 
-def meets_group_like_requirement(user: models.SurveyRecord, group: list[models.SurveyRecord], min_like_count=0) -> bool:
+def meets_group_like_requirement(user: models.SurveyRecord, group: models.GroupRecord, min_like_count=0) -> bool:
     '''
     checks if the user fits above the minimum like count threshold for the group
     '''
@@ -230,14 +243,15 @@ def meets_group_like_requirement(user: models.SurveyRecord, group: list[models.S
     return len(user_likes_group(user, group)) + list(group_like.values()).count(True) >= min_like_count
 
 
-def meets_like_requirement(group: list[models.SurveyRecord], min_like_count=0):
+def meets_like_requirement(group: models.GroupRecord, min_like_count=0):
     '''
     checks if the group meets the like requirements
     '''
-    return len(group_like_occurrences(group).values()) >= min_like_count
+
+    return len(list(itertools.chain.from_iterable(group_like_occurrences(group).values()))) >= min_like_count
 
 
-def duplicate_user_in_group(group: list[models.SurveyRecord]) -> bool:
+def duplicate_user_in_group(group: models.GroupRecord) -> bool:
     '''
     This method checks to see if there are any duplicates in a group.
     This will return true if there are any duplicates. False otherwise.
@@ -245,8 +259,8 @@ def duplicate_user_in_group(group: list[models.SurveyRecord]) -> bool:
     check = False
     state = 1
     copy_user = []
-    for user in group:
-        for user2 in group:
+    for user in group.members:
+        for user2 in group.members:
             if user.student_id == user2.student_id:
                 if state == 1:
                     state -= 1
@@ -259,7 +273,7 @@ def duplicate_user_in_group(group: list[models.SurveyRecord]) -> bool:
     return check
 
 
-def duplicate_user_in_dataset(groups: list[list[models.SurveyRecord]]) -> bool:
+def duplicate_user_in_dataset(groups: list[models.GroupRecord]) -> bool:
     '''
     This method checks to see if there are any duplicates in different groups.
     This will return true if there are any duplicates. False otherwise.
@@ -269,7 +283,7 @@ def duplicate_user_in_dataset(groups: list[list[models.SurveyRecord]]) -> bool:
     group_list = []
     copy_user = []
     for group in groups:
-        for student in group:
+        for student in group.members:
             group_list.append(student)
 
     for user in group_list:
