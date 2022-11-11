@@ -3,7 +3,7 @@ Testing loader
 '''
 from app import models
 from app import config
-from app.data.load import SurveyDataReader
+from app.data.load import SurveyDataReader, parse_asurite
 
 # NOTE: These tests verify the functionality in read_dataset.py. Additionally,
 #   in the process of doing so, they also verify the functionality in read_config.py.
@@ -31,8 +31,8 @@ def test_read_dataset_1():
     #First user record -- jsmith1
     student_id_1 = 'jsmith1'
     timezone_1 = 'UTC +1'
-    preferred_students_1 = ['jdoe2 - Jane Doe']
-    disliked_students_1 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
+    preferred_students_1 = ['jdoe2']
+    disliked_students_1 = ['mmuster3', 'jschmo4']
     availability_1 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Sunday', 'Thursday', 'Friday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Monday'], 
@@ -54,8 +54,8 @@ def test_read_dataset_1():
     #Second user record -- jdoe2
     student_id_2 = 'jdoe2'
     timezone_2 = 'UTC +2'
-    preferred_students_2 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
-    disliked_students_2 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
+    preferred_students_2 = ['mmuster3', 'jschmo4']
+    disliked_students_2 = ['jsmith1', 'bwillia5']
     availability_2 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
@@ -77,8 +77,8 @@ def test_read_dataset_1():
     #Third user record -- mmuster3
     student_id_3 = 'mmuster3'
     timezone_3 = 'UTC +3'
-    preferred_students_3 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
-    disliked_students_3 = ['jdoe2 - Jane Doe']
+    preferred_students_3 = ['jsmith1', 'bwillia5']
+    disliked_students_3 = ['jdoe2']
     availability_3 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
@@ -163,8 +163,8 @@ def test_read_dataset_2():
     #First user record -- jsmith1
     student_id_1 = 'jsmith1'
     timezone_1 = 'UTC +1'
-    preferred_students_1 = ['jdoe2 - Jane Doe', 'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', 'bwillia5 - Billy Williams', 'mbrown6 - Mary Brown']
-    disliked_students_1 = ['jwhite7 - Jack White', 'ssilver8 - Sarah Silver', 'hpotter9 - Harry Potter']
+    preferred_students_1 = ['jdoe2', 'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
+    disliked_students_1 = ['jwhite7', 'ssilver8', 'hpotter9']
     availability_1 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Sunday', 'Monday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Thursday'], 
@@ -186,8 +186,8 @@ def test_read_dataset_2():
     #Second user record -- jdoe2
     student_id_2 = 'jdoe2'
     timezone_2 = 'UTC +2'
-    preferred_students_2 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', 'bwillia5 - Billy Williams', 'mbrown6 - Mary Brown', 'jwhite7 - Jack White']
-    disliked_students_2 = ['ssilver8 - Sarah Silver', 'hpotter9 - Harry Potter', 'jsmith1 - John Smith']
+    preferred_students_2 = ['mmuster3', 'jschmo4', 'bwillia5', 'mbrown6', 'jwhite7']
+    disliked_students_2 = ['ssilver8', 'hpotter9', 'jsmith1']
     availability_2 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Monday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Tuesday'], 
@@ -209,8 +209,8 @@ def test_read_dataset_2():
     #Third user record -- mmuster3
     student_id_3 = 'mmuster3'
     timezone_3 = 'UTC +3'
-    preferred_students_3 = ['jschmo4 - Joe Schmo', 'bwillia5 - Billy Williams', 'mbrown6 - Mary Brown', 'jwhite7 - Jack White', 'ssilver8 - Sarah Silver']
-    disliked_students_3 = ['hpotter9 - Harry Potter', 'jsmith1 - John Smith', 'jdoe2 - Jane Doe']
+    preferred_students_3 = ['jschmo4', 'bwillia5', 'mbrown6', 'jwhite7', 'ssilver8']
+    disliked_students_3 = ['hpotter9', 'jsmith1', 'jdoe2']
     availability_3 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Tuesday', 'Wednesday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Tuesday', 'Wednesday'], 
@@ -232,8 +232,8 @@ def test_read_dataset_2():
     #Fourth user record -- jschmo4
     student_id_4 = 'jschmo4'
     timezone_4 = 'UTC +2'
-    preferred_students_4 = ['bwillia5 - Billy Williams', 'mbrown6 - Mary Brown', 'jwhite7 - Jack White', 'ssilver8 - Sarah Silver', 'hpotter9 - Harry Potter']
-    disliked_students_4 = ['jsmith1 - John Smith', 'jdoe2 - Jane Doe', 'mmuster3 - Max Mustermann']
+    preferred_students_4 = ['bwillia5', 'mbrown6', 'jwhite7', 'ssilver8', 'hpotter9']
+    disliked_students_4 = ['jsmith1', 'jdoe2', 'mmuster3']
     availability_4 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Thursday', 'Monday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Tuesday'], 
@@ -256,8 +256,8 @@ def test_read_dataset_2():
     # User record 5 -- bwillia5
     student_id_5 = 'bwillia5'
     timezone_5 = 'UTC +5'
-    preferred_students_5 = ['mbrown6 - Mary Brown', 'jwhite7 - Jack White', 'ssilver8 - Sarah Silver', 'hpotter9 - Harry Potter', 'jsmith1 - John Smith']
-    disliked_students_5 = ['jdoe2 - Jane Doe', 'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
+    preferred_students_5 = ['mbrown6', 'jwhite7', 'ssilver8', 'hpotter9', 'jsmith1']
+    disliked_students_5 = ['jdoe2', 'mmuster3', 'jschmo4']
     availability_5 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Monday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Tuesday', 'Wednesday', 'Saturday'], 
@@ -279,8 +279,8 @@ def test_read_dataset_2():
     # User record 6 -- mbrown6
     student_id_6 = 'mbrown6'
     timezone_6 = 'UTC +2'
-    preferred_students_6 = ['jwhite7 - Jack White', 'ssilver8 - Sarah Silver', 'hpotter9 - Harry Potter', 'jsmith1 - John Smith', 'jdoe2 - Jane Doe']
-    disliked_students_6 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', 'bwillia5 - Billy Williams']
+    preferred_students_6 = ['jwhite7', 'ssilver8', 'hpotter9', 'jsmith1', 'jdoe2']
+    disliked_students_6 = ['mmuster3', 'jschmo4', 'bwillia5']
     availability_6 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Saturday'], 
@@ -556,8 +556,8 @@ def test_read_dataset_1_all_fields():
     student_name_1 = "John Smith"
     student_login_1 = "jsmith_1"
     timezone_1 = 'UTC +1'
-    preferred_students_1 = ['jdoe2 - Jane Doe']
-    disliked_students_1 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
+    preferred_students_1 = ['jdoe2']
+    disliked_students_1 = ['mmuster3', 'jschmo4']
     availability_1 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['Sunday', 'Thursday', 'Friday'], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['Monday'], 
@@ -585,8 +585,8 @@ def test_read_dataset_1_all_fields():
     student_email_2 = "jdoe2@asu.edu"
     student_name_2 = "Jane Doe"
     student_login_2 = "jdoe_2"    
-    preferred_students_2 = ['mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo']
-    disliked_students_2 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
+    preferred_students_2 = ['mmuster3', 'jschmo4']
+    disliked_students_2 = ['jsmith1', 'bwillia5']
     availability_2 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
@@ -614,8 +614,8 @@ def test_read_dataset_1_all_fields():
     student_email_3 = "mmuster3@asu.edu"
     student_name_3 = "Max Munster"
     student_login_3 = "mmuster_3"        
-    preferred_students_3 = ['jsmith1 - John Smith', 'bwillia5 - Billy Williams']
-    disliked_students_3 = ['jdoe2 - Jane Doe']
+    preferred_students_3 = ['jsmith1', 'bwillia5']
+    disliked_students_3 = ['jdoe2']
     availability_3 = {
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [''], 
         'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': [''], 
@@ -689,3 +689,11 @@ def test_read_dataset_1_all_fields():
 
     assert(len(surveys_result) == 4) #4 user records
     assert(surveys_result == surveys_expected)
+    
+def test_parse_asurite(): 
+    
+    asurites = ['asurite 123124 -123123', 'asurite', 'asurite  1234', '  asurite ']
+    
+    for asurite in asurites:
+        assert parse_asurite(asurite) == 'asurite'
+        a = parse_asurite(asurite)

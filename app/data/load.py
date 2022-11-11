@@ -30,11 +30,11 @@ class SurveyDataReader():
                 student_login = ""
                 for field in self.config['preferred_students_field_names']:
                     if row[field] != "":
-                        preferred_students.append(row[field])
+                        preferred_students.append(parse_asurite(row[field]))
 
                 for field in self.config['disliked_students_field_names']:
                     if row[field] != "":
-                        disliked_students.append(row[field])
+                        disliked_students.append(parse_asurite(row[field]))
 
                 availability: dict[str, list[str]] = {}
                 for field in self.config['availability_field_names']:
@@ -81,3 +81,11 @@ class GroupingDataReader:
         print(groupfile)
         groups = []
         return groups
+
+
+def parse_asurite(val: str) -> str:
+    '''
+    parses a student's id from the string.
+    Returns the first value when splitting a str on a space character
+    '''
+    return val.strip().split(" ", 1)[0]
