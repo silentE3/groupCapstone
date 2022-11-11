@@ -1,6 +1,7 @@
 '''
 validate is used for validating groups
 '''
+import re
 import itertools
 from app import models
 
@@ -78,10 +79,50 @@ def group_availability(group: models.GroupRecord) -> dict[str, dict[str, bool]]:
     # loop through the members and set to False if it isn't met
     for member in group.members:
         for key in member.availability.keys():
+            # convert values to lowercase for comparison
+            lowercase_avail: list[str] = [x.lower()
+                                          for x in member.availability[key]]
             for day in WEEK_DAYS:
-                if member.availability[key].count(day) == 0:
+                if (lowercase_avail).count(day.lower()) == 0:
                     group_available[key][day] = False
     return group_available
+
+
+def group_availability_strings(group: models.GroupRecord) -> list[str]:
+    '''
+    Returns the overlapping availability of the group as a list of strings.
+    List entries have the following structure:
+    ```
+    <weekday> @ <time slot>
+    ```
+    '''
+    available_slots: list[str] = []
+    group_availability_dict: dict[str, dict[str, bool]
+                                  ] = group_availability(group)
+    for time_slot, availability_days in group_availability_dict.items():
+        for day, available in availability_days.items():
+            if available:
+                available_slots.append(
+                    day + " @ " + _extract_time_(time_slot))
+    return available_slots
+
+
+def _extract_time_(time_slot_str: str) -> str:
+    '''
+    This function accepts a time slot header and attempts to extract the time portion
+    from within it, under the assumption that the time is within two brackets.
+    Ex:
+        input string of: "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]"
+            would return "0:00 AM - 3:00 AM"
+    If the enclosing bracket pattern is not found, it simply returns the original string.
+    '''
+    result: str
+    try:
+        result = re.search(r'\[(.*?)\]', time_slot_str).group(1)
+    except AttributeError:
+        # bracketed time string not found. OK, just return the original
+        result = time_slot_str
+    return result
 
 
 def availability_overlap_count(group: models.GroupRecord) -> int:
@@ -143,7 +184,7 @@ def group_dislikes_user(user: str, group: models.GroupRecord) -> dict[str, bool]
 
 def user_dislikes_group(user: models.SurveyRecord, group: models.GroupRecord) -> list[str]:
     '''
-    returns each user in the group that matched with the disliked users
+    returns each member in the group that matched with the user's disliked students
     '''
     disliked_users = []
 
@@ -166,7 +207,7 @@ def meets_group_dislike_requirement(user: models.SurveyRecord, group: models.Gro
 
 def users_disliked_in_group(group: models.GroupRecord) -> list[str]:
     '''
-    loops through each group and lists all of the disliked users
+    loops through each user in the group and lists all of the disliked users
     '''
     disliked_users = []
 
@@ -310,3 +351,42 @@ def size_limit_in_dataset(groups: list[models.GroupRecord], limit: int) -> bool:
         if size > limit + 1 or size < limit - 1:
             return False
     return True
+
+
+def total_disliked_pairings(groups: list[models.GroupRecord]) -> int:
+    '''
+    This method returns the total number of disliked pairings in a set
+    of groups.
+    '''
+    result: int = 0
+
+    for group in groups:
+        for user in group.members:
+            result += len(user_dislikes_group(user, group))
+    return result
+
+
+def total_groups_no_availability(groups: list[models.GroupRecord]) -> int:
+    '''
+    This method returns the total number of groups without an overlapping time
+    slot in a set of groups.
+    '''
+    result: int = 0
+
+    for group in groups:
+        if availability_overlap_count(group) == 0:
+            result += 1
+    return result
+
+
+def total_liked_pairings(groups: list[models.GroupRecord]) -> int:
+    '''
+    This method returns the total number of liked pairings in a set
+    of groups.
+    '''
+    result: int = 0
+
+    for group in groups:
+        for user in group.members:
+            result += len(user_likes_group(user, group))
+    return result

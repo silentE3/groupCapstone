@@ -84,7 +84,7 @@ def test_format_group_report_check_group():
 
     report = report_formatter.format_group_report(groups)
 
-    assert report[1][0] == 0
+    assert report[1][0] == '1'
 
 
 def test_format_individual_report_check_header_all_enabled():

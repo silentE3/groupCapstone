@@ -33,7 +33,7 @@ def format_records_as_table(records: list[UserRecord]) -> list[list[str]]:
         row: list[str] = []
         row.append(record.asurite)
         for item in list(record.days_available_by_time.values()):
-            row.append(','.join(item))
+            row.append(';'.join(item))
         for i in range(5):
             if i < len(record.preferred_students):
                 row.append(record.preferred_students[i])

@@ -51,7 +51,7 @@ class RandomGrouper:
                 # result[i].append(survey_data[survey_num])
                 members.append(survey_data[survey_num])
                 survey_num += 1
-            group = models.GroupRecord(f'Group #{i+1}', members)
+            group = models.GroupRecord(f'{i+1}', members)
             result.append(group)
 
         return result

@@ -173,6 +173,123 @@ def test_group_availability():
     assert availability['7']['friday'] == True
 
 
+def test_group_availability_strings_1():
+    group = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        availability={
+            "1": ['tuesday', 'wednesday'],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": ['thursday'],
+            "7": ['friday']
+        },
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        availability={
+            "1": ['monday', 'tuesday', 'wednesday'],
+            "2": ['tuesday'],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": ['thursday'],
+            "7": []
+        },
+    ), models.SurveyRecord(
+        student_id="asurite4",
+        availability={
+            "1": ['tuesday', 'wednesday', 'friday'],
+            "2": ['tuesday'],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": ['thursday'],
+            "7": ['friday']
+        },
+    )])
+
+    availability = validate.group_availability_strings(group)
+
+    assert "monday @ 1" not in availability
+    assert "tuesday @ 1" in availability
+    assert "wednesday @ 1" in availability
+    assert "thursday @ 1" not in availability
+    assert "friday @ 1" not in availability
+    assert "saturday @ 1" not in availability
+    assert "sunday @ 1" not in availability
+
+    # Note: only checked EVERY day above for robustness. Not necessary throughout
+    assert sum(map(lambda x: '@ 2' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 3' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 4' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 5' in x, availability)) == 0
+
+    assert "thursday @ 6" in availability
+    assert sum(map(lambda x: '@ 6' in x, availability)) == 1
+
+    assert sum(map(lambda x: '@ 7' in x, availability)) == 0
+
+
+def test_group_availability_strings_2():
+    group = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        availability={
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]": ['tuesday', 'wednesday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]": ['thursday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]": ['friday']
+        },
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        availability={
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]": ['monday', 'tuesday', 'wednesday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]": ['tuesday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]": ['thursday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]": []
+        },
+    ), models.SurveyRecord(
+        student_id="asurite4",
+        availability={
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]": ['tuesday', 'wednesday', 'friday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]": ['tuesday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]": [],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]": ['thursday'],
+            "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]": ['friday']
+        },
+    )])
+
+    availability = validate.group_availability_strings(group)
+
+    assert "monday @ 0:00 AM - 3:00 AM" not in availability
+    assert "tuesday @ 0:00 AM - 3:00 AM" in availability
+    assert "wednesday @ 0:00 AM - 3:00 AM" in availability
+    assert "thursday @ 0:00 AM - 3:00 AM" not in availability
+    assert "friday @ 0:00 AM - 3:00 AM" not in availability
+    assert "saturday @ 0:00 AM - 3:00 AM" not in availability
+    assert "sunday @ 0:00 AM - 3:00 AM" not in availability
+
+    # Note: only checked EVERY day above for robustness. Not necessary throughout
+    assert sum(map(lambda x: '@ 3:00 AM - 6:00 AM' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 6:00 AM - 9:00 AM' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 9:00 AM - 12:00 PM' in x, availability)) == 0
+    assert sum(map(lambda x: '@ 12:00 PM - 3:00 PM' in x, availability)) == 0
+
+    assert "thursday @ 3:00 PM - 6:00 PM" in availability
+    # verify '@ 6'is only in the list once
+    assert sum(map(lambda x: '@ 3:00 PM - 6:00 PM' in x, availability)) == 1
+
+    assert sum(map(lambda x: '@ 6:00 PM - 9:00 PM' in x, availability)) == 0
+
+
 def test_availability_overlap_count():
     group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite1",
@@ -514,7 +631,6 @@ def test_meets_like_requirements():
         student_id="asurite6",
     )])
 
-
     assert validate.meets_like_requirement(group, 3)
     assert not validate.meets_like_requirement(group, 5)
     assert validate.meets_like_requirement(group, 0)
@@ -727,3 +843,211 @@ def test_size_limit_4():
     group_list = [group1, group2]
 
     assert not validate.size_limit_in_dataset(group_list, 4)
+
+
+def test_total_disliked_pairings():
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        disliked_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        disliked_students=['asurite5', 'asurite6']
+    )])  # 1 dislikes
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+        disliked_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+        disliked_students=['asurite3', 'asurite7']
+    )])  # 0 dislikes
+
+    group_3 = models.GroupRecord("3", [models.SurveyRecord(
+        student_id="asurite7",
+        disliked_students=['asurite9']
+    ), models.SurveyRecord(
+        student_id="asurite8",
+    ), models.SurveyRecord(
+        student_id="asurite9",
+        disliked_students=['asurite7', 'asurite8']
+    )])  # 3 dislikes
+
+    assert validate.total_disliked_pairings([group_1, group_2, group_3]) == 4
+
+
+def test_total_groups_no_availability_1():
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite2",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        availability={
+            "1": [],
+            "2": [],
+            "3": ['monday'],
+        },
+    )])  # NO overlapping slot
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite6",
+        availability={
+            "1": ['monday', 'tuesday'],
+            "2": [],
+            "3": ['wednesday'],
+        },
+    )])  # overlapping slot
+
+    group_3 = models.GroupRecord("3", [models.SurveyRecord(
+        student_id="asurite7",
+        availability={
+            "1": [],
+            "2": ['wednesday'],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite8",
+        availability={
+            "1": [],
+            "2": ['wednesday'],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite9",
+        availability={
+            "1": [],
+            "2": ['tuesday', 'wednesday'],
+            "3": ['monday'],
+        },
+    )])  # overlapping slot
+
+    assert validate.total_groups_no_availability(
+        [group_1, group_2, group_3]) == 1  # 1 group WITHOUT an overlapping time slot
+
+
+def test_total_groups_no_availability_2():
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite2",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        availability={
+            "1": [],
+            "2": [],
+            "3": ['monday'],
+        },
+    )])  # No overlapping slot
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+        availability={
+            "1": ['monday'],
+            "2": [],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        availability={
+            "1": [],
+            "2": ['monday'],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite6",
+        availability={
+            "1": ['monday', 'tuesday'],
+            "2": [],
+            "3": ['wednesday'],
+        },
+    )])  # No overlapping slot
+
+    group_3 = models.GroupRecord("3", [models.SurveyRecord(
+        student_id="asurite7",
+        availability={
+            "1": [],
+            "2": ['wednesday'],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite8",
+        availability={
+            "1": [],
+            "2": ['wednesday'],
+            "3": [],
+        },
+    ), models.SurveyRecord(
+        student_id="asurite9",
+        availability={
+            "1": [],
+            "2": ['tuesday'],
+            "3": ['monday'],
+        },
+    )])  # No overlapping slot
+
+    assert validate.total_groups_no_availability(
+        [group_1, group_2, group_3]) == 3  # 3 groups WITHOUT an overlapping time slot
+
+
+def test_total_liked_pairings_1():
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+        preferred_students=['asurite2']
+    ), models.SurveyRecord(
+        student_id="asurite2",
+        preferred_students=['asurite1', 'asurite4']
+    ), models.SurveyRecord(
+        student_id="asurite3",
+        preferred_students=['asurite6']
+    )])  # 2 preferred pairings
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+        preferred_students=['asurite6']
+    ), models.SurveyRecord(
+        student_id="asurite5",
+        preferred_students=['asurite1']
+    ), models.SurveyRecord(
+        student_id="asurite6",
+        preferred_students=['asurite4', 'asurite5']
+    )])  # 3 preferred pairings
+
+    assert validate.total_liked_pairings([group_1, group_2]) == 5

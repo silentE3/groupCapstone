@@ -32,11 +32,13 @@ class ReportFormatter():
                 if self.config['show_preferred_students']:
                     record.append('')
 
-                record.append('')
+                record.append(
+                    validate.meets_group_availability_requirement(group))
                 if self.config['show_availability_overlap']:
-                    record.append('')
+                    record.append(
+                        ';'.join(validate.group_availability_strings(group)))
 
-                record.append(groups.index(group))
+                record.append(group.group_id)
                 records.append(record)
 
         return records
@@ -64,9 +66,9 @@ class ReportFormatter():
         returns a 2d array with the group level report of the data.
         '''
         records: list[list] = [self.__group_report_header()]
-        for idx, group in enumerate(groups):
+        for group in groups:
             record = []
-            record.append(idx)
+            record.append(group.group_id)
 
             record.append(validate.meets_dislike_requirement(group))
             if self.config['show_disliked_students']:
@@ -80,7 +82,8 @@ class ReportFormatter():
             record.append(
                 validate.meets_group_availability_requirement(group))
             if self.config['show_availability_overlap']:
-                record.append('')
+                record.append(
+                    ';'.join(validate.group_availability_strings(group)))
 
             records.append(record)
 
@@ -100,5 +103,28 @@ class ReportFormatter():
         headers.append('Meets Availability Requirement')
         if self.config['show_availability_overlap']:
             headers.append('Availability Overlap')
+
+        return headers
+
+    def format_overall_report(self, groups: list[models.GroupRecord]):
+        '''
+        returns a 2d array with the top level (overall) report data.
+        '''
+        records: list[list] = [self.__overall_report_header()]
+
+        record = []
+        record.append(str(validate.total_disliked_pairings(groups)))
+        record.append(str(validate.total_groups_no_availability(groups)))
+        record.append(str(validate.total_liked_pairings(groups)))
+
+        records.append(record)
+
+        return records
+
+    def __overall_report_header(self) -> list[str]:
+        headers = []
+        headers.append('Disliked Pairings')
+        headers.append('Number of Groups Without Overlapping Time Slot')
+        headers.append('Preferred Pairings')
 
         return headers

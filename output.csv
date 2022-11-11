@@ -1,5 +1,21 @@
-group id,student id,student email,student login
-group_1,jsmith1,jsmith1@asu.edu,jsmith_1
-group_1,jschmo4,,
-group_2,mmuster3,mmuster3@asu.edu,mmuster_3
-group_2,jdoe2,jdoe2@asu.edu,jdoe_2
+group id,student id
+group_1,asurite2
+group_1,asurite6
+group_1,asurite3
+group_1,asurite14
+group_1,asurite9
+group_2,asurite0
+group_2,asurite1
+group_2,asurite13
+group_2,asurite17
+group_2,asurite10
+group_3,asurite18
+group_3,asurite4
+group_3,asurite11
+group_3,asurite8
+group_3,asurite12
+group_4,asurite19
+group_4,asurite7
+group_4,asurite15
+group_4,asurite16
+group_4,asurite5
