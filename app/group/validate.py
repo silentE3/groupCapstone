@@ -122,6 +122,7 @@ def _extract_time_(time_slot_str: str) -> str:
     except AttributeError:
         # bracketed time string not found. OK, just return the original
         result = time_slot_str
+
     return result
 
 
