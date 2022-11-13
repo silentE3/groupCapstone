@@ -6,7 +6,7 @@
 #
 # Subsequent lines: define results for a single student per line
 #
-# Preferred and non-preferred student entries have the format: 
+# Preferred and non-preferred student entries have the format:
 # "<asurite> - <First Name> <Last Name>"
 #
 # *********************************************
@@ -19,91 +19,124 @@ import csv
 import os
 import sys
 
-#Get and parse program args
+# Get and parse program args
 argCnt = len(sys.argv)
 if argCnt < 2:
-	print("USAGE: python anonymize-survey-results.py <RawResults>.csv")
-	quit()
+    print("USAGE: python anonymize-survey-results.py <RawResults>.csv")
+    quit()
 
 filename = os.path.basename(sys.argv[1])
 
 raw_results = []
-with open(filename, newline='') as input_file:
-	reader = csv.reader(input_file)
-	raw_results = list(reader)
+with open(filename, 'r', newline='', encoding='utf-8-sig') as input_file:
+    reader = csv.reader(input_file)
+    raw_results = list(reader)
 
-# asurite data dictionary key:value = original:new/fake
-asuriteDict = {}
+# analyze the headers for certain expected columns
+headers: list[str] = raw_results[0]
 
-for index,line in enumerate(raw_results):
-	if index == 0 or len(line) < 24: #headers or non-conforming data
-		continue
+username_col: int
+try:
+    username_col = next(idx for idx, element in enumerate(
+        headers) if element.lower() == 'username')
+except StopIteration:
+    username_col = -1
 
-	# Generate fake new asurite for the student
-	newAsurite = "asurite" + str(index)
-	
-	if line[2] != "": #asurite
-		asuriteDict[line[2]] = newAsurite
+asurite_col: int
+try:
+    asurite_col = next(idx for idx, element in enumerate(
+        headers) if "asurite" in element.lower())
+except StopIteration:
+    print("Error!! No column containing 'asurite' found. Program terminated.")
+    quit()
 
+github_username_col: int
+try:
+    github_username_col = next(idx for idx, element in enumerate(
+        headers) if "github username" in element.lower())
+except StopIteration:
+    github_username_col = -1
+
+email_col: int
+try:
+    email_col = next(idx for idx, element in enumerate(
+        headers) if element.lower().startswith("email address"))
+except StopIteration:
+    email_col = -1
+
+preferences_cols: list[int] = [idx for idx, element in enumerate(
+    headers) if "preferred" in element.lower()]
+
+# Some datasets appeared to contain extraneous data in unlabeled columns. Flag
+#	this data to be skipped when writing the anonymized output.
+unidentified_cols: list[int] = [idx for idx, element in enumerate(
+    headers) if element == ""]
+unidentified_cols.sort(reverse=True)  # sort in descending order
+
+# Build asurite data dictionary key:value = original:new/fake
+asurite_dict = {}
+for index, line in enumerate(raw_results):
+    if index == 0:  # skip headers row
+        continue
+
+    # Generate fake new asurite for the student
+    NEW_ASURITE: str = "asurite" + str(index)
+
+    if line[asurite_col] != "":
+        asurite_dict[line[asurite_col]] = NEW_ASURITE
+
+# Anonymize the necessary columns
 studentCount = len(raw_results) - 1
-for index,line in enumerate(raw_results):
-	if len(line) < 24:
-		print("WARNING: Non-conforming data (less than 24 comma-separated elements) found on line " + str(index + 1) + ". Line skipped.")
-		continue
-	if index == 0: #headers
-		continue
+for index, line in enumerate(raw_results):
+    if index != 0:  # skip headers row
 
-	# Generate fake new identifiers for the student
-	newName = "A" + str(index)
-	newAsurite = "asurite" + str(index)
-	newGithub = "A_" + str(index)
+        # Generate fake new identifiers for the student
+        NEW_NAME: str = "A" + str(index)
+        NEW_ASURITE: str = "asurite" + str(index)
+        NEW_GITHUB = "A_" + str(index)
 
-	# index 0: timestamp -- do nothing
-	
-	# index 1: username
-	if line[1] != "":
-		line[1] = newAsurite + "@asu.edu"
-	
-	# index 2:
-	#asurite ID
-	if line[2] != "":
-		line[2] = newAsurite
-	
-	# index 3:
-	#Github username
-	if line[3] != "":
-		line[3] = newGithub
-	
-	# index 4:
-	#email address
-	if line[4] != "":
-		line[4] = newName + "@gmail.com"
-	
-	# index 5: time zone -- do nothing
-	# index 6 - 13: Availability slots -- do nothing
-	# index 14 & 15: Skills rating -- do nothing
+        # username
+        if username_col != -1 and line[username_col] != "":
+            line[username_col] = NEW_ASURITE + "@asu.edu"
 
-	# 16 - 23: preferred and non-preferred students	
-	for num in range(16,24):
-		element = line[num]
-		if element != "" and not(element in asuriteDict):
-			elementParts = line[num].split(' ')
-			# first element of parts is asurite
-			if elementParts[0] in asuriteDict:
-				line[num] = asuriteDict[elementParts[0]]
-			else:
-				# add to asurite dictionary
-				studentCount += 1
-				asuriteDict[elementParts[0]] = "asurite" + str(studentCount)
-				#replace this instance
-				line[num] = asuriteDict[elementParts[0]]
-	
-	# replace the original data with the anonymized data					
-	raw_results[index] = line
+        # asurite ID
+        if line[asurite_col] != "":
+            line[asurite_col] = NEW_ASURITE
+
+        # Github username
+        if github_username_col != -1 and line[github_username_col] != "":
+            line[github_username_col] = NEW_GITHUB
+
+        # email address
+        if email_col != -1 and line[email_col] != "":
+            line[email_col] = NEW_NAME + "@gmail.com"
+
+        # preferred and non-preferred students
+        for num in preferences_cols:
+            element = line[num]
+            if element != "" and not element in asurite_dict:
+                elementParts = line[num].split(' ')
+                # first element of parts is asurite
+                if elementParts[0] in asurite_dict:
+                    line[num] = asurite_dict[elementParts[0]]
+                else:
+                    # add to asurite dictionary
+                    studentCount += 1
+                    asurite_dict[elementParts[0]] = "asurite" + \
+                        str(studentCount)
+                    # replace this instance
+                    line[num] = asurite_dict[elementParts[0]]
+
+    # Delete unidentified data (columns)
+    for num in unidentified_cols:
+        del line[num]
+
+    # replace the original data with the anonymized data
+    raw_results[index] = line
 
 # write the anonymized data out to <origFilename>_Anon.csv
 filename_parts = filename.split('.')
-with open(filename_parts[0] + "_Anon.csv", 'w', newline='') as output_file:
-	writer = csv.writer(output_file, quoting=csv.QUOTE_ALL)
-	for row in raw_results:
-		writer.writerow(row)
+with open(filename_parts[0] + "_Anon.csv", 'w', newline='', encoding='utf-8-sig') as output_file:
+    writer = csv.writer(output_file, quoting=csv.QUOTE_ALL)
+    for row in raw_results:
+        writer.writerow(row)
