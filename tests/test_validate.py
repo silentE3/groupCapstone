@@ -51,7 +51,7 @@ def test_user_matches_availability_count():
         student_id="asurite1",
         availability={
             "1": ['monday', 'tuesday', 'wednesday'],
-            "2": ['wednesday'],
+            "2": ['wednesday', 'thursday'],
             "3": ['monday'],
             "4": ['monday'],
             "5": ['sunday'],
@@ -63,7 +63,7 @@ def test_user_matches_availability_count():
     group = models.GroupRecord("1", [models.SurveyRecord(
         student_id="asurite2",
         availability={
-            "1": ['monday', ],
+            "1": ['monday'],
             "2": [],
             "3": [],
             "4": [],
@@ -78,6 +78,17 @@ def test_user_matches_availability_count():
             "2": [],
             "3": [],
             "4": [],
+            "5": [],
+            "6": ['thursday'],
+            "7": ['friday']
+        },
+    ), models.SurveyRecord(
+        student_id="asurite4",
+        availability={
+            "1": ['saturday'],
+            "2": [],
+            "3": [],
+            "4": ['wednesday'],
             "5": [],
             "6": ['thursday'],
             "7": ['friday']

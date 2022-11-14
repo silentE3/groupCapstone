@@ -1,102 +1,121 @@
-'''
-Pseudo Code for algorithm implementation
+"""
+module for the implementation of the grouping algorithm
+"""
+from app import models
+from app.group import validate
 
-class Grouper():
 
-    students: list[models.SurveyRecord]
-    groups: list[models.GroupRecord]
-    def group_students(students):
-      sorted_student_list = sort_students(students)
-      
-      while len(sorted_student_list) > 0:
-          # add_user_to_group:
-          student = sorted_student_list.pop()
-        
-        
-    def add_student_to_group(student):
+class Algorithm:
+
+    def __init__(self, students) -> None:
+        self.students: list[models.SurveyRecord] = students
+        self.groups: list[models.GroupRecord] = []
+
+    def group_students(self) -> list[models.GroupRecord]:
+        while len(self.students) > 0:
+            student = self.students.pop()
+
+            self.add_student_to_group(student)
+
+        return self.groups
+
+    def add_student_to_group(self, student: models.SurveyRecord):
         for group in self.groups:
-            if not len(group) < criteria:
+            if not len(group.members) < 5:
                 continue
-            
-            if student_meets_group_criteria:
-                group.add_student(student)
+
+            if len(validate.user_dislikes_group(student, group)) < 1 and validate.user_matches_availability_count(student, group) > 0:
+                group.members.append(student)
                 return
-        
-        # groups were full or they didn't meet the criteria. Now we need to start the swapping logic
-        
-        for group in self.groups:
-            if student_meets_group_criteria:
-                find_the_person_to_swap()
-                swap_user(student)
-                return
-        
-        # no criteria were met
-        add_student_to_leftover_pile_for_later():
-        
-        
 
-  
-  
-  
-def sort_students(students):
-  for each student in students
-    look at the criteria.
-    
-    For dislikes:
-      
-    For availability:  
-      look at how often they are available. Count the total number of slots they are available. 
-      Rank the availability compared to when others fit the available slots
+        if len(self.groups) < len(self.students) // 4:
+            self.groups.append(models.GroupRecord())
+            self.groups[-1].members.append(student)
+            return
+        else:
+            for group in self.groups:
+                if 
 
-    For preferred students:
-      if there are preferred students, it means they may have a more refined interest, 
-      For ties, the least preferred count means higher compatibility
-      
-def student_score():
-  dislikes = total_dislikes_for_the_user(student)
-  likes = len(students)-dislikes   
-      
-def total_dislikes_for_the_user(student):
-      look at the number of times their name shows up in dislikes 
-      and also append the number of people they dislike. 
-      This should be the total count of incompatible people for the student. 
-      If the dislike is reciprical, don't count it twice.
-    
-    first add each of the student's non preferred students to the set.
-    disliked_set = {}
-    
-    for student in students:
-        if student.non_preferred_students.contains(this_student):
-            disliked_set.add(student.student_id)
-            
-    return len(disliked_set)
-      
-def get_total_preferred_slots():
-  first 
-  
-def build_map_of_availability_across_dataset():
-  dict[day_of_week, dict[time_of_day, availability_count]  
-  avail_map = {}
-  for student in students:
-    for day in week:
-      avail_map
-
-'''
+        print(student.student_id)
 
 
-def total_dislike_incompatible_students(student, students):
+def total_dislike_incompatible_students(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
     """
-    function to identify the total number of students that are disliked 
-    ook at the number of times their name shows up in dislikes
-    and also append the number of people they dislike.
-    This should be the total count of incompatible people for the student.
+    function to identify the total number of students that are disliked
+    This should be the total count of incompatible students for the student.
     If the dislike is reciprical, don't count it twice.
-    """
-    # first add each of the student's non preferred students to the set.
-    disliked_set = {}
 
-    for student in students:
-        if student.non_preferred_students.contains(this_student):
-            disliked_set.add(student.student_id)
+    Args:
+        student (models.SurveyRecord): student to check
+        students (list[models.SurveyRecord]): full list of students
+
+    Returns:
+        int: number of total incompatible students
+    """
+    disliked_set: set[str] = set(student.disliked_students)
+
+    for other_student in students:
+        if student.student_id == other_student.student_id:
+            continue
+
+        if student.student_id in other_student.disliked_students:
+            disliked_set.add(other_student.student_id)
 
     return len(disliked_set)
+
+
+def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
+    """
+    checks the student's availability against everyone elses and counts the number of times that they match
+
+    Args:
+        student (models.SurveyRecord): student to check matches for
+        students (list[models.SurveyRecord]): full list of students
+
+    Returns:
+        int: number of times the student matches availability in the dataset
+    """
+
+    totals = 0
+
+    for other_student in students:
+        if student.student_id == other_student.student_id:
+            continue
+
+        for time, avail_days in other_student.availability.items():
+            for avail_day in avail_days:
+                if avail_day in student.availability[time] and not avail_day == '':
+                    totals += 1
+
+    return totals
+
+
+def rank_students(students: list[models.SurveyRecord]):
+    for student in students:
+        student.avail_rank = total_availability_matches(student, students)
+        student.okay_with_rank = len(
+            students) - total_dislike_incompatible_students(student, students)
+
+    students.sort(reverse=True)
+
+
+def pick_group():
+    """
+    how do I choose what group to join?
+
+    generate a ranking of the available groups
+    generate a ranking with a scenario for how it would change the overall score
+
+    start at score of 100
+    subtract for dislikes
+    add for any matching availabilities
+    how would adding a new user to the group work?
+    how would swapping a user with the group work?
+    how would a new group work
+    how would the group limits work? Should it be a threshold? If it would result in a very good group score, it can break the boundary
+    """
+
+def run_scenario(user):
+    """
+    We need the ability to run a scenario when adding a user to a group. If
+    """

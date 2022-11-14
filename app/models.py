@@ -23,7 +23,6 @@ class SurveyFieldMapping(TypedDict):
 class ReportConfiguration(TypedDict):
     '''
     Data class for the report layout
-    TODO: Add additional attributes to this
     '''
 
     # show preferred students found in the grouping
@@ -60,6 +59,11 @@ class SurveyRecord:
     preferred_students: list[str] = field(default_factory=list)
     disliked_students: list[str] = field(default_factory=list)
     availability: dict[str, list[str]] = field(default_factory=dict)
+    okay_with_rank = 0
+    avail_rank = 0
+
+    def __lt__(self, other):
+        return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank
 
 
 @dataclass
@@ -67,5 +71,5 @@ class GroupRecord:
     '''
     Class that holds group infomation for a single group
     '''
-    group_id: str
-    members: list[SurveyRecord]
+    group_id: str = ""
+    members: list[SurveyRecord] = field(default_factory=list)

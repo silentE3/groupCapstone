@@ -38,7 +38,7 @@ class SurveyDataReader():
 
                 availability: dict[str, list[str]] = {}
                 for field in self.config['availability_field_names']:
-                    availability[field] = row[field].split(';')
+                    availability[field] = row[field].lower().split(';')
 
                 timezone = ''
                 if self.config.get('timezone_field_name') and row[self.config['timezone_field_name']] != '':

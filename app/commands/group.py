@@ -5,9 +5,7 @@ Also includes reading in the configuration file.
 
 import click
 
-from app import models
-from app import app
-from app import config
+from app import app, algorithm, models, config
 from app.grouping import randomizer
 
 
@@ -28,8 +26,16 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
     application = app.Application(config_data, randomizer.RandomGrouper())
 
     records = application.read_survey(surveyfile)
+
+    algorithm.rank_students(records)
+    # print()
+    # for r in records:
+    #     print(f'{r.student_id}\t\t\t likes: {r.okay_with_rank}, avail: {r.avail_rank}')
+    alg = algorithm.Algorithm(records)
+
     click.echo(f'grouping students from {surveyfile}')
-    groups = application.group_students(records)
+    # groups = application.group_students(records)
+    groups = alg.group_students()
     click.echo(f'writing groups to {outputfile}')
     application.write_groups(groups, outputfile)
 

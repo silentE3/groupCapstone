@@ -192,7 +192,6 @@ def user_dislikes_group(user: models.SurveyRecord, group: models.GroupRecord) ->
     for group_user in group.members:
         if group_user.student_id in user.disliked_students:
             disliked_users.append(group_user.student_id)
-
     return disliked_users
 
 
@@ -391,3 +390,7 @@ def total_liked_pairings(groups: list[models.GroupRecord]) -> int:
         for user in group.members:
             result += len(user_likes_group(user, group))
     return result
+
+
+def compatibility_rating(user: models.SurveyRecord, groups: list[models.GroupRecord]):
+    pass
