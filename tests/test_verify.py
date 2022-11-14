@@ -35,3 +35,61 @@ def test_all_users_are_grouped():
     ungrouped = verifier.verify_all_users_grouped(surveys_result, groupings)
 
     assert len(ungrouped) == 1
+
+def test_generate_preferred_pairs_per_group():
+    '''
+    Generates a test grouping and runs generate_preferred_pairs_per_group against it
+    then compairs the user lists
+    '''
+
+    # load the config data. Does not matter what config data is used
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_1_full.json")
+
+    group1 = models.GroupRecord("1", 
+        [models.SurveyRecord("a1", "", "", "", "", ["a2", "a3"], [], {}), 
+        models.SurveyRecord("a2", "", "", "", "", ["a1", "a3"], [], {}),
+        models.SurveyRecord("a3", "", "", "", "", ["a1", "a2"], [], {})])
+    
+    
+    group2 = models.GroupRecord("2", 
+        [models.SurveyRecord("a4", "", "", "", "", ["a5"], [], {}), 
+        models.SurveyRecord("a5", "", "", "", "", ["a6", "a8"], [], {}),
+        models.SurveyRecord("a6", "", "", "", "", ["a7"], [], {})])
+
+    verifier = verify.VerifyGrouping(config_data)
+    perfs = verifier.generate_preferred_pairs_per_group([group1, group2])
+
+    # check the lengths of the preferred pairings for a group
+    assert len(perfs["1"]) == 6
+    assert len(perfs["2"]) == 2
+    
+def test_generate_preferred_list_per_user():
+    '''
+    Generates a test group and runs generate_preferred_list_per_user against it
+    then compairs the user lists
+    '''
+
+    # load the config data. Does not matter what config data is used
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_1_full.json")
+
+    group1 = models.GroupRecord("1", 
+        [models.SurveyRecord("a1", "", "", "", "", ["a2", "a3"], [], {}), 
+        models.SurveyRecord("a2", "", "", "", "", ["a1", "a3"], [], {}),
+        models.SurveyRecord("a3", "", "", "", "", ["a1", "a2"], [], {})])
+    
+    
+    group2 = models.GroupRecord("2", 
+        [models.SurveyRecord("a4", "", "", "", "", ["a5"], [], {}), 
+        models.SurveyRecord("a5", "", "", "", "", ["a6", "a8"], [], {}),
+        models.SurveyRecord("a6", "", "", "", "", ["a7"], [], {})])
+
+    verifier = verify.VerifyGrouping(config_data)
+    perfs = verifier.generate_preferred_list_per_user([group1, group2])
+
+    # check the lengths of the preferred users per user
+    assert len(perfs["a1"]) == 2 
+    assert len(perfs["a2"]) == 2 
+    assert len(perfs["a3"]) == 2 
+    assert len(perfs["a4"]) == 1 
+    assert len(perfs["a5"]) == 1 
+    assert len(perfs["a6"]) == 0 
