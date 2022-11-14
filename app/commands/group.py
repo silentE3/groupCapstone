@@ -67,14 +67,14 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
             report_filename = reportfile
         click.echo(f'Writing report to: "{report_filename}"')
         write_report(
-            groups, config_data['report_fields'], report_filename)
+            groups, config_data, report_filename)
 
 
-def write_report(groups: list[models.GroupRecord], format_config: models.ReportConfiguration, filename: str):
+def write_report(groups: list[models.GroupRecord], data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
-    formatter = ReportFormatter(format_config)
+    formatter = ReportFormatter(data_config)
     formatted_data = formatter.format_individual_report(groups)
     group_formatted_report = formatter.format_group_report(groups)
     overall_formatted_report = formatter.format_overall_report(groups)
