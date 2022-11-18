@@ -31,7 +31,8 @@
     "report_fields": {
         "show_preferred_students": true,
         "show_disliked_students": true,
-        "show_availability_overlap": true
+        "show_availability_overlap": true,
+        "show_scores": true
     },
     "output_student_name": false,
     "output_student_email": true,
