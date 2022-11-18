@@ -8,7 +8,7 @@ import click
 from app import config, core, output
 from app import models
 from app.data import load
-from app.grouping.randomizer import RandomGrouper
+from app.grouping.grouper_prototype import Grouper
 from app.file import xlsx
 from app.data.formatter import ReportFormatter
 
@@ -49,7 +49,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     # Create random groupings
     groups: list[models.GroupRecord]
-    groups = RandomGrouper().create_groups(
+    groups = Grouper().create_groups(
         data, config_data["target_group_size"], num_groups)
     # For now, simply print the groups to the terminal (until file output is implemented)
     for grouping in groups:
