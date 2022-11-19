@@ -27,9 +27,13 @@ class UniqueGrouper:
         if non_stand_mod == -1:
             num_non_targ_groups = target_group_size - (len(survey_data) % target_group_size)
 
-        result: list[models.GroupRecord]
-        result = []
+        groups: list[models.GroupRecord]
+        groups = []
 
-        #This part focuses on finding all possible group combinations of the target size
-        print(itertools.combinations(survey_data, target_group_size))
-        return result
+        #This part focuses on finding all possible group combinations
+        combo1 = list(itertools.combinations(survey_data, target_group_size))
+        combo2 = list(itertools.combinations(survey_data, target_group_size + non_stand_mod))
+        print(combo1)
+        print(combo2)
+
+        return groups

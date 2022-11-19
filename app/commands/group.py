@@ -9,6 +9,7 @@ from app import config, core, output
 from app import models
 from app.data import load
 from app.grouping.randomizer import RandomGrouper
+from app.grouping.sorting import UniqueGrouper
 from app.file import xlsx
 from app.data.formatter import ReportFormatter
 
@@ -48,16 +49,21 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
         return
 
     # Create random groupings
-    groups: list[models.GroupRecord]
-    groups = RandomGrouper().create_groups(
-        data, config_data["target_group_size"], num_groups)
+#    groups: list[models.GroupRecord]
+#    groups = RandomGrouper().create_groups(
+#        data, config_data["target_group_size"], num_groups)
     # For now, simply print the groups to the terminal (until file output is implemented)
-    for grouping in groups:
-        print(f'***** Group #{grouping.group_id} *****')
-        for student in grouping.members:
-            click.echo(student.student_id)
-    click.echo("**********************")
-    click.echo(outputfile)
+#    for grouping in groups:
+#        print(f'***** Group #{grouping.group_id} *****')
+#        for student in grouping.members:
+#            click.echo(student.student_id)
+#    click.echo("**********************")
+#    click.echo(outputfile)
+
+    #Testing out unique groups
+    groups: list[models.GroupRecord]
+    groups = UniqueGrouper().create_groups(
+        data, config_data["target_group_size"], num_groups)
 
     output.WriteGroupingData(config_data).output_groups_csv(groups, outputfile)
 
