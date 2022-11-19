@@ -8,7 +8,7 @@ class UniqueGrouper:
     '''
     This class creates unique groups based on all the possible combinations for each student.
     '''
-    def create_groups(self, survey_data: list, target_group_size: int, num_groups: int) -> list[models.GroupRecord]:
+    def create_groups(self, survey_data: list[models.SurveyRecord], target_group_size: int, num_groups: int) -> list[models.GroupRecord]:
         '''
         This method finds all possible group combinations in the survey and removes any duplicates.
         '''
@@ -30,10 +30,14 @@ class UniqueGrouper:
         groups: list[models.GroupRecord]
         groups = []
 
-        #This part focuses on finding all possible group combinations
-        combo1 = list(itertools.combinations(survey_data, target_group_size))
-        #combo2 = list(itertools.combinations(survey_data, target_group_size + non_stand_mod))
-        print(combo1)
-        #print(combo2)
+        students: list[str]
+        students = []
+
+        #This part first gets the student id of every student and prints it out in terminal.
+        for entry in survey_data:
+            students.append(entry.student_id)
+        
+        print(students)
+
 
         return groups
