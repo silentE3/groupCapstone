@@ -32,8 +32,8 @@ class UniqueGrouper:
 
         #This part focuses on finding all possible group combinations
         combo1 = list(itertools.combinations(survey_data, target_group_size))
-        combo2 = list(itertools.combinations(survey_data, target_group_size + non_stand_mod))
+        #combo2 = list(itertools.combinations(survey_data, target_group_size + non_stand_mod))
         print(combo1)
-        print(combo2)
+        #print(combo2)
 
         return groups

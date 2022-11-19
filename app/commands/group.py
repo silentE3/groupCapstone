@@ -8,7 +8,7 @@ import click
 from app import config, core, output
 from app import models
 from app.data import load
-from app.grouping.randomizer import RandomGrouper
+#from app.grouping.randomizer import RandomGrouper
 from app.grouping.sorting import UniqueGrouper
 from app.file import xlsx
 from app.data.formatter import ReportFormatter
