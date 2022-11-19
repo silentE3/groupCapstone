@@ -32,7 +32,7 @@ class Application():
     def __init__(self, config: models.Configuration, grouper: AbstractGrouper) -> None:
         self.__config = config
         self.__report_formatter = formatter.ReportFormatter(
-            config["report_fields"])
+            config)
         self.__survey_reader = load.SurveyDataReader(config["field_mappings"])
         self.__group_reader = load.GroupingDataReader()
         self.__grouper = grouper
