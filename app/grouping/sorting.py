@@ -1,7 +1,7 @@
 '''
 This file contains a class that finds unique groups.
 '''
-import itertools
+from itertools import combinations
 from app import models
 
 class UniqueGrouper:
@@ -27,6 +27,9 @@ class UniqueGrouper:
         if non_stand_mod == -1:
             num_non_targ_groups = target_group_size - (len(survey_data) % target_group_size)
 
+        print("Number of groups: " + str(num_groups))
+        print("Target group size: " + str(target_group_size))
+        print("Number of non target groups: " + str(num_non_targ_groups))
         groups: list[models.GroupRecord]
         groups = []
 
@@ -38,6 +41,10 @@ class UniqueGrouper:
             students.append(entry.student_id)
         
         print(students)
+        groups2 = list(combinations(students, target_group_size))
+        print(len(groups2))
+            
+
 
 
         return groups
