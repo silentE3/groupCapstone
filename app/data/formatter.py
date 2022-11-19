@@ -4,6 +4,7 @@ format handles the formatting for data output
 from app.group import verify
 from app import models
 from app.group import validate
+from app.group import scoring
 
 
 class ReportFormatter():
@@ -97,6 +98,16 @@ class ReportFormatter():
             if self.report_config['show_availability_overlap']:
                 record.append(
                     ';'.join(validate.group_availability_strings(group)))
+            if self.report_config['show_scores']:
+                # Note: the first 3 values are "don't care" for individual group scoring
+                scoring_vars = models.GroupSetData(group.group_id,
+                                                   0, 0, 0,
+                                                   self.data_config["target_group_size"],
+                                                   len((self.data_config["field_mappings"])[
+                                                       "preferred_students_field_names"]),
+                                                   len(group.members))
+                record.append(scoring.score_individual_group(
+                    group, scoring_vars))
 
             records.append(record)
 
@@ -118,6 +129,9 @@ class ReportFormatter():
         if self.report_config['show_availability_overlap']:
             headers.append('Availability Overlap')
 
+        if self.report_config['show_scores']:
+            headers.append('Score')
+
         return headers
 
     def format_overall_report(self, groups: list[models.GroupRecord]):
@@ -127,9 +141,26 @@ class ReportFormatter():
         records: list[list] = [self.__overall_report_header()]
 
         record = []
-        record.append(str(validate.total_disliked_pairings(groups)))
-        record.append(str(validate.total_groups_no_availability(groups)))
-        record.append(str(validate.total_liked_pairings(groups)))
+
+        num_disliked_pairings: int = validate.total_disliked_pairings(groups)
+        num_groups_no_avail: int = validate.total_groups_no_availability(
+            groups)
+        num_liked_pairings: int = validate.total_liked_pairings(groups)
+
+        record.append(str(num_disliked_pairings))
+        record.append(str(num_groups_no_avail))
+        record.append(str(num_liked_pairings))
+
+        if self.report_config['show_scores']:
+            scoring_vars = models.GroupSetData("solution_1",
+                                               num_groups_no_avail,
+                                               num_disliked_pairings,
+                                               num_liked_pairings,
+                                               self.data_config["target_group_size"],
+                                               len((self.data_config["field_mappings"])[
+                                                   "preferred_students_field_names"]),
+                                               sum(len(group.members) for group in groups))
+            record.append(scoring.score_groups(scoring_vars))
 
         records.append(record)
 
@@ -140,5 +171,7 @@ class ReportFormatter():
         headers.append('Disliked Pairings')
         headers.append('Number of Groups Without Overlapping Time Slot')
         headers.append('Preferred Pairings')
+        if self.report_config['show_scores']:
+            headers.append('Score')
 
         return headers

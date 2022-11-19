@@ -10,9 +10,11 @@ def test_format_group_report_check_header():
         'show_preferred_students': True,
         'show_disliked_students': False,
         'show_availability_overlap': True,
+        'show_scores': False
     }
 
-    data_config: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    data_config: models.Configuration = config.read_json(
+        "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
     report_formatter = formatter.ReportFormatter(data_config)
 
@@ -39,9 +41,11 @@ def test_format_group_report_check_header_show_disliked():
         'show_preferred_students': False,
         'show_disliked_students': True,
         'show_availability_overlap': False,
+        'show_scores': True
     }
 
-    data_config: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    data_config: models.Configuration = config.read_json(
+        "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
     report_formatter = formatter.ReportFormatter(data_config)
 
@@ -61,7 +65,7 @@ def test_format_group_report_check_header_show_disliked():
     report = report_formatter.format_group_report(groups)
 
     assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Disliked students in group', 'Meets Preferred Goal',
-                         'Meets Availability Requirement']
+                         'Meets Availability Requirement', 'Score']
 
 
 def test_format_group_report_check_group():
@@ -69,9 +73,11 @@ def test_format_group_report_check_group():
         'show_preferred_students': False,
         'show_disliked_students': False,
         'show_availability_overlap': False,
+        'show_scores': False
     }
 
-    data_config: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    data_config: models.Configuration = config.read_json(
+        "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
     report_formatter = formatter.ReportFormatter(data_config)
 
@@ -98,9 +104,11 @@ def test_format_individual_report_check_header_all_enabled():
         'show_preferred_students': True,
         'show_disliked_students': True,
         'show_availability_overlap': True,
+        'show_scores': True
     }
 
-    data_config: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    data_config: models.Configuration = config.read_json(
+        "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
     report_formatter = formatter.ReportFormatter(data_config)
 

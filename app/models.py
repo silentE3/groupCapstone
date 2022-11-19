@@ -34,6 +34,9 @@ class ReportConfiguration(TypedDict):
     # show availability that matched in the grouping
     show_availability_overlap: bool
 
+    # show group-level and solution-level scores
+    show_scores: bool
+
 
 @dataclass
 class Configuration(TypedDict):
@@ -73,3 +76,17 @@ class GroupRecord:
     '''
     group_id: str = ""
     members: list[SurveyRecord] = field(default_factory=list)
+
+
+@dataclass
+class GroupSetData:
+    '''
+    Class that holds set information for a group set
+    '''
+    scoring_id: str  # e.g. "solution_x" if scoring a group set or group_id if scoring a group
+    num_groups_no_overlap: int
+    num_of_disliked_pairs: int
+    num_of_preferred_pairs: int
+    target_group_size: int
+    num_of_preferred_slots: int
+    num_of_students: int
