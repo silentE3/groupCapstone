@@ -10,40 +10,77 @@ from app.group import validate
 
 
 class Algorithm:
-
+    '''
+    class with operations that perform the algorithm to group students
+    '''
     def __init__(self, students) -> None:
         self.students: list[models.SurveyRecord] = students
+        self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
         self.max_group_size = len(self.students) // 5
         for x in range(self.max_group_size):
             self.groups.append(models.GroupRecord(f"group_{x}"))
 
     def group_students(self) -> list[models.GroupRecord]:
-        tries = 0
-        while len(self.students) > 0 and tries < 20000:
+        """
+        initiates the grouping process
+        """
+        while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
-            tries += 1
+        self.fix_bad_groups()
+        print(len(self.students))
         return self.groups
 
-    def add_student_to_group(self, student: models.SurveyRecord):
-        """adds a student to a given group
+    def fix_bad_groups(self):
+        '''
+        fix bad groups looks at the groups that were created and attempts to fix them
+        '''
+        self.students.extend(self.bad_students)
+        while len(self.students) > 0:
+            student = self.students.pop()
+            self.add_bad_student_to_group(student)
 
-        1. loop through the groups
-        2. Find a group that is open
-        3. If there is an open group and the group meets the dislike+availability requirement, append them
-        4. if no groups worked we need to look at adding a new group if it is an option.
-        5. if we have made all of the groups, it is time to look at swapping the users
+    def add_bad_student_to_group(self, student: models.SurveyRecord):
+        """
+        adds a student to a given group
         """
         for group in self.groups:
-            # first check if hard requirements are met. There is a group, the group meets size requirement, dislikes, and availability.
+            # first check if hard requirements are met. There is a group, the group meets size requirement, dislikes, and availability. Add the user if they are met
             if meets_hard_requirement(student, group):
                 group.members.append(student)
                 return
-        scenarios = self.run_scenarios(student)
 
+        scenarios = self.run_bad_scenarios(student, 6)
         if len(scenarios) == 0:
-            raise Exception('no available grouping scenarios')
+            print('no scenarios :(')
+            return
+
+        randidx = randint(0, len(scenarios)-1)
+        chosen_scenario = scenarios.pop(randidx)
+        for group in self.groups:
+            if group.group_id == chosen_scenario.group.group_id:
+                group.members = chosen_scenario.group.members
+                if chosen_scenario.removed_user is not None:
+                    self.students.append(chosen_scenario.removed_user)
+
+    def add_student_to_group(self, student: models.SurveyRecord):
+        """
+        adds a student to a given group. Initially we just look to see that hard requirements are met.
+        After that, we look for best case scenarios.
+        This ensures population of the groups before getting hung up in a cycle of finding best case scenarios.
+        """
+        for group in self.groups:
+            # first check if hard requirements are met. There is a group, the group meets size requirement, dislikes, and availability. Add the user if they are met
+            if meets_hard_requirement(student, group):
+                group.members.append(student)
+                return
+
+        scenarios = self.run_scenarios(student, 5)
+        if len(scenarios) == 0:
+            self.bad_students.append(student)
+            print('bad student len: ', len(self.bad_students))
+            return
 
         target_scenario = scenarios.pop(0)
         matched_scenarios = [target_scenario]
@@ -52,34 +89,42 @@ class Algorithm:
                 matched_scenarios.append(s)
 
         randidx = randint(0, len(matched_scenarios)-1)
-
         chosen_scenario = matched_scenarios[randidx]
-
         for group in self.groups:
             if group.group_id == chosen_scenario.group.group_id:
                 group.members = chosen_scenario.group.members
                 if chosen_scenario.removed_user is not None:
                     self.students.append(chosen_scenario.removed_user)
 
-    def run_scenarios(self, student):
+    def run_scenarios(self, student, max_size):
         """
         runs all of the available scenarios for adding this user to a group
         """
-        empty_ones_exist = 0
-        for g in self.groups:
-            if len(g.members) == 0:
-                empty_ones_exist += 1
 
         scenarios: list[Scenario] = []
         for group in self.groups:
-            scenarios.extend(group_scenarios(student, group))
+            scenarios.extend(group_scenarios(student, group, max_size))
+
+        scenarios.sort(reverse=True)
+
+        return scenarios
+
+    def run_bad_scenarios(self, student, max_size):
+        """
+        runs all of the available scenarios for adding this user to a group
+        """
+
+        scenarios: list[Scenario] = []
+        for group in self.groups:
+            scenarios.extend(group_scenarios_doesnt_have_to_be_better(
+                student, group, max_size))
 
         scenarios.sort(reverse=True)
 
         return scenarios
 
 
-def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord):
+def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord, max_size: int):
     """
     creates scenarios for all possible situations with the group
     1. just adding the user to the group
@@ -88,14 +133,40 @@ def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord):
     returns a list of scenarios
     """
     scenarios: list[Scenario] = []
-    # check the scenario of just adding the member to the group
-    if len(group.members) < 5:
+    if len(group.members) < max_size:
         group_new = copy.deepcopy(group)
         group_new.members.append(student)
         scenario = Scenario(group_new, rank_group(group_new))
         scenarios.append(scenario)
 
-    if len(group.members) == 5:
+    if len(group.members) == max_size:
+        for mem in group.members:
+            group_new = copy.deepcopy(group)
+            group_new.members.remove(mem)
+            group_new.members.append(student)
+            if rank_group(group) < rank_group(group_new):
+                scenario = Scenario(group_new, rank_group(group_new), mem)
+                scenarios.append(scenario)
+
+    return scenarios
+
+
+def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group: models.GroupRecord, max_size: int):
+    """
+    creates scenarios for all possible situations with the group
+    1. just adding the user to the group
+    2. swapping the user for another
+
+    returns a list of scenarios
+    """
+    scenarios: list[Scenario] = []
+    if len(group.members) < max_size:
+        group_new = copy.deepcopy(group)
+        group_new.members.append(student)
+        scenario = Scenario(group_new, rank_group(group_new))
+        scenarios.append(scenario)
+
+    if len(group.members) == max_size:
         for mem in group.members:
             group_new = copy.deepcopy(group)
             group_new.members.remove(mem)
@@ -109,30 +180,34 @@ def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord):
 def rank_group(group: models.GroupRecord) -> int:
     '''
     how do we provide a number ranking to a group??
-    start at 100
     1. dislikes = return a score of 0
     2. availability = add 100 to each
     3. preferred_occurrences = add 1 to each
-    if score < 100 it is bad
-    if score > 100 it is good
     '''
 
     if len(validate.users_disliked_in_group(group)) > 0:
         return 0
 
     availability = validate.availability_overlap_count(group)
+    if availability == 0:
+        return 0
 
     preferred_users = validate.group_likes_count(group)
 
     return availability * 100 + preferred_users
 
 
-def meets_hard_requirement(student, group):
-    dislikes = validate.user_dislikes_group(student, group)
-    matches_avail = validate.user_matches_availability_count(student, group)
-    group_size = len(group.members)
-    
-    return dislikes == 0 and matches_avail > 0 and group_size < 6
+def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord):
+    '''
+    checks if the basic hard requirements are met including the group size, availability, and dislikes
+    '''
+    group_copy = copy.deepcopy(group)
+    group_copy.members.append(student)
+    dislikes = validate.meets_dislike_requirement(group_copy)
+    matches_avail = validate.meets_group_availability_requirement(group_copy)
+    group_size = len(group_copy.members)
+
+    return dislikes and matches_avail and group_size < 6
 
 
 def total_dislike_incompatible_students(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -187,6 +262,9 @@ def total_availability_matches(student: models.SurveyRecord, students: list[mode
 
 
 def rank_students(students: list[models.SurveyRecord]):
+    '''
+    creates a ranking for students based on their availability and # of people they are compatible with
+    '''
     for student in students:
         student.avail_rank = total_availability_matches(student, students)
         student.okay_with_rank = len(
@@ -195,21 +273,11 @@ def rank_students(students: list[models.SurveyRecord]):
     students.sort(reverse=True)
 
 
-def group_scenario_rank(student: models.SurveyRecord, group: models.GroupRecord):
-    totals = 0
-
-    if len(validate.user_dislikes_group(student, group)):
-        return 0
-
-    totals += validate.user_matches_availability_count(student, group)
-
-    totals += len(validate.user_likes_group(student, group)) * 0.5
-
-    return totals
-
-
 @dataclass
 class Scenario:
+    '''
+    scenario for a new group. includes the score, result group, and the removed user if they exist
+    '''
     group: models.GroupRecord
     score: int
     removed_user: Optional[models.SurveyRecord] = field(default=None)

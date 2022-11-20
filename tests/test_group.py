@@ -145,7 +145,7 @@ def test_group_algorithm():
     '''
 
     response = runner.invoke(group.group, [
-                             'dataset.csv', '--configfile', 'config-dev.json', '--verify'])
+                             'testdata/S7_Anon (1).csv', '--verify'])
     assert response.exit_code == 0
 
     assert response.output.endswith(

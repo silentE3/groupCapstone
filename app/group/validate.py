@@ -397,7 +397,3 @@ def total_liked_pairings(groups: list[models.GroupRecord]) -> int:
         for user in group.members:
             result += len(user_likes_group(user, group))
     return result
-
-
-def compatibility_rating(user: models.SurveyRecord, groups: list[models.GroupRecord]):
-    pass

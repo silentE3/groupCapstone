@@ -7,6 +7,7 @@ import click
 
 from app import app, algorithm, models, config
 from app.grouping import randomizer
+from app.group import validate
 
 
 @click.command("group")
@@ -27,14 +28,19 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     records = application.read_survey(surveyfile)
 
+    non_matching: list[models.SurveyRecord] = []
+    for idx, record in enumerate(records):
+        if algorithm.total_availability_matches(record, records) == 0:
+            record.availability = set_avail(record)
+            non_matching.append(records[idx])
     algorithm.rank_students(records)
-    # print()
-    # for r in records:
-    #     print(f'{r.student_id}\t\t\t likes: {r.okay_with_rank}, avail: {r.avail_rank}')
+    # filter out any that don't match first
+
+    algorithm.rank_students(records)
+
     alg = algorithm.Algorithm(records)
 
     click.echo(f'grouping students from {surveyfile}')
-    # groups = application.group_students(records)
     groups = alg.group_students()
     click.echo(f'writing groups to {outputfile}')
     application.write_groups(groups, outputfile)
@@ -46,3 +52,14 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
         click.echo(f'writing report to {report}')
         application.write_report(groups, report)
+
+
+def set_avail(student: models.SurveyRecord):
+    '''
+    sets the availability
+    '''
+    avail = {}
+    for key in student.availability:
+        avail[key] = validate.WEEK_DAYS
+
+    return avail
