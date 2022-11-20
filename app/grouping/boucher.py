@@ -63,9 +63,10 @@ From each of the three, if one run is listed twice or three times, it will be au
 
 '''
 import random as rnd
-from app import models
+from app import core, models
 
 
+group_sizes: list[int] = []
 
 
 def create_groups(config: models.Configuration,
@@ -73,14 +74,34 @@ def create_groups(config: models.Configuration,
     '''
     function for grouping students
     '''
-
+    passes: list[list[list[models.GroupRecord]]] = []
     groups: list[models.GroupRecord] = []
+    group_sizes = core.get_group_sizes(
+        survey_data, config["target_group_size"])
+    
+    passes = __do_passes(config["grouping_passes"], survey_data)
+
+    
+
     return groups
+
+
+def __reset_availability(rand_users: list, dislike_tallies: list):
+    '''
+    This method resets the avaiable bool flag on the lists of users
+    '''
+
+    for user in rand_users:
+        user[1] = False
+
+    for user in dislike_tallies:
+        user[2] = False
+
 
 def __radomize_users(survey_data: list[models.SurveyRecord]) -> list[tuple[models.SurveyRecord, bool]]:
     '''
     Randomizes the list of users
-    Also adds a bool to indicate usage
+    Also adds a bool to indicate usage. True means used
     '''
     users: list[tuple[models.SurveyRecord, bool]] = []
 
@@ -96,42 +117,81 @@ def __tally_dislikes(survey_data: list[models.SurveyRecord]) -> list[tuple[model
     tally: list[tuple[models.SurveyRecord, int, bool]] = []
     return tally
 
-def __do_passes(to_do: int):
+
+def __do_passes(to_do: int, survey_data: list[models.SurveyRecord]) -> list[list[list[models.GroupRecord]]]:
     '''
     Executes the number passes specified in the config
     '''
-    pass_counts: int = 0
-    passes: list = []
 
-def __do_runs():
+    passes: list[list[list[models.GroupRecord]]] = []
+    rand_users: list = []
+    dislike_tallies: list = []
+    for pass_index in range(to_do):
+        rand_users = __radomize_users(survey_data)
+        dislike_tallies = __tally_dislikes(survey_data)
+        passes.append(__do_runs(rand_users, dislike_tallies))
+
+    return passes
+
+
+def __do_runs(rand_users: list, dislike_tallies: list) -> list[list[models.GroupRecord]]:
     '''
     Executes all the runs in a pass
     '''
-    run_index: int = 0
-    runs: list = []
+    runs: list[list[models.GroupRecord]] = []
+
+    for run_index in range(len(rand_users)):
+        __reset_availability(rand_users, dislike_tallies)
+        runs.append(__execute_run(run_index, rand_users, dislike_tallies))
+
+    return runs
 
 
-def __score_groups():
-    '''
-    Applies scoring to the groups in a run
-    '''
-
-def __score_runs():
-    '''
-    Applies scoring to the runs in a pass
-    '''
-
-def __select_winners():
-    '''
-    Selects the winner or winners, depending on config options
-    '''
-
-def __execute_run():
+def __execute_run(starting_index: int, rand_users: list, dislike_tallies: list) -> list[models.GroupRecord]:
     '''
     This handles the grouping for all groups
     '''
 
-def __execute_grouping():
+    run: list[models.GroupRecord] = []
+
+    for size in group_sizes:
+        run.append(__execute_grouping(
+            size, starting_index, rand_users, dislike_tallies))
+
+    return run
+
+
+def __execute_grouping(group_size: int, starting_index: int, rand_users: list, dislike_tallies: list) -> models.GroupRecord:
     '''
     This does the actual grouping for a single group at a time
+    '''
+    group: models.GroupRecord = models.GroupRecord("", [])
+
+    return group
+
+
+def __score_groups(groups: list[models.GroupRecord]) -> list[tuple[int, int, int]]:
+    '''
+    Applies scoring to the groups in a run
+    Scores are returned in the same order as the groups
+    '''
+    group_scores: list[tuple[int, int, int]] = []
+
+    return group_scores
+
+
+def __score_runs(runs: list[list[models.GroupRecord]]) -> list[int]:
+    '''
+    Applies scoring to the runs in a pass
+    Scores are returned in the same order as the runs
+    '''
+
+    run_scores: list[int] = []
+
+    return run_scores
+
+
+def __select_winners():
+    '''
+    Selects the winner or winners, depending on config options
     '''

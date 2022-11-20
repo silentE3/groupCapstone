@@ -6,6 +6,33 @@ Core grouping class for general functionality
 from app import models
 
 
+def get_group_sizes(survey_data: list, target_group_size: int) -> list[int]:
+    '''
+    returns the number of users in each group. The number of groups will be
+    based on the len of the list returned.
+    '''
+    groups: list[int] = []
+    data_count: int = len(survey_data)
+
+    if data_count < 1:
+        return groups
+
+    if target_group_size < 1 and data_count > 1:
+        groups.append(data_count)
+        return groups
+
+    groups_of_plus_1: int = data_count % target_group_size
+    int_number_of_groups: int = data_count // target_group_size
+
+    for index in range(int_number_of_groups):
+        groups.append(int_number_of_groups)
+
+    for index in range(groups_of_plus_1):
+        groups[index] += 1
+
+    return groups
+
+
 def get_num_groups(survey_data: list, target_group_size: int) -> int:
     '''
     Function for determining the number of groups that the students
