@@ -137,3 +137,18 @@ def test_group_verify_and_report_file_name_1():
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
     os.remove('test_verify_and_report_file_name_1.csv')
+
+
+def test_group_algorithm():
+    '''
+    Test of grouping six students with a target group size of 2 (divides evenly).
+    '''
+
+    response = runner.invoke(group.group, [
+                             'dataset.csv', '--configfile', 'config-dev.json', '--verify'])
+    assert response.exit_code == 0
+
+    assert response.output.endswith(
+        'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
+    os.remove('test_verify_and_report_file_name_1_report.xlsx')
+    os.remove('test_verify_and_report_file_name_1.csv')
