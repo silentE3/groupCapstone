@@ -1,6 +1,5 @@
 '''This file contains the Grouper class, which creates groups via constructive, heuristic approach with local backtracking.'''
 
-from dataclasses import dataclass
 import random as rnd
 from app import models
 from app.group import validate
