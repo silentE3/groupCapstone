@@ -4,9 +4,9 @@ of a grouping
 '''
 
 import click
-from app import config, models, app
-from app.grouping import randomizer
-
+from app import config, models
+from app.data import load
+from app.group import verify as verifier
 
 @click.command("verify")
 @click.argument('surveyfile', type=click.Path(exists=True), default="dataset.csv")
@@ -25,12 +25,10 @@ def verify(surveyfile: str, groupfile: str, reportfile: str, configfile: str):
     # load config data and survey data reader
     config_data: models.Configuration = config.read_json(configfile)
 
-    application = app.Application(config_data, randomizer.RandomGrouper())
-
-    records = application.read_survey(surveyfile)
+    records = load.SurveyDataReader(config_data['field_mappings']).load(surveyfile)
 
     # redefine the reader and read in the grouping data
-    groups = application.read_groups(groupfile)
+    groups = load.GroupingDataReader().load(groupfile)
 
     # create the verifier and run the verification
-    application.verify_groups(records, groups, reportfile)
+    verifier.VerifyGrouping(config_data).verify(records, groups, reportfile)

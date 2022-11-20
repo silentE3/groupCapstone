@@ -5,9 +5,9 @@ Also includes reading in the configuration file.
 
 import click
 
-from app import app, algorithm, models, config
-from app.grouping import randomizer
+from app import algorithm, core, models, config, output
 from app.group import validate
+from app.data import load
 
 
 @click.command("group")
@@ -24,16 +24,15 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    application = app.Application(config_data, randomizer.RandomGrouper())
+    records = load.SurveyDataReader(
+        config_data['field_mappings']).load(surveyfile)
 
-    records = application.read_survey(surveyfile)
-
-    non_matching: list[models.SurveyRecord] = []
-    for idx, record in enumerate(records):
+    # loop through the data and if they don't match any availability, set them to be a wildcard
+    for record in records:
         if algorithm.total_availability_matches(record, records) == 0:
             record.availability = set_avail(record)
-            non_matching.append(records[idx])
     algorithm.rank_students(records)
+
     # filter out any that don't match first
 
     algorithm.rank_students(records)
@@ -43,7 +42,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
     click.echo(f'grouping students from {surveyfile}')
     groups = alg.group_students()
     click.echo(f'writing groups to {outputfile}')
-    application.write_groups(groups, outputfile)
+    output.GroupingDataWriter(config_data).write_csv(groups, outputfile)
 
     if verify:
         report = f'{outputfile.removesuffix(".csv")}_report.xlsx'
@@ -51,7 +50,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
             report = reportfile
 
         click.echo(f'writing report to {report}')
-        application.write_report(groups, report)
+        core.write_report(groups, config_data, report)
 
 
 def set_avail(student: models.SurveyRecord):

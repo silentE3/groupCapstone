@@ -4,6 +4,8 @@ Core grouping class for general functionality
 
 
 from app import models
+from app.data import formatter
+from app.file import xlsx
 
 
 def get_num_groups(survey_data: list, target_group_size: int) -> int:
@@ -51,3 +53,22 @@ def pre_group_error_checking(target_group_size: int, surveys_list: list[models.S
         print("**********************\n")
         return True
     return False
+
+
+def write_report(groups: list[models.GroupRecord], config: models.Configuration, filename: str):
+    '''
+    writes out the grouping report
+    '''
+    report_formatter = formatter.ReportFormatter(config)
+
+    formatted_data = report_formatter.format_individual_report(
+        groups)
+    group_formatted_report = report_formatter.format_group_report(
+        groups)
+    overall_formatted_report = report_formatter.format_overall_report(
+        groups)
+    xlsx_writer = xlsx.XLSXWriter(filename)
+    xlsx_writer.write_sheet('individual_report', formatted_data)
+    xlsx_writer.write_sheet('group_report', group_formatted_report)
+    xlsx_writer.write_sheet('overall_report', overall_formatted_report)
+    xlsx_writer.save()

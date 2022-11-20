@@ -2,9 +2,7 @@
 module for the implementation of the grouping algorithm
 """
 import copy
-from dataclasses import dataclass, field
 from random import randint
-from typing import Optional
 from app import models
 from app.group import validate
 
@@ -13,13 +11,14 @@ class Algorithm:
     '''
     class with operations that perform the algorithm to group students
     '''
+
     def __init__(self, students) -> None:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
         self.max_group_size = len(self.students) // 5
-        for x in range(self.max_group_size):
-            self.groups.append(models.GroupRecord(f"group_{x}"))
+        for idx in range(self.max_group_size):
+            self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
     def group_students(self) -> list[models.GroupRecord]:
         """
@@ -46,7 +45,6 @@ class Algorithm:
         adds a student to a given group
         """
         for group in self.groups:
-            # first check if hard requirements are met. There is a group, the group meets size requirement, dislikes, and availability. Add the user if they are met
             if meets_hard_requirement(student, group):
                 group.members.append(student)
                 return
@@ -71,7 +69,6 @@ class Algorithm:
         This ensures population of the groups before getting hung up in a cycle of finding best case scenarios.
         """
         for group in self.groups:
-            # first check if hard requirements are met. There is a group, the group meets size requirement, dislikes, and availability. Add the user if they are met
             if meets_hard_requirement(student, group):
                 group.members.append(student)
                 return
@@ -84,9 +81,9 @@ class Algorithm:
 
         target_scenario = scenarios.pop(0)
         matched_scenarios = [target_scenario]
-        for s in scenarios:
-            if s.score == target_scenario.score:
-                matched_scenarios.append(s)
+        for scenario in scenarios:
+            if scenario.score == target_scenario.score:
+                matched_scenarios.append(scenario)
 
         randidx = randint(0, len(matched_scenarios)-1)
         chosen_scenario = matched_scenarios[randidx]
@@ -101,7 +98,7 @@ class Algorithm:
         runs all of the available scenarios for adding this user to a group
         """
 
-        scenarios: list[Scenario] = []
+        scenarios: list[models.Scenario] = []
         for group in self.groups:
             scenarios.extend(group_scenarios(student, group, max_size))
 
@@ -114,7 +111,7 @@ class Algorithm:
         runs all of the available scenarios for adding this user to a group
         """
 
-        scenarios: list[Scenario] = []
+        scenarios: list[models.Scenario] = []
         for group in self.groups:
             scenarios.extend(group_scenarios_doesnt_have_to_be_better(
                 student, group, max_size))
@@ -132,11 +129,11 @@ def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord, max
 
     returns a list of scenarios
     """
-    scenarios: list[Scenario] = []
+    scenarios: list[models.Scenario] = []
     if len(group.members) < max_size:
         group_new = copy.deepcopy(group)
         group_new.members.append(student)
-        scenario = Scenario(group_new, rank_group(group_new))
+        scenario = models.Scenario(group_new, rank_group(group_new))
         scenarios.append(scenario)
 
     if len(group.members) == max_size:
@@ -145,7 +142,7 @@ def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord, max
             group_new.members.remove(mem)
             group_new.members.append(student)
             if rank_group(group) < rank_group(group_new):
-                scenario = Scenario(group_new, rank_group(group_new), mem)
+                scenario = models.Scenario(group_new, rank_group(group_new), mem)
                 scenarios.append(scenario)
 
     return scenarios
@@ -159,11 +156,11 @@ def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group
 
     returns a list of scenarios
     """
-    scenarios: list[Scenario] = []
+    scenarios: list[models.Scenario] = []
     if len(group.members) < max_size:
         group_new = copy.deepcopy(group)
         group_new.members.append(student)
-        scenario = Scenario(group_new, rank_group(group_new))
+        scenario = models.Scenario(group_new, rank_group(group_new))
         scenarios.append(scenario)
 
     if len(group.members) == max_size:
@@ -171,7 +168,7 @@ def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group
             group_new = copy.deepcopy(group)
             group_new.members.remove(mem)
             group_new.members.append(student)
-            scenario = Scenario(group_new, rank_group(group_new), mem)
+            scenario = models.Scenario(group_new, rank_group(group_new), mem)
             scenarios.append(scenario)
 
     return scenarios
@@ -271,16 +268,3 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
-
-
-@dataclass
-class Scenario:
-    '''
-    scenario for a new group. includes the score, result group, and the removed user if they exist
-    '''
-    group: models.GroupRecord
-    score: int
-    removed_user: Optional[models.SurveyRecord] = field(default=None)
-
-    def __lt__(self, other):
-        return self.score < other.score

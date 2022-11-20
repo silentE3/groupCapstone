@@ -1,7 +1,7 @@
 
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
 @dataclass
@@ -90,3 +90,16 @@ class GroupSetData:
     target_group_size: int
     num_of_preferred_slots: int
     num_of_students: int
+
+
+@dataclass
+class Scenario:
+    '''
+    scenario for a new group. includes the score, result group, and the removed user if they exist
+    '''
+    group: GroupRecord
+    score: int
+    removed_user: Optional[SurveyRecord] = field(default=None)
+
+    def __lt__(self, other):
+        return self.score < other.score
