@@ -49,8 +49,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     # Create random groupings
     groups: list[models.GroupRecord]
-    groups = Grouper().create_groups(
-        data, config_data, num_groups)
+    groups = Grouper(data, config_data, num_groups).create_groups()
     # For now, simply print the groups to the terminal (until file output is implemented)
     for grouping in groups:
         print(f'***** Group #{grouping.group_id} *****')
