@@ -65,6 +65,7 @@ From each of the three, if one run is listed twice or three times, it will be au
 from dataclasses import dataclass
 import random
 from statistics import mean, stdev
+from typing import Union
 from app import core, models
 
 
@@ -84,7 +85,7 @@ class DislikedUser:
     '''
     user: models.SurveyRecord
     dislikes: int = 0
-    is_used: bool = False
+    # is_used: bool = False
 
 
 @dataclass
@@ -121,7 +122,6 @@ class Pass:
     '''
     runs: list[GroupingRun]
 
-time_slots: int = 0
 
 def create_groups(config: models.Configuration,
                   survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
@@ -129,41 +129,43 @@ def create_groups(config: models.Configuration,
     function for grouping students
     '''
     passes: list[Pass] = []
-    groups: list[models.GroupRecord] = []
+    groups: GroupingRun
     group_sizes: list[int] = core.get_group_sizes(
         survey_data, config["target_group_size"])
+    time_slots: list[str] = config["field_mappings"]["availability_field_names"]
 
-    passes = __do_passes(config["grouping_passes"], survey_data, group_sizes)
+    passes = __do_passes(config["grouping_passes"], survey_data, group_sizes, time_slots)
 
-    groups = __select_winners(passes, False)[0].groups
-    time_slots = config["field_mappings"]["availability_field_names"]
-
-    return groups
+    groups = __select_winners(passes, False)[0]
 
 
-def __reset_availability(liked_users: list[AvailableUser], dislike_tallies: list[DislikedUser]):
+    return groups.groups
+
+
+def __reset_availability(all_users: dict[str, AvailableUser]):
     '''
     This method resets the avaiable bool flag on the lists of users
     '''
 
-    for user in liked_users:
-        user.is_used = False
-
-    for user in dislike_tallies:
-        user.is_used = False
+    for key in all_users:
+        all_users[key].is_used = False
 
 
-def __radomize_users(survey_data: list[models.SurveyRecord]) -> list[models.SurveyRecord]:
+def __radomize_users(survey_data: list[models.SurveyRecord]) -> dict[str, AvailableUser]:
     '''
     Randomizes the list of users
     Also adds a bool to indicate usage. True means used
     '''
-    users: list[models.SurveyRecord] = []
+    users: dict[str, AvailableUser] = {}
+    temp: list[models.SurveyRecord] = []
 
     for record in survey_data:
-        users.append(record)
+        temp.append(record)
 
-    random.shuffle(users)
+    random.shuffle(temp)
+
+    for user in temp:
+        users[user.student_id] = AvailableUser(user, False)
 
     return users
 
@@ -192,7 +194,7 @@ def __tally_dislikes(survey_data: list[models.SurveyRecord]) -> list[DislikedUse
             if not user in tallies:
                 record = __get_user_by_id(user, survey_data)
                 if record is not None:
-                    tally: DislikedUser = DislikedUser(record, 0, False)
+                    tally: DislikedUser = DislikedUser(record, 0)
                     tallies[user] = tally
 
             # increment the count
@@ -207,22 +209,22 @@ def __tally_dislikes(survey_data: list[models.SurveyRecord]) -> list[DislikedUse
 
     return tally_values
 
-def __get_liked_users(rand_users: list[models.SurveyRecord], disliked_users: list[DislikedUser]) -> list[AvailableUser]:
+
+def __get_liked_users(all_users: dict[str, AvailableUser], disliked_users: list[DislikedUser]) -> list[models.SurveyRecord]:
     '''
     Returns a list of users that are not in the list of disliked users
     '''
 
-    liked_users : list[AvailableUser] = []
+    liked_users: list[models.SurveyRecord] = []
 
-    for user in rand_users:
+    for user in all_users:
         for disliked in disliked_users:
-            if disliked.user.student_id == user.student_id:
+            if disliked.user.student_id == all_users[user].user.student_id:
                 break
         else:
-            liked_users.append(AvailableUser(user, False))
+            liked_users.append(all_users[user].user)
 
     return liked_users
-
 
 
 def __get_user_by_id(user_id: str, survey_data: list[models.SurveyRecord]):
@@ -238,46 +240,52 @@ def __get_user_by_id(user_id: str, survey_data: list[models.SurveyRecord]):
     return None
 
 
-def __do_passes(to_do: int, survey_data: list[models.SurveyRecord], group_sizes: list[int]) -> list[Pass]:
+def __do_passes(to_do: int, 
+    survey_data: list[models.SurveyRecord], 
+    group_sizes: list[int],
+    time_slots: list[str]) -> list[Pass]:
     '''
     Executes the number passes specified in the config
     '''
 
     passes: list[Pass] = []
-    rand_users: list[models.SurveyRecord] = []
+    rand_users: dict[str, AvailableUser] = {}
     dislike_tallies: list[DislikedUser] = []
-    liked_users: list[AvailableUser] = []
+    liked_users: list[models.SurveyRecord] = []
     for pass_index in range(to_do):
         rand_users = __radomize_users(survey_data)
         dislike_tallies = __tally_dislikes(survey_data)
         liked_users = __get_liked_users(rand_users, dislike_tallies)
-        passes.append(__do_runs(rand_users, liked_users, dislike_tallies, group_sizes))
+        passes.append(__do_runs(rand_users, liked_users,
+                      dislike_tallies, group_sizes, time_slots))
 
     return passes
 
 
-def __do_runs(rand_users: list[models.SurveyRecord], 
-    liked_users: list[AvailableUser],
-    dislike_tallies: list[DislikedUser], 
-    group_sizes: list[int]) -> Pass:
+def __do_runs(rand_users: dict[str, AvailableUser],
+              liked_users: list[models.SurveyRecord],
+              dislike_tallies: list[DislikedUser],
+              group_sizes: list[int],
+              time_slots: list[str]) -> Pass:
     '''
     Executes all the runs in a pass
     '''
     runs: Pass = Pass([])
 
     for run_index in range(len(rand_users)):
-        __reset_availability(liked_users, dislike_tallies)
+        __reset_availability(rand_users)
         runs.runs.append(__execute_run(
-            run_index, rand_users, liked_users, dislike_tallies, group_sizes))
+            run_index, rand_users, liked_users, dislike_tallies, group_sizes, time_slots))
 
     return runs
 
 
-def __execute_run(starting_index: int, 
-    rand_users: list[models.SurveyRecord], 
-    liked_users: list[AvailableUser],
-    dislike_tallies: list[DislikedUser], 
-    group_sizes: list[int]) -> GroupingRun:
+def __execute_run(starting_index: int,
+                  all_users: dict[str, AvailableUser],
+                  liked_users: list[models.SurveyRecord],
+                  dislike_tallies: list[DislikedUser],
+                  group_sizes: list[int],
+                  time_slots: list[str]) -> GroupingRun:
     '''
     This handles the grouping for all groups
     '''
@@ -287,89 +295,151 @@ def __execute_run(starting_index: int,
 
     for size in group_sizes:
         run.groups.append(__execute_grouping(
-            size, starting_index, liked_users, dislike_tallies))
+            size, all_users, starting_index, liked_users, dislike_tallies))
 
-    scores.group_scores = __score_groups(run.groups)
-    scores.run_score = __calc_run_score(run, rand_users)
+    scores.group_scores = __score_groups(run.groups, time_slots)
+    scores.run_score = __calc_run_score(run, all_users)
 
     return run
 
 
-def __execute_grouping(group_size: int, 
-    starting_index: int, 
-    liked_users: list[AvailableUser],
-    dislike_tallies: list[DislikedUser]) -> models.GroupRecord:
+def __execute_grouping(group_size: int,
+                       all_users: dict[str, AvailableUser],
+                       starting_index: int,
+                       liked_users: list[models.SurveyRecord],
+                       dislike_tallies: list[DislikedUser]) -> models.GroupRecord:
     '''
     This does the actual grouping for a single group at a time
     '''
     group: models.GroupRecord = models.GroupRecord("", [])
     first_user: bool = True
+
+    user: Union[AvailableUser, None]
+
+    # For the first user, get the first available user at or after the starting_index
+    if first_user:
+        user = __get_next_user(starting_index, all_users)
+        group.members.append(user.user)
+        user.is_used = True
+
     # if the group is not full get the first liked user
 
     while len(group.members) < group_size:
 
-        user_index: int = -1
-        # For the first user, try to get a liked user first
-        if first_user:
-            user_index = __get_next_user_index(starting_index, liked_users)
+        index: int = -1
+        user = None
+        # First check for a disliked user that is not disliked in the group
+        # and does not dislike anyone in the group
+        index = __get_next_disliked_user_index(all_users, dislike_tallies, group, True, True)
+        if index >= 0:
+            group.members.append(dislike_tallies[index].user)
+            __mark_user_as_used(all_users, dislike_tallies[index].user)
+            continue
 
-        # if no liked users are available get the first disliked who's not on a disliked list
-        if user_index < 0:
-            user_index = __get_next_disliked_user_index(
-                dislike_tallies, group, False)
+        # Then check for a liked user that does not dislike anyone in the
+        # group
+        index = __get_next_liked_user_index(all_users, liked_users, group, True, True)
+        if index >= 0:
+            group.members.append(liked_users[index])
+            __mark_user_as_used(all_users, liked_users[index])
+            continue
 
-            # if not dislike user is available get first avilable disliked
-            if user_index < 0:
-                user_index = __get_next_disliked_user_index(
-                    dislike_tallies, group, True)
-                # if still no user is available try liked users again
-                if user_index < 0 and not first_user:
-                    first_user = True
-                    continue
-                
-                # if we got here then we ran out of users too soon
-                if user_index < 0:                
-                    raise Exception(
-                        "Ran out of users to group before all groups filled.")
+        # Then check for any disliked user
+        index = __get_next_disliked_user_index(all_users, dislike_tallies, group, False, False)
+        if index >= 0:
+            group.members.append(dislike_tallies[index].user)
+            __mark_user_as_used(all_users, dislike_tallies[index].user)
+            continue
 
-            # if we make it here, we either have a disliked user to add or an exception
-            group.members.append(dislike_tallies[user_index].user)
-            dislike_tallies[user_index].is_used = True  # mark the user as used
-
-        else:
-            group.members.append(liked_users[user_index].user)
-            liked_users[user_index].is_used = True  # mark the user as used
-
-        first_user = False
+        # Then check for any liked user
+        index = __get_next_liked_user_index(all_users, liked_users, group, False, False)
+        if index >= 0:
+            group.members.append(liked_users[index])
+            __mark_user_as_used(all_users, liked_users[index])
+            continue
+  
+        # if we reached here, we couldn't find any more users
+        # but we are still trying to fill groups so something went wrong
+        raise Exception("No more availiable users while filling groups")
+        
 
     return group
 
 
-def __get_next_user_index(starting_index: int, users: list[AvailableUser]) -> int:
+def __mark_user_as_used(all_users: dict[str, AvailableUser], user: models.SurveyRecord):
     '''
-    Gets the index of the next available user in the list 
-    from a starting index then wraps around to the beginning
-    If no users is found, -1 is returned
+    Finds a user by the user SurveyRecord model and marks it as used
     '''
-    actual_index: int = 0
+
+    all_users[user.student_id].is_used = True
+
+
+def __get_next_user(starting_index: int, all_users: dict[str, AvailableUser]) -> AvailableUser:
+    '''
+    Gets the next available users from all users
+    At or after a starting index, then looping around
+    to the beginning of the list.
+    Throws an exception if no user could be found
+    '''
+
+    users: list[AvailableUser] = list(all_users.values())
     user_count: int = len(users)
-    # we have to start at the starting index and loop around
+    actual_index: int = 0
+
     for index in range(0, len(users)):
 
         actual_index = index + starting_index
         if actual_index >= user_count:
             actual_index -= user_count
-        # if user is not marked as used (a.ka. available)
+
         if not users[actual_index].is_used:
-            return index
+            return users[actual_index]
+
+    raise Exception("No available users could be found.")
+
+
+def __get_next_liked_user_index(all_users: dict[str, AvailableUser], 
+    liked_users: list[models.SurveyRecord], 
+    current_group: models.GroupRecord,
+    check_user_is_disliked_in_group: bool,
+    check_user_dislikes_any_in_group: bool,
+    ) -> int:
+    '''
+    Gets the index of the next available user in the list 
+    
+    If no users is found, -1 is returned
+    '''
+
+    for index, user in enumerate(liked_users):
+
+        # if the user is used, skip and look at the next
+        if (all_users[user.student_id].is_used):
+            continue
+
+        # if we are checking for users that are not disliked by anyone already in the group
+        # and the user is disliked by anyone, then skip
+        if (check_user_is_disliked_in_group and __is_user_in_dislikes(user, current_group)):
+            continue
+
+        # if we are checking for users that do no dislike anyone alredy in the gorup
+        # and the user does dislike someone, then skip
+        if (check_user_dislikes_any_in_group and __does_user_dislike_any(user, current_group)):
+            continue
+
+        # we made it through all the conditions so return this index
+        return index
 
     # if we reach here, no available user was found
     return -1
 
 
-def __get_next_disliked_user_index(diskiled_tallies: list[DislikedUser], 
-    current_group: models.GroupRecord, 
-    ignore_disliked_lists: bool) -> int:
+def __get_next_disliked_user_index(all_users: dict[str, AvailableUser], 
+    diskiled_tallies: list[DislikedUser], 
+    current_group: models.GroupRecord,
+    check_user_is_disliked_in_group: bool,
+    check_user_dislikes_any_in_group: bool,
+    ) -> int:
+    
     '''
     returns the index of the first available user from
     the dislike tallies list that does not appear in any
@@ -377,10 +447,23 @@ def __get_next_disliked_user_index(diskiled_tallies: list[DislikedUser],
     If no users is found, -1 is returned
     '''
     for index, tally in enumerate(diskiled_tallies):
-        # Now if the user in the dislikes is available and
-        # the user is not in any dislike lists (or we are ignoring the dislike lists)
-        if not tally.is_used and (ignore_disliked_lists or not __is_user_in_dislikes(tally.user, current_group)):
-            return index
+
+        # if the user is used, skip and look at the next
+        if (all_users[tally.user.student_id].is_used):
+            continue
+
+        # if we are checking for users that are not disliked by anyone already in the group
+        # and the user is disliked by anyone, then skip
+        if (check_user_is_disliked_in_group and __is_user_in_dislikes(tally.user, current_group)):
+            continue
+
+        # if we are checking for users that do no dislike anyone alredy in the gorup
+        # and the user does dislike someone, then skip
+        if (check_user_dislikes_any_in_group and __does_user_dislike_any(tally.user, current_group)):
+            continue
+
+        # we made it through all the conditions so return this index
+        return index
 
     return -1
 
@@ -398,20 +481,28 @@ def __is_user_in_dislikes(user: models.SurveyRecord, current_group: models.Group
 
     return False
 
+def __does_user_dislike_any(user: models.SurveyRecord, current_group: models.GroupRecord) -> bool:
+    '''
+    returns true if the user dislikes anyone else currently 
+    in the group
+    '''
+    user_ids: list[str] = [user.student_id for user in current_group.members]
+    return len(set(user.disliked_students).intersection(user_ids)) > 0
 
-def __score_groups(groups: list[models.GroupRecord]) -> GroupScores:
+
+def __score_groups(groups: list[models.GroupRecord], time_slots: list[str]) -> GroupScores:
     '''
     Applies scoring to the groups in a run
     Scores are returned in the same order as the groups
     '''
     individual_scores: list[int] = []
     for group in groups:
-        individual_scores.append(__calc_group_score(group))
+        individual_scores.append(__calc_group_score(group, time_slots))
 
     return GroupScores(mean(individual_scores), stdev(individual_scores))
 
 
-def __calc_group_score(group: models.GroupRecord) -> int:
+def __calc_group_score(group: models.GroupRecord, time_slots: list[str]) -> int:
     '''
     Calculates the score for an individual group
     '''
@@ -419,10 +510,11 @@ def __calc_group_score(group: models.GroupRecord) -> int:
 
     # Fisrt up is the dislike scoring
     score = __calc_dislike_group_score(group)
-    score += __calc_availability_score(group)
+    score += __calc_availability_score(group, time_slots)
     score += __calc_preferred_score(group)
 
     return score
+
 
 def __calc_dislike_group_score(group: models.GroupRecord) -> int:
     '''
@@ -442,7 +534,7 @@ def __calc_dislike_group_score(group: models.GroupRecord) -> int:
     return score
 
 
-def __calc_availability_score(group: models.GroupRecord) -> int:
+def __calc_availability_score(group: models.GroupRecord, time_slots: list[str]) -> int:
     '''
     Caclulates the availability score for a group
     Points start at number of available time slots
@@ -450,9 +542,29 @@ def __calc_availability_score(group: models.GroupRecord) -> int:
     all users share 
     '''
 
-    score: int = time_slots
-# TODO: Finish this scoring
+    score: int = len(time_slots) * 7 # number of tranches possible values in timeslots
+    first: bool = True
+    traunches: list[str] = [] #using tranches instead of days to be more generic
+
+    for slot in time_slots:
+        traunches = []
+        first = True
+
+        # for each timeslot, we will get a count of the number of days(tranches) that each
+        # user shares
+
+        for user in group.members:            
+            if first:                    
+                traunches = user.availability[slot].copy()
+                first = False
+
+            else:
+                traunches = list(set(user.availability[slot]).intersection(traunches))
+            
+        score -= len(traunches)
+
     return score
+
 
 def __calc_preferred_score(group: models.GroupRecord) -> int:
     '''
@@ -469,15 +581,16 @@ def __calc_preferred_score(group: models.GroupRecord) -> int:
             if other_user != user:
                 for user_id in other_user.preferred_students:
                     if user.student_id == user_id:
-                        score -=1
-                        break 
+                        score -= 1
+                        break
                 else:
-                    continue # this will continue if the inner break did not occurr
-                break # this will break if the inner break oocurred
+                    continue  # this will continue if the inner break did not occurr
+                break  # this will break if the inner break oocurred
 
     return score
 
-def __calc_run_score(run: GroupingRun, survey_data: list[models.SurveyRecord]) -> int:
+
+def __calc_run_score(run: GroupingRun, all_users: dict[str, AvailableUser]) -> int:
     '''
     Calcualtes the score for an idividual run
     A point is added for each group that contains at least 
@@ -486,8 +599,8 @@ def __calc_run_score(run: GroupingRun, survey_data: list[models.SurveyRecord]) -
     score: int = 0
 
     for group in run.groups:
-        for user in survey_data:
-            if __is_user_in_dislikes(user, group):
+        for user in list(all_users.values()):
+            if __is_user_in_dislikes(user.user, group):
                 score += 1
                 break
 
@@ -497,7 +610,19 @@ def __calc_run_score(run: GroupingRun, survey_data: list[models.SurveyRecord]) -
 def __select_winners(passes: list[Pass], select_multiple_winners: bool) -> list[GroupingRun]:
     '''
     Selects the winner or winners, depending on config options
+    for now, this will only return one winner
     '''
-    winning_runs: list[GroupingRun] = []
+    winner: GroupingRun = passes[0].runs[0]
 
-    return winning_runs
+    for grouping_pass in passes:
+        for run in grouping_pass.runs:
+            if run.scores.run_score < winner.scores.run_score:
+                winner = run
+            elif run.scores.run_score == winner.scores.run_score:
+                if run.scores.group_scores.deviation < winner.scores.group_scores.deviation:
+                    winner = run
+                elif run.scores.group_scores.deviation == winner.scores.group_scores.deviation:
+                    if run.scores.group_scores.mean < winner.scores.group_scores.mean:
+                        winner = run
+
+    return [winner]
