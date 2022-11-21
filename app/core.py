@@ -10,6 +10,7 @@ def get_group_sizes(survey_data: list, target_group_size: int) -> list[int]:
     '''
     returns the number of users in each group. The number of groups will be
     based on the len of the list returned.
+    Note that the larger group sizes will always be listed first.
     '''
     groups: list[int] = []
     data_count: int = len(survey_data)
@@ -21,14 +22,29 @@ def get_group_sizes(survey_data: list, target_group_size: int) -> list[int]:
         groups.append(data_count)
         return groups
 
-    groups_of_plus_1: int = data_count % target_group_size
+    modulo: int = data_count % target_group_size
     int_number_of_groups: int = data_count // target_group_size
 
-    for index in range(int_number_of_groups):
-        groups.append(int_number_of_groups)
+    # if the number of groups is less than the modulo
+    # we know we will have to add one group and drop the
+    # target size by one. Ohterwise, we will keep the number
+    # of groups.
+    # After that, we will add one to each group until the total
+    # number of users is reached
 
-    for index in range(groups_of_plus_1):
-        groups[index] += 1
+    if int_number_of_groups < modulo:
+        int_number_of_groups += 1
+        target_group_size -= 1
+
+    total: int = int_number_of_groups * target_group_size
+
+    for index in range(int_number_of_groups):
+        groups.append(target_group_size)
+
+    for index in range(int_number_of_groups):
+        if total < data_count:
+            groups[index] += 1
+            total += 1
 
     return groups
 
