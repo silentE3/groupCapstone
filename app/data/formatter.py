@@ -98,6 +98,9 @@ class ReportFormatter():
             if self.report_config['show_availability_overlap']:
                 record.append(
                     ';'.join(validate.group_availability_strings(group)))
+
+            record.append(len(group.members))
+
             if self.report_config['show_scores']:
                 # Note: the first 3 values are "don't care" for individual group scoring
                 scoring_vars = models.GroupSetData(group.group_id,
@@ -129,6 +132,7 @@ class ReportFormatter():
         if self.report_config['show_availability_overlap']:
             headers.append('Availability Overlap')
 
+        headers.append('Group size')
         if self.report_config['show_scores']:
             headers.append('Score')
 

@@ -37,7 +37,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     algorithm.rank_students(records)
 
-    alg = algorithm.Algorithm(records)
+    alg = algorithm.Algorithm(records, config_data['target_group_size'])
 
     click.echo(f'grouping students from {surveyfile}')
     groups = alg.group_students()

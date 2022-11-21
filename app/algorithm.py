@@ -12,12 +12,14 @@ class Algorithm:
     class with operations that perform the algorithm to group students
     '''
 
-    def __init__(self, students) -> None:
+    def __init__(self, students, target_group_size) -> None:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
-        self.max_group_size = len(self.students) // 5
-        for idx in range(self.max_group_size):
+        self.max_group_count = len(self.students) // 5
+        self.target_group_size = target_group_size
+        self.target_group_margin = 1
+        for idx in range(self.max_group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
     def group_students(self) -> list[models.GroupRecord]:
@@ -28,7 +30,6 @@ class Algorithm:
             student = self.students.pop()
             self.add_student_to_group(student)
         self.fix_bad_groups()
-        print(len(self.students))
         return self.groups
 
     def fix_bad_groups(self):
@@ -42,16 +43,16 @@ class Algorithm:
 
     def add_bad_student_to_group(self, student: models.SurveyRecord):
         """
-        adds a student to a given group
+        adds a student to a given group. This is slightly different than the original add student. There is more margin for variability
         """
         for group in self.groups:
-            if meets_hard_requirement(student, group):
+            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
                 group.members.append(student)
                 return
 
-        scenarios = self.run_bad_scenarios(student, 6)
+        scenarios = self.run_bad_scenarios(student,  self.target_group_size + self.target_group_margin)
         if len(scenarios) == 0:
-            print('no scenarios :(')
+            print(f'no scenarios for student: {student.student_id} :(')
             return
 
         randidx = randint(0, len(scenarios)-1)
@@ -69,14 +70,13 @@ class Algorithm:
         This ensures population of the groups before getting hung up in a cycle of finding best case scenarios.
         """
         for group in self.groups:
-            if meets_hard_requirement(student, group):
+            if meets_hard_requirement(student, group, self.target_group_size):
                 group.members.append(student)
                 return
 
-        scenarios = self.run_scenarios(student, 5)
+        scenarios = self.run_scenarios(student, self.target_group_size)
         if len(scenarios) == 0:
             self.bad_students.append(student)
-            print('bad student len: ', len(self.bad_students))
             return
 
         target_scenario = scenarios.pop(0)
@@ -116,6 +116,10 @@ class Algorithm:
             scenarios.extend(group_scenarios_doesnt_have_to_be_better(
                 student, group, max_size))
 
+        for idx, scenario in enumerate(scenarios):
+            if scenario.score == 0:
+                scenarios.pop(idx)
+
         scenarios.sort(reverse=True)
 
         return scenarios
@@ -142,7 +146,8 @@ def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord, max
             group_new.members.remove(mem)
             group_new.members.append(student)
             if rank_group(group) < rank_group(group_new):
-                scenario = models.Scenario(group_new, rank_group(group_new), mem)
+                scenario = models.Scenario(
+                    group_new, rank_group(group_new), mem)
                 scenarios.append(scenario)
 
     return scenarios
@@ -194,7 +199,7 @@ def rank_group(group: models.GroupRecord) -> int:
     return availability * 100 + preferred_users
 
 
-def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord):
+def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
     '''
     checks if the basic hard requirements are met including the group size, availability, and dislikes
     '''
@@ -204,8 +209,7 @@ def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupReco
     matches_avail = validate.meets_group_availability_requirement(group_copy)
     group_size = len(group_copy.members)
 
-    return dislikes and matches_avail and group_size < 6
-
+    return dislikes and matches_avail and group_size <= max_group_size
 
 def total_dislike_incompatible_students(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
     """
