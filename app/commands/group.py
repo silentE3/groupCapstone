@@ -30,11 +30,8 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
     # loop through the data and if they don't match any availability, set them to be a wildcard
     for record in records:
         if algorithm.total_availability_matches(record, records) == 0:
+            print(f"found no matching availability for: {record.student_id}")
             record.availability = set_avail(record)
-    algorithm.rank_students(records)
-
-    # filter out any that don't match first
-
     algorithm.rank_students(records)
 
     alg = algorithm.Algorithm(records, config_data['target_group_size'])
