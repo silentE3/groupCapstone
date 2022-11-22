@@ -196,7 +196,9 @@ def __tally_dislikes(survey_data: list[models.SurveyRecord]) -> list[DislikedUse
                 if record is not None:
                     tally: DislikedUser = DislikedUser(record, 0)
                     tallies[user] = tally
-
+                else:
+                    continue
+                
             # increment the count
             tallies[user].dislikes += 1
 

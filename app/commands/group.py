@@ -47,7 +47,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
                    ''')
         return
 
-    # Create random groupings
+    # Create groupings
     groups: list[models.GroupRecord]
     groups = boucher.create_groups(config_data, data)
         

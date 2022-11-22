@@ -3,8 +3,8 @@ Tests general core grouping functionality
 '''
 
 from app import models
-from app import core
-
+from app import core, config
+from app.data.load import SurveyDataReader
 
 def test_get_num_groups_1():
     '''
@@ -278,3 +278,50 @@ def test_pre_group_error_checking_valid_2():
     target_group_size = 4
 
     assert core.pre_group_error_checking(target_group_size, group) == False
+
+def test_multi_size_group_numbering_1():
+    '''
+    Tests the multi-size group sizing algorithm
+    '''
+    
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    survey_reader = SurveyDataReader(config_data['field_mappings'])
+    surveys_result = survey_reader.load('./tests/test_files/survey_results/Example_Survey_Results_1.csv')
+
+    group_sizes: list[int] = core.get_group_sizes(surveys_result, config_data["target_group_size"])
+
+    assert len(group_sizes) == 2
+    assert group_sizes[0] == 2
+    assert group_sizes[1] == 2
+
+def test_multi_size_group_numbering_2():
+    '''
+    Tests the multi-size group sizing algorithm
+    '''
+    
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_5.json")
+    survey_reader = SurveyDataReader(config_data['field_mappings'])
+    surveys_result = survey_reader.load('./tests/test_files/survey_results/Example_Survey_Results_5.csv')
+
+    group_sizes: list[int] = core.get_group_sizes(surveys_result, config_data["target_group_size"])
+
+    assert len(group_sizes) == 2
+    assert group_sizes[0] == 5
+    assert group_sizes[1] == 3
+
+
+def test_multi_size_group_numbering_3():
+    '''
+    Tests the multi-size group sizing algorithm
+    '''
+    
+    config_data: models.Configuration = config.read_json("./tests/test_files/configs/config_1.json")
+    survey_reader = SurveyDataReader(config_data['field_mappings'])
+    surveys_result = survey_reader.load('./tests/test_files/survey_results/Example_Survey_Results_2.csv')
+
+    group_sizes: list[int] = core.get_group_sizes(surveys_result, config_data["target_group_size"])
+
+    assert len(group_sizes) == 3
+    assert group_sizes[0] == 2
+    assert group_sizes[1] == 2
+    assert group_sizes[2] == 2

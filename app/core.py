@@ -46,6 +46,11 @@ def get_group_sizes(survey_data: list, target_group_size: int) -> list[int]:
             groups[index] += 1
             total += 1
 
+    if total > data_count:
+        groups[int_number_of_groups - 1] -= (total - data_count)
+    elif total < data_count:
+        groups[int_number_of_groups - 1] += (total - data_count)
+
     return groups
 
 
