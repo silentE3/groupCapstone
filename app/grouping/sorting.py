@@ -41,8 +41,13 @@ class UniqueGrouper:
             students.append(entry.student_id)
         
         print(students)
+        
         groups2 = list(combinations(students, target_group_size))
         print(len(groups2))
+
+        for group in groups2:
+            
+
             
 
 
