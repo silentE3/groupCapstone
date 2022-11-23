@@ -81,8 +81,10 @@ class GroupSetData:
     '''
     scoring_id: str  # e.g. "solution_x" if scoring a group set or group_id if scoring a group
     num_groups_no_overlap: int
-    num_of_disliked_pairs: int
-    num_of_preferred_pairs: int
+    num_disliked_pairs: int
+    num_preferred_pairs: int
+    num_additional_overlap: int
     target_group_size: int
-    num_of_preferred_slots: int
-    num_of_students: int
+    num_survey_preferred_slots: int
+    num_students: int
+    num_survey_time_slots: int
