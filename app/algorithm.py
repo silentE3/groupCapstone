@@ -51,7 +51,7 @@ class Algorithm:
         creates grouping optimizations by swapping users
         '''
         x = 0
-        while x < 15:
+        while x < 5:
             for group in self.groups:
                 for mem in group.members:
                     scenarios = self.run_swap_scenarios(group, mem)
