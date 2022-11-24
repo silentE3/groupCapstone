@@ -29,8 +29,8 @@ def test_format_group_report_check_header():
 
     report = report_formatter.format_group_report(groups)
 
-    assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Meets Preferred Goal', 'Preferred pairs in group', 'Preferred pair count',
-                         'Meets Availability Requirement', 'Availability Overlap']
+    assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Meets Availability Requirement',
+                         'Availability Overlap', 'Meets Preferred Goal', 'Preferred pairs in group', 'Preferred pair count']
 
 
 def test_format_group_report_check_header_show_disliked():
@@ -64,8 +64,8 @@ def test_format_group_report_check_header_show_disliked():
 
     report = report_formatter.format_group_report(groups)
 
-    assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Disliked students in group', 'Meets Preferred Goal',
-                         'Meets Availability Requirement', 'Score']
+    assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Disliked students in group',
+                         'Meets Availability Requirement', 'Meets Preferred Goal', 'Score']
 
 
 def test_format_group_report_check_group():
@@ -133,5 +133,5 @@ def test_format_individual_report_check_header_all_enabled():
 
     report = report_formatter.format_individual_report(groups)
 
-    assert report[0] == ['Student Id', 'Meets Dislike Requirement', 'Disliked students in group',
-                         'Meets Preferred Goal', 'Preferred students in group', 'Meets Availability Requirement', 'Availability Overlap', 'Group Id']
+    assert report[0] == ['Student Id', 'Meets Dislike Requirement', 'Disliked students in group', 'Meets Availability Requirement', 'Availability Overlap',
+                         'Meets Preferred Goal', 'Preferred students in group',  'Group Id']
