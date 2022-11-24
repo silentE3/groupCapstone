@@ -86,8 +86,8 @@ def score_groups(variables: models.GroupSetData) -> float:
 
 def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData) -> float:
     '''
-    This function scores an individual group using the T (s, d, p ) equation in the score_groups
-     function, but with s, d, and p being specific to the group (i.e., s is 0 or 1 for the group,
+    This function scores an individual group using the S (p, t, s, d) equation in the score_groups
+     function, but with p, t, s, and d being specific to the group (i.e., s is 0 or 1 for the group,
      d is number of disliked pairings within the group, etc.).
 
     '''
@@ -115,7 +115,6 @@ def standard_dev_groups(groups: list[models.GroupRecord], variables: models.Grou
         score = score_individual_group(group, variables)
         mean_groups += score
         group_scores.append(score)
-        print(mean_groups)
     mean_groups = mean_groups / len(groups)
 
     std_dev: float = sqrt(
