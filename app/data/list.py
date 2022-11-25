@@ -13,3 +13,13 @@ class StudentList:
         to the survey data.
         '''
         survey_students = []
+        for entry in survey:
+            survey_students.append(entry.student_name)
+        
+        #At this point, the survey_student list should have every student name from the survey data.
+        #Next, we will check if all the students have answered the survey.
+
+        missing_students = []
+        for student in roster:
+            if survey_students.count(student) == 0:
+                missing_students.append(student)
