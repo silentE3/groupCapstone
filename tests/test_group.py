@@ -3,6 +3,7 @@ from click.testing import CliRunner
 import click
 from app.commands import group
 from tests.test_utils.helper_functions import verify_rand_groups
+from os.path import exists
 
 runner = CliRunner()
 
@@ -137,3 +138,31 @@ def test_group_verify_and_report_file_name_1():
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
     os.remove('test_verify_and_report_file_name_1.csv')
+
+def test_alt_command_args_1():
+    '''
+    Should be same as test_group_verify_and_report_file_name_1 but using the altername command line args
+    '''
+
+
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--verify'])
+    assert response.exit_code == 0
+
+    assert response.output.endswith(
+        'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
+    os.remove('test_verify_and_report_file_name_1_report.xlsx')
+    os.remove('test_verify_and_report_file_name_1.csv')    
+
+def test_with_minimal_command_args():
+    '''
+    This tests the CLI to ensure that the minimum number of command line args works
+    '''
+
+    if exists("./output.csv"):
+        os.remove("output.csv")
+
+    response = runner.invoke(group.group, [])
+    assert response.exit_code == 0
+    assert exists("./output.csv")
+    os.remove('output.csv')
