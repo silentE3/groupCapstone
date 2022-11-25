@@ -84,13 +84,16 @@ class GroupSetData:
     Class that holds set information for a group set
     '''
     scoring_id: str  # e.g. "solution_x" if scoring a group set or group_id if scoring a group
-    num_groups_no_overlap: int
-    num_of_disliked_pairs: int
-    num_of_preferred_pairs: int
     target_group_size: int
-    num_of_preferred_slots: int
-    num_of_students: int
-
+    num_survey_preferred_slots: int
+    num_students: int
+    num_survey_time_slots: int
+    # Default assignment of 0  for the items below b/c their iniital values are "don't
+    # care" (reassigned as necessary) when being used to score INDIVIDUAL groups
+    num_groups_no_overlap: int = 0
+    num_disliked_pairs: int = 0
+    num_preferred_pairs: int = 0
+    num_additional_overlap: int = 0
 
 @dataclass
 class Scenario:

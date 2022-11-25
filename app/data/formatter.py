@@ -34,16 +34,16 @@ class ReportFormatter():
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
 
-                record.append(len(user_perfs[user.student_id]) > 0)
-                if self.report_config['show_preferred_students']:
-                    # for preferred list
-                    record.append(";".join(user_perfs[user.student_id]))
-
                 record.append(
                     validate.meets_group_availability_requirement(group))
                 if self.report_config['show_availability_overlap']:
                     record.append(
                         ';'.join(validate.group_availability_strings(group)))
+
+                record.append(len(user_perfs[user.student_id]) > 0)
+                if self.report_config['show_preferred_students']:
+                    # for preferred list
+                    record.append(";".join(user_perfs[user.student_id]))
 
                 record.append(group.group_id)
                 records.append(record)
@@ -56,13 +56,13 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             header.append('Disliked students in group')
 
-        header.append('Meets Preferred Goal')
-        if self.report_config['show_preferred_students']:
-            header.append('Preferred students in group')
-
         header.append('Meets Availability Requirement')
         if self.report_config['show_availability_overlap']:
             header.append('Availability Overlap')
+
+        header.append('Meets Preferred Goal')
+        if self.report_config['show_preferred_students']:
+            header.append('Preferred students in group')
 
         header.append('Group Id')
 
@@ -85,6 +85,12 @@ class ReportFormatter():
                 record.append(
                     ';'.join(validate.users_disliked_in_group(group)))
 
+            record.append(
+                validate.meets_group_availability_requirement(group))
+            if self.report_config['show_availability_overlap']:
+                record.append(
+                    ';'.join(validate.group_availability_strings(group)))
+
             pairs = []
             for pair in group_pairs[group.group_id]:
                 pairs.append(pair[0] + "/" + pair[1])
@@ -93,22 +99,16 @@ class ReportFormatter():
                 record.append(';'.join(pairs))
                 record.append(len(pairs))
 
-            record.append(
-                validate.meets_group_availability_requirement(group))
-            if self.report_config['show_availability_overlap']:
-                record.append(
-                    ';'.join(validate.group_availability_strings(group)))
-
-            record.append(len(group.members))
-
             if self.report_config['show_scores']:
-                # Note: the first 3 values are "don't care" for individual group scoring
+                # Note: the first 4 values are "don't care" for individual group scoring
                 scoring_vars = models.GroupSetData(group.group_id,
-                                                   0, 0, 0,
                                                    self.data_config["target_group_size"],
                                                    len((self.data_config["field_mappings"])[
                                                        "preferred_students_field_names"]),
-                                                   len(group.members))
+                                                   sum(len(group.members)
+                                                       for group in groups),
+                                                   len((self.data_config["field_mappings"])[
+                                                       "availability_field_names"]))
                 record.append(scoring.score_individual_group(
                     group, scoring_vars))
 
@@ -123,16 +123,17 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             headers.append('Disliked students in group')
 
+        headers.append('Meets Availability Requirement')
+        if self.report_config['show_availability_overlap']:
+            headers.append('Availability Overlap')
+
         headers.append('Meets Preferred Goal')
         if self.report_config['show_preferred_students']:
             headers.append('Preferred pairs in group')
             headers.append('Preferred pair count')
 
-        headers.append('Meets Availability Requirement')
-        if self.report_config['show_availability_overlap']:
-            headers.append('Availability Overlap')
-
         headers.append('Group size')
+
         if self.report_config['show_scores']:
             headers.append('Score')
 
@@ -150,20 +151,29 @@ class ReportFormatter():
         num_groups_no_avail: int = validate.total_groups_no_availability(
             groups)
         num_liked_pairings: int = validate.total_liked_pairings(groups)
+        num_additional_overlap: int = sum(
+            # subtract one to get "additional"
+            max(validate.availability_overlap_count(group) - 1, 0)
+            for group in groups)
 
         record.append(str(num_disliked_pairings))
         record.append(str(num_groups_no_avail))
         record.append(str(num_liked_pairings))
+        record.append(str(num_additional_overlap))
 
         if self.report_config['show_scores']:
             scoring_vars = models.GroupSetData("solution_1",
-                                               num_groups_no_avail,
-                                               num_disliked_pairings,
-                                               num_liked_pairings,
                                                self.data_config["target_group_size"],
                                                len((self.data_config["field_mappings"])[
                                                    "preferred_students_field_names"]),
-                                               sum(len(group.members) for group in groups))
+                                               sum(len(group.members)
+                                                   for group in groups),
+                                               len((self.data_config["field_mappings"])[
+                                                   "availability_field_names"]),
+                                               num_groups_no_avail,
+                                               num_disliked_pairings,
+                                               num_liked_pairings,
+                                               num_additional_overlap)
             record.append(scoring.score_groups(scoring_vars))
 
         records.append(record)
@@ -175,6 +185,7 @@ class ReportFormatter():
         headers.append('Disliked Pairings')
         headers.append('Number of Groups Without Overlapping Time Slot')
         headers.append('Preferred Pairings')
+        headers.append('"Additional" Overlapping Time Slots')
         if self.report_config['show_scores']:
             headers.append('Score')
 
