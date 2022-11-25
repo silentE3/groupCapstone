@@ -1,7 +1,7 @@
 {
     "class_name": "SER401",
     "target_group_size": 5,
-    "grouping_passes": 2,
+    "grouping_passes": 200,
     "field_mappings": {
         "student_id_field_name": "Please select your ASURITE ID",
         "timezone_field_name": "In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.",
