@@ -31,6 +31,40 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
     return num_groups
 
 
+def get_min_max_num_groups(survey_data: list, target_group_size: int) -> list[int]:
+    '''
+    Function for determining the number of groups that the 
+        students can be seperated into based upon the number of students 
+        and the target group size +/- 1.
+
+    Returns an empty list if it is not possible to adhere to the target group
+        size +/-1 (e.g. target = 6 with 8 total students)
+    Returns the min and max value otherwise
+    '''
+    # calculate the number of groups based on number of students and target group size +/- 1
+    if target_group_size <= 0 or len(survey_data) < 1:
+        # protection from invalid group size input and survey data input
+        return []
+
+    # make sure it is possible to adhere to the target group size +/- 1
+    default_num_groups = round(len(survey_data) / target_group_size)
+    # make sure at least one group
+    default_num_groups = max(default_num_groups, 1)
+    if not (((target_group_size - 1) * default_num_groups <= len(survey_data)) and
+            (((target_group_size + 1) * default_num_groups >= len(survey_data)))):
+        return []  # not possible to adhere to the target group size +/- 1
+
+    min_max_num_groups: list[int] = []
+    # min possible number groups focusing on target group size + 1
+    min_max_num_groups.append(-(-len(survey_data) // (target_group_size + 1)))
+    # max possible number groups focusing on target group size - 1
+    if (target_group_size - 1) <= 0:
+        min_max_num_groups.append(len(survey_data)//(target_group_size))
+    else:
+        min_max_num_groups.append(len(survey_data)//(target_group_size - 1))
+    return min_max_num_groups
+
+
 def pre_group_error_checking(target_group_size: int, surveys_list: list[models.SurveyRecord]) -> bool:
     '''
     Perform pre-grouping error checking:

@@ -8,6 +8,7 @@ import click
 from app import config, core, output
 from app import models
 from app.data import load
+from app.group import scoring
 from app.grouping.grouper_prototype import Grouper
 from app.file import xlsx
 from app.data.formatter import ReportFormatter
@@ -35,11 +36,11 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
     if core.pre_group_error_checking(config_data["target_group_size"], data):
         return  # error found -- don't continue
 
-    # Determine number of groups
-    num_groups: int = core.get_num_groups(
+    # Determine min and max possible number of groups
+    min_max_num_groups: list[int] = core.get_min_max_num_groups(
         data, config_data["target_group_size"])
 
-    if num_groups < 0:
+    if len(min_max_num_groups) < 1:
         click.echo('''
                    **********************
                    Error: Not possible to adhere to the target_group_size (+/- 1) defined in the config file (config.json) in use.
@@ -47,18 +48,27 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
                    ''')
         return
 
-    # Create random groupings
-    groups: list[models.GroupRecord]
-    groups = Grouper(data, config_data, num_groups).create_groups()
-    # For now, simply print the groups to the terminal (until file output is implemented)
-    for grouping in groups:
+    # Run the grouping algorithm for all possible group sizes
+    best_solution_found_grouper: Grouper = Grouper(data, config_data, 0)
+    for num_groups in range(min_max_num_groups[0], min_max_num_groups[-1] + 1):
+        grouper = Grouper(data, config_data, num_groups)
+        grouper.create_groups()
+        if (num_groups == min_max_num_groups[0] or
+            (best_solution_found_grouper.best_solution_score <= grouper.best_solution_score) or
+            (best_solution_found_grouper.best_solution_score == grouper.best_solution_score) and
+                (scoring.standard_dev_groups(best_solution_found_grouper.best_solution_found, best_solution_found_grouper.scoring_vars) >=
+                    scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars))):
+            best_solution_found_grouper = grouper
+        # For now, simply print the groups to the terminal (until file output is implemented)
+    for grouping in best_solution_found_grouper.best_solution_found:
         print(f'***** Group #{grouping.group_id} *****')
         for student in grouping.members:
             click.echo(student.student_id)
     click.echo("**********************")
     click.echo(outputfile)
 
-    output.WriteGroupingData(config_data).output_groups_csv(groups, outputfile)
+    output.WriteGroupingData(config_data).output_groups_csv(
+        best_solution_found_grouper.best_solution_found, outputfile)
 
     if verify:
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
@@ -66,7 +76,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
             report_filename = reportfile
         click.echo(f'Writing report to: "{report_filename}"')
         write_report(
-            groups, config_data, report_filename)
+            best_solution_found_grouper.best_solution_found, config_data, report_filename)
 
 
 def write_report(groups: list[models.GroupRecord], data_config: models.Configuration, filename: str):
