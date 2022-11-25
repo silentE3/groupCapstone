@@ -5,7 +5,7 @@ import copy
 import math
 from random import randint
 from app import models
-from app.group import validate
+from app.group import validate, scoring
 
 
 class Algorithm:
@@ -236,7 +236,7 @@ def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group
     return scenarios
 
 
-def rank_group(group: models.GroupRecord) -> int:
+def rank_group(group: models.GroupRecord) -> float:
     '''
     1. dislikes = return a score of 0
     2. availability = log10(avail)*10 or 0 if none
@@ -250,9 +250,14 @@ def rank_group(group: models.GroupRecord) -> int:
     if availability == 0:
         return 0
 
-    preferred_users = validate.group_likes_count(group)
+    availability_score = 10
+    if availability - 1 > 0:
+        availability_score += math.floor(math.log10(availability-1))
 
-    return math.floor(math.log2(availability))*100 + math.floor((2) ^ (preferred_users))
+    preferred_users = validate.group_likes_count(group)
+    # preferred_user_score = math.floor((10) ^ (preferred_users))
+
+    return scoring.score_individual_group(group)
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):

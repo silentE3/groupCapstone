@@ -84,13 +84,14 @@ def score_groups(variables: models.GroupSetData) -> float:
     return round(total_score, 4)
 
 
-def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData) -> float:
+def score_individual_group(group: models.GroupRecord) -> float:
     '''
     This function scores an individual group using the S (p, t, s, d) equation in the score_groups
      function, but with p, t, s, and d being specific to the group (i.e., s is 0 or 1 for the group,
      d is number of disliked pairings within the group, etc.).
 
     '''
+    variables = models.GroupSetData(group.group_id, 5, 2, 7, 6)
     variables.num_disliked_pairs = validate.total_disliked_pairings([group])
     variables.num_preferred_pairs = validate.total_liked_pairings([group])
     variables.num_groups_no_overlap = \
@@ -100,7 +101,7 @@ def score_individual_group(group: models.GroupRecord, variables: models.GroupSet
     return score_groups(variables)
 
 
-def standard_dev_groups(groups: list[models.GroupRecord], variables: models.GroupSetData) -> float:
+def standard_dev_groups(groups: list[models.GroupRecord]) -> float:
     '''
     This function computes the standard deviation of the individual group scores within
     a Group Set.
@@ -112,7 +113,7 @@ def standard_dev_groups(groups: list[models.GroupRecord], variables: models.Grou
     mean_groups: float = 0
     group_scores: list[float] = []
     for group in groups:
-        score = score_individual_group(group, variables)
+        score = score_individual_group(group)
         mean_groups += score
         group_scores.append(score)
     mean_groups = mean_groups / len(groups)

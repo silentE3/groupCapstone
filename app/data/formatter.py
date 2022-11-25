@@ -99,6 +99,8 @@ class ReportFormatter():
                 record.append(';'.join(pairs))
                 record.append(len(pairs))
 
+            record.append(len(group.members))
+            
             if self.report_config['show_scores']:
                 # Note: the first 4 values are "don't care" for individual group scoring
                 scoring_vars = models.GroupSetData(group.group_id,
@@ -110,7 +112,7 @@ class ReportFormatter():
                                                    len((self.data_config["field_mappings"])[
                                                        "availability_field_names"]))
                 record.append(scoring.score_individual_group(
-                    group, scoring_vars))
+                    group))
 
             records.append(record)
 

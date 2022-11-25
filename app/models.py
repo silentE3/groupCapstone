@@ -101,7 +101,7 @@ class Scenario:
     scenario for a new group. includes the score, result group, and the removed user if they exist
     '''
     group: GroupRecord
-    score: int
+    score: float
     removed_user: Optional[SurveyRecord] = field(default=None)
 
     def __lt__(self, other):
@@ -115,8 +115,8 @@ class SwapScenario:
     '''
     group_1: GroupRecord
     group_2: GroupRecord
-    score1: int
-    score2: int
+    score1: float
+    score2: float
 
     def __lt__(self, other):
         return self.score1 < other.score1 and self.score2 < other.score2
