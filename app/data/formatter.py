@@ -102,7 +102,6 @@ class ReportFormatter():
             if self.report_config['show_scores']:
                 # Note: the first 4 values are "don't care" for individual group scoring
                 scoring_vars = models.GroupSetData(group.group_id,
-                                                   0, 0, 0, 0,
                                                    self.data_config["target_group_size"],
                                                    len((self.data_config["field_mappings"])[
                                                        "preferred_students_field_names"]),
@@ -162,17 +161,17 @@ class ReportFormatter():
 
         if self.report_config['show_scores']:
             scoring_vars = models.GroupSetData("solution_1",
-                                               num_groups_no_avail,
-                                               num_disliked_pairings,
-                                               num_liked_pairings,
-                                               num_additional_overlap,
                                                self.data_config["target_group_size"],
                                                len((self.data_config["field_mappings"])[
                                                    "preferred_students_field_names"]),
                                                sum(len(group.members)
                                                    for group in groups),
                                                len((self.data_config["field_mappings"])[
-                                                   "availability_field_names"]))
+                                                   "availability_field_names"]),
+                                               num_groups_no_avail,
+                                               num_disliked_pairings,
+                                               num_liked_pairings,
+                                               num_additional_overlap)
             record.append(scoring.score_groups(scoring_vars))
 
         records.append(record)
