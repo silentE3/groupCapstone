@@ -24,8 +24,7 @@ def verify(surveyfile: str, groupfile: str, reportfile: str, configfile: str):
 
     # load config data and survey data reader
     config_data: models.Configuration = config.read_json(configfile)
-
-    records = load.SurveyDataReader(config_data['field_mappings']).load(surveyfile)
+    records = load.read_survey(config_data['field_mappings'], surveyfile)
 
     # redefine the reader and read in the grouping data
     groups = load.GroupingDataReader().load(groupfile)

@@ -24,8 +24,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    records = load.SurveyDataReader(
-        config_data['field_mappings']).load(surveyfile)
+    records: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
 
     # loop through the data and if they don't match any availability, set them to be a wildcard
     for record in records:
@@ -33,7 +32,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
             print(f"found no matching availability for: {record.student_id}")
             record.availability = set_avail(record)
     algorithm.rank_students(records)
-
+    # Perform pre-grouping error checking
     alg = algorithm.Algorithm(records, config_data['target_group_size'], config_data['grouping_passes'])
 
     click.echo(f'grouping students from {surveyfile}')

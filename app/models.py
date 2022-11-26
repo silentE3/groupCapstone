@@ -1,7 +1,8 @@
 
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
-from typing import Optional, TypedDict
+import datetime as dt
+from typing import TypedDict, Optional
 
 
 @dataclass
@@ -14,6 +15,7 @@ class SurveyFieldMapping(TypedDict):
     student_email_field_name: str
     student_login_field_name: str
     timezone_field_name: str
+    submission_timestamp_field_name: str
     preferred_students_field_names: list[str]
     disliked_students_field_names: list[str]
     availability_field_names: list[str]
@@ -55,6 +57,7 @@ class Configuration(TypedDict):
 class SurveyRecord:
     """Data class that describes a single record in the survey dataset"""
     student_id: str
+    submission_date: dt.datetime = dt.datetime.now()
     student_name: str = ""
     student_email: str = ""
     student_login: str = ""
@@ -64,6 +67,8 @@ class SurveyRecord:
     availability: dict[str, list[str]] = field(default_factory=dict)
     okay_with_rank = 0
     avail_rank = 0
+    has_matching_availability: bool = True
+    provided_availability: bool = True
 
     def __lt__(self, other):
         return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank
