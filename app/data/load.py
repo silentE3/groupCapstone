@@ -93,7 +93,7 @@ def __parse_survey_record(config, row) -> models.SurveyRecord:
             survey.preferred_students.append(
                 parse_asurite(row[field]).lower())
     survey.preferred_students = list(set(survey.preferred_students))
-    print(survey.preferred_students)
+
     for field in config['disliked_students_field_names']:
         if row[field] != "":
             survey.disliked_students.append(
