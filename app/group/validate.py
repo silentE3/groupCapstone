@@ -70,6 +70,9 @@ def group_availability(group: models.GroupRecord) -> dict[str, dict[str, bool]]:
     '''
     group_available: dict[str, dict[str, bool]] = {}
 
+    if len(group.members) == 0:
+        return group_available
+
     # create a map with each time and set to true for every day
     for key in group.members[0].availability.keys():
         group_available[key] = {}
@@ -116,12 +119,12 @@ def _extract_time_(time_slot_str: str) -> str:
             would return "0:00 AM - 3:00 AM"
     If the enclosing bracket pattern is not found, it simply returns the original string.
     '''
-    result: str
-    try:
-        result = re.search(r'\[(.*?)\]', time_slot_str).group(1)
-    except AttributeError:
-        # bracketed time string not found. OK, just return the original
+    search = re.search(r'\[(.*?)\]', time_slot_str)
+    if search is not None:
+        result = search.group(1)
+    else:
         result = time_slot_str
+
     return result
 
 
@@ -290,6 +293,10 @@ def meets_like_requirement(group: models.GroupRecord, min_like_count=0):
     '''
 
     return len(list(itertools.chain.from_iterable(group_like_occurrences(group).values()))) >= min_like_count
+
+
+def group_likes_count(group: models.GroupRecord):
+    return len(list(itertools.chain.from_iterable(group_like_occurrences(group).values())))
 
 
 def duplicate_user_in_group(group: models.GroupRecord) -> bool:

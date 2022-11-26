@@ -24,6 +24,6 @@ def gen(filename: str, count: int):
         'disliked 1', 'disliked 2', 'disliked 3'
     ]
 
-    writer = output.WriteSurveyData()
+    writer = output.SurveyDataWriter()
     writer.output_to_csv(headers, body, filename)
     click.echo(f'Created new survey dataset: "{filename}"')

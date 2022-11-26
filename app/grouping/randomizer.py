@@ -3,8 +3,7 @@
 import random as rnd
 from app import models
 
-
-class RandomGrouper:
+class RandomGrouper():
     '''
     This class creates groups by random assignment
     '''

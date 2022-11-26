@@ -5,7 +5,7 @@ of a grouping
 
 import click
 from app import config, models
-from app.data import load, reporter
+from app.data import load
 
 
 @click.command("report")
@@ -27,16 +27,10 @@ def report(surveyfile: str, groupfile: str, reportfile: str, configfile: str):
 
     # load config data and survey data reader
     config_data: models.Configuration = config.read_json(configfile)
-
-
-
-    # data = load.read_survey(config_data['field_mappings'])
-
+    records = load.read_survey(config_data['field_mappings'], surveyfile)
 
     # redefine the reader and read in the grouping data
-    reader = load.GroupingDataReader()
-    groups = reader.load(groupfile)
+    groups = load.GroupingDataReader().load(groupfile)
 
-    click.echo(f'Writing report to: "{reportfile}"')
-    reporter.write_report(
-        groups, config_data, reportfile)
+    # create the verifier and run the verification
+    # verifier.VerifyGrouping(config_data).verify(records, groups, reportfile)

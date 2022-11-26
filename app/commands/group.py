@@ -4,9 +4,9 @@ Also includes reading in the configuration file.
 '''
 
 import click
-from app import config, core, models, output
+
+from app import algorithm, models, config, output
 from app.data import load, reporter
-from app.grouping.randomizer import RandomGrouper
 
 
 @click.command("group")
@@ -23,36 +23,17 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    data: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
+    records: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
+
+    # loop through the data and if they don't match any availability, set them to be a wildcard
+    algorithm.rank_students(records)
     # Perform pre-grouping error checking
-    if core.pre_group_error_checking(config_data["target_group_size"], data):
-        return  # error found -- don't continue
+    alg = algorithm.Grouper(records, config_data['target_group_size'], config_data['grouping_passes'])
 
-    # Determine number of groups
-    num_groups: int = core.get_num_groups(
-        data, config_data["target_group_size"])
-
-    if num_groups < 0:
-        click.echo('''
-                   **********************
-                   Error: Not possible to adhere to the target_group_size (+/- 1) defined in the config file (config.json) in use.
-                   **********************
-                   ''')
-        return
-
-    # Create random groupings
-    groups: list[models.GroupRecord]
-    groups = RandomGrouper().create_groups(
-        data, config_data["target_group_size"], num_groups)
-    # For now, simply print the groups to the terminal (until file output is implemented)
-    for grouping in groups:
-        print(f'***** Group #{grouping.group_id} *****')
-        for student in grouping.members:
-            click.echo(student.student_id)
-    click.echo("**********************")
-    click.echo(outputfile)
-
-    output.WriteGroupingData(config_data).output_groups_csv(groups, outputfile)
+    click.echo(f'grouping students from {surveyfile}')
+    groups = alg.group_students()
+    click.echo(f'writing groups to {outputfile}')
+    output.GroupingDataWriter(config_data).write_csv(groups, outputfile)
 
     if report:
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'

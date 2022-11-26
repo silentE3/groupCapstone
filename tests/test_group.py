@@ -25,7 +25,7 @@ def test_group_1():
     expected_num_groups = 3
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
-                      
+
     verify_rand_groups(response.output, expected_num_groups, expected_students)
 
 
@@ -125,6 +125,7 @@ def test_group_bad_configfile():
     assert response.exit_code == 2
     assert response.exception
 
+
 def test_group_verify_and_report_file_name_1():
     '''
     Test of grouping six students with a target group size of 2 (divides evenly).
@@ -139,11 +140,11 @@ def test_group_verify_and_report_file_name_1():
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
     os.remove('test_verify_and_report_file_name_1.csv')
 
+
 def test_alt_command_args_1():
     '''
     Should be same as test_group_verify_and_report_file_name_1 but using the altername command line args
     '''
-
 
     response = runner.invoke(group.group, [
                              './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
@@ -152,7 +153,8 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1.csv')    
+    os.remove('test_verify_and_report_file_name_1.csv')
+
 
 def test_with_minimal_command_args():
     '''
@@ -166,3 +168,12 @@ def test_with_minimal_command_args():
     assert response.exit_code == 0
     assert exists("./output.csv")
     os.remove('output.csv')
+
+
+def test_group_algorithm():
+    '''
+    Test of grouping six students with a target group size of 2 (divides evenly).
+    '''
+
+    response = runner.invoke(group.group, [
+                             'testdata/S7_Anon (1).csv', '--verify'])
