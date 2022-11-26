@@ -2,6 +2,7 @@
 This file will be in charge of adding missing students to the list.
 '''
 from app import models
+from app.data import load
 
 class StudentList:
     '''
@@ -31,6 +32,7 @@ class StudentList:
                 student_id=asurite
             )
             #This code will use the function that adds availiability to all time slots.
+            record.availability = load.set_wildcard_availability(record)
             new_survey_data.append(record)
 
         return new_survey_data
