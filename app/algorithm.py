@@ -7,7 +7,7 @@ from app import models
 from app.group import validate, scoring
 
 
-class Algorithm:
+class Grouper:
     '''
     class with operations that perform the algorithm to group students
     '''
@@ -37,6 +37,10 @@ class Algorithm:
         self.optimize_groups()
         return self.groups
 
+    # def balance_groups(self):
+    #     for g in self.groups:
+    #         if len(g.members) < self.target_group_size-self.target_group_margin:
+
     def fix_bad_groups(self):
         '''
         fix bad groups looks at the groups that were created and attempts to fix them
@@ -54,11 +58,11 @@ class Algorithm:
             print(f'optimization pass #{x+1}')
             for group in self.groups:
                 for mem in group.members:
-                    scenarios = self.run_swap_scenarios(group, mem)
-                    if len(scenarios) == 0:
+                    scenario = self.run_swap_scenarios(group, mem)
+                    if scenario is None:
+                        print('no scenarios found')
                         continue
-                    print(f'found {len(scenarios)} scenarios')
-                    scenario = scenarios[0]
+                    print('found a scenario')
 
                     for g in self.groups:
                         if g.group_id == scenario.group_1.group_id:
@@ -66,6 +70,8 @@ class Algorithm:
                             g.members = scenario.group_1.members
                         elif g.group_id == scenario.group_2.group_id:
                             g.members = scenario.group_2.members
+
+                    break
 
     def add_bad_student_to_group(self, student: models.SurveyRecord):
         """
@@ -165,9 +171,13 @@ class Algorithm:
                 student, copy_group, other_group))
         scenarios.sort(reverse=True)
         if len(scenarios) > 1:
-            print(scenarios[0].score1+scenarios[0].score2,
-                  scenarios[-1].score1+scenarios[-1].score2)
-        return scenarios
+            best_scenario = scenarios[0]
+            for scenario in scenarios:
+                if best_scenario.score1 + best_scenario.score2 > scenario.score1+scenario.score2:
+                    best_scenario = scenario
+            return best_scenario
+
+        return None
 
 
 def swap_members_and_rate(student: models.SurveyRecord, group: models.GroupRecord, other_group: models.GroupRecord):

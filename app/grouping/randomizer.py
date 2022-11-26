@@ -2,9 +2,8 @@
 
 import random as rnd
 from app import models
-from app import app
 
-class RandomGrouper(app.AbstractGrouper):
+class RandomGrouper():
     '''
     This class creates groups by random assignment
     '''
