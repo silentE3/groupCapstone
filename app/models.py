@@ -95,6 +95,7 @@ class GroupSetData:
     num_preferred_pairs: int = 0
     num_additional_overlap: int = 0
 
+
 @dataclass
 class Scenario:
     '''
@@ -119,4 +120,4 @@ class SwapScenario:
     score2: float
 
     def __lt__(self, other):
-        return self.score1 < other.score1 and self.score2 < other.score2
+        return (self.score1 < other.score1 and self.score2 <= other.score2) or (self.score1 <= other.score1 and self.score2 < other.score2)

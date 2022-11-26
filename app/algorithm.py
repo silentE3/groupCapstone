@@ -2,7 +2,6 @@
 module for the implementation of the grouping algorithm
 """
 import copy
-import math
 from random import randint
 from app import models
 from app.group import validate, scoring
@@ -13,13 +12,14 @@ class Algorithm:
     class with operations that perform the algorithm to group students
     '''
 
-    def __init__(self, students, target_group_size) -> None:
+    def __init__(self, students, target_group_size: int, grouping_passes: int) -> None:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
-        self.max_group_count = len(self.students) // 5
+        self.max_group_count = len(self.students) // target_group_size
         self.target_group_size = target_group_size
         self.target_group_margin = 1
+        self.grouping_passes = grouping_passes
         for idx in range(self.max_group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
@@ -50,20 +50,22 @@ class Algorithm:
         '''
         creates grouping optimizations by swapping users
         '''
-        x = 0
-        while x < 5:
+        for x in range(self.grouping_passes):
+            print(f'optimization pass #{x+1}')
             for group in self.groups:
                 for mem in group.members:
                     scenarios = self.run_swap_scenarios(group, mem)
                     if len(scenarios) == 0:
                         continue
+                    print(f'found {len(scenarios)} scenarios')
                     scenario = scenarios[0]
+
                     for g in self.groups:
                         if g.group_id == scenario.group_1.group_id:
+                            print(f'switching group members {g.group_id}')
                             g.members = scenario.group_1.members
                         elif g.group_id == scenario.group_2.group_id:
                             g.members = scenario.group_2.members
-            x += 1
 
     def add_bad_student_to_group(self, student: models.SurveyRecord):
         """
@@ -162,6 +164,9 @@ class Algorithm:
             scenarios.extend(swap_members_and_rate(
                 student, copy_group, other_group))
         scenarios.sort(reverse=True)
+        if len(scenarios) > 1:
+            print(scenarios[0].score1+scenarios[0].score2,
+                  scenarios[-1].score1+scenarios[-1].score2)
         return scenarios
 
 
@@ -238,24 +243,8 @@ def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group
 
 def rank_group(group: models.GroupRecord) -> float:
     '''
-    1. dislikes = return a score of 0
-    2. availability = log10(avail)*10 or 0 if none
-    3. preferred_occurrences = add 2^x avail
+    uses the scoring algorithm to rank the group
     '''
-
-    if len(validate.users_disliked_in_group(group)) > 0:
-        return 0
-
-    availability = validate.availability_overlap_count(group)
-    if availability == 0:
-        return 0
-
-    availability_score = 10
-    if availability - 1 > 0:
-        availability_score += math.floor(math.log10(availability-1))
-
-    preferred_users = validate.group_likes_count(group)
-    # preferred_user_score = math.floor((10) ^ (preferred_users))
 
     return scoring.score_individual_group(group)
 
@@ -266,11 +255,11 @@ def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupReco
     '''
     group_copy = copy.deepcopy(group)
     group_copy.members.append(student)
-    dislikes = validate.meets_dislike_requirement(group_copy)
-    matches_avail = validate.meets_group_availability_requirement(group_copy)
+    meets_dislikes = validate.meets_dislike_requirement(group_copy)
+    meets_avail = validate.meets_group_availability_requirement(group_copy)
     group_size = len(group_copy.members)
 
-    return dislikes and matches_avail and group_size <= max_group_size
+    return meets_dislikes and meets_avail and group_size <= max_group_size
 
 
 def total_dislike_incompatible_students(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:

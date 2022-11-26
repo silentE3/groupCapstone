@@ -34,7 +34,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
             record.availability = set_avail(record)
     algorithm.rank_students(records)
 
-    alg = algorithm.Algorithm(records, config_data['target_group_size'])
+    alg = algorithm.Algorithm(records, config_data['target_group_size'], config_data['grouping_passes'])
 
     click.echo(f'grouping students from {surveyfile}')
     groups = alg.group_students()
