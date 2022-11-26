@@ -27,10 +27,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    reader: load.SurveyDataReader = load.SurveyDataReader(
-        config_data['field_mappings'])
-
-    data: list[models.SurveyRecord] = reader.load(surveyfile)
+    data: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], data):
         return  # error found -- don't continue

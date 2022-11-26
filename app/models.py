@@ -1,6 +1,7 @@
 
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
+import datetime as dt
 from typing import TypedDict
 
 
@@ -14,6 +15,7 @@ class SurveyFieldMapping(TypedDict):
     student_email_field_name: str
     student_login_field_name: str
     timezone_field_name: str
+    submission_timestamp_field_name: str
     preferred_students_field_names: list[str]
     disliked_students_field_names: list[str]
     availability_field_names: list[str]
@@ -56,6 +58,7 @@ class Configuration(TypedDict):
 class SurveyRecord:
     """Data class that describes a single record in the survey dataset"""
     student_id: str
+    submission_date: dt.datetime = dt.datetime.now()
     student_name: str = ""
     student_email: str = ""
     student_login: str = ""
@@ -63,7 +66,8 @@ class SurveyRecord:
     preferred_students: list[str] = field(default_factory=list)
     disliked_students: list[str] = field(default_factory=list)
     availability: dict[str, list[str]] = field(default_factory=dict)
-
+    has_matching_availability: bool = True
+    provided_availability: bool = True
 
 @dataclass
 class GroupRecord:
