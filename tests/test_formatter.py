@@ -1,6 +1,5 @@
-from app.data import formatter, generate
+from app.data import reporter
 from app import config, models
-
 
 def test_format_group_report_check_header():
     '''
@@ -16,7 +15,7 @@ def test_format_group_report_check_header():
     data_config: models.Configuration = config.read_json(
         "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
-    report_formatter = formatter.ReportFormatter(data_config)
+    report_formatter = reporter.ReportFormatter(data_config)
 
     groups = [models.GroupRecord("1", [
         models.SurveyRecord('asurite1', preferred_students=[
@@ -47,7 +46,7 @@ def test_format_group_report_check_header_show_disliked():
     data_config: models.Configuration = config.read_json(
         "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
-    report_formatter = formatter.ReportFormatter(data_config)
+    report_formatter = reporter.ReportFormatter(data_config)
 
     groups = [models.GroupRecord("1",
                                  [
@@ -79,7 +78,7 @@ def test_format_group_report_check_group():
     data_config: models.Configuration = config.read_json(
         "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
-    report_formatter = formatter.ReportFormatter(data_config)
+    report_formatter = reporter.ReportFormatter(data_config)
 
     groups = [models.GroupRecord("1",
                                  [
@@ -110,7 +109,7 @@ def test_format_individual_report_check_header_all_enabled():
     data_config: models.Configuration = config.read_json(
         "./tests/test_files/configs/config_1.json")
     data_config["report_fields"] = report_config
-    report_formatter = formatter.ReportFormatter(data_config)
+    report_formatter = reporter.ReportFormatter(data_config)
 
     groups = [
         models.GroupRecord('1', [

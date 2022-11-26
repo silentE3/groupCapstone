@@ -4,22 +4,18 @@ Also includes reading in the configuration file.
 '''
 
 import click
-
-from app import config, core, output
-from app import models
-from app.data import load
+from app import config, core, models, output
+from app.data import load, reporter
 from app.grouping.randomizer import RandomGrouper
-from app.file import xlsx
-from app.data.formatter import ReportFormatter
 
 
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
 @click.option('-o', '--outputfile', show_default=True, default="output.csv", help="Enter the path to the output file.")
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
-@click.option('--verify/--no-verify', show_default=True, default=False, help="Use this option to add verification reporting to the data.")
-@click.option('-r', '--reportfile', show_default=True, help="report filename, relies on --verify flag being enabled")
-def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, reportfile: str):
+@click.option('--report/--no-report', show_default=True, default=False, help="Use this option to output a report on the results of the goruping.")
+@click.option('-r', '--reportfile', show_default=True, help="report filename, relies on --report flag being enabled")
+def group(surveyfile: str, outputfile: str, configfile: str, report: bool, reportfile: str):
     '''Group Users - forms groups for the users from the survey.
 
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
@@ -27,10 +23,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    reader: load.SurveyDataReader = load.SurveyDataReader(
-        config_data['field_mappings'])
-
-    data: list[models.SurveyRecord] = reader.load(surveyfile)
+    data: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], data):
         return  # error found -- don't continue
@@ -61,25 +54,10 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
 
     output.WriteGroupingData(config_data).output_groups_csv(groups, outputfile)
 
-    if verify:
+    if report:
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
         if reportfile:
             report_filename = reportfile
         click.echo(f'Writing report to: "{report_filename}"')
-        write_report(
+        reporter.write_report(
             groups, config_data, report_filename)
-
-
-def write_report(groups: list[models.GroupRecord], data_config: models.Configuration, filename: str):
-    '''
-    writes the report to an xlsx file
-    '''
-    formatter = ReportFormatter(data_config)
-    formatted_data = formatter.format_individual_report(groups)
-    group_formatted_report = formatter.format_group_report(groups)
-    overall_formatted_report = formatter.format_overall_report(groups)
-    xlsx_writer = xlsx.XLSXWriter(filename)
-    xlsx_writer.write_sheet('individual_report', formatted_data)
-    xlsx_writer.write_sheet('group_report', group_formatted_report)
-    xlsx_writer.write_sheet('overall_report', overall_formatted_report)
-    xlsx_writer.save()

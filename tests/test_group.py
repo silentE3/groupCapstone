@@ -81,7 +81,7 @@ def test_group_size_not_possible():
 def test_group_invalid_group_size():
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json', '--no-verify'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json', '--no-report'])
     assert response.exit_code == 0
 
     # Verify that no groups were created
@@ -131,7 +131,7 @@ def test_group_verify_and_report_file_name_1():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--outputfile', 'test_verify_and_report_file_name_1.csv', '--configfile', './tests/test_files/configs/config_1.json', '--reportfile', 'test_verify_and_report_file_name_1_report.xlsx', '--verify'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--outputfile', 'test_verify_and_report_file_name_1.csv', '--configfile', './tests/test_files/configs/config_1.json', '--reportfile', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
     assert response.exit_code == 0
 
     assert response.output.endswith(
@@ -146,7 +146,7 @@ def test_alt_command_args_1():
 
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--verify'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
     assert response.exit_code == 0
 
     assert response.output.endswith(
