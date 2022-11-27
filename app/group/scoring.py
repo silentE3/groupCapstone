@@ -81,17 +81,16 @@ def score_groups(variables: models.GroupSetData) -> float:
                    (constant_4 * variables.num_additional_overlap) -
                    (constant_2 * variables.num_groups_no_overlap) -
                    (constant_3 * variables.num_disliked_pairs))
-    return round(total_score, 4)
+    return round(total_score, 10)
 
 
-def score_individual_group(group: models.GroupRecord) -> float:
+def score_individual_group(group: models.GroupRecord, variables) -> float:
     '''
     This function scores an individual group using the S (p, t, s, d) equation in the score_groups
      function, but with p, t, s, and d being specific to the group (i.e., s is 0 or 1 for the group,
      d is number of disliked pairings within the group, etc.).
 
     '''
-    variables = models.GroupSetData(group.group_id, 5, 2, 7, 6)
     variables.num_disliked_pairs = validate.total_disliked_pairings([group])
     variables.num_preferred_pairs = validate.total_liked_pairings([group])
     variables.num_groups_no_overlap = \

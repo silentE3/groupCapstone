@@ -28,7 +28,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     # loop through the data and if they don't match any availability, set them to be a wildcard
     algorithm.rank_students(records)
     # Perform pre-grouping error checking
-    alg = algorithm.Grouper(records, config_data['target_group_size'], config_data['grouping_passes'])
+    alg = algorithm.Grouper(records, config_data, config_data['target_group_size'], config_data['grouping_passes'])
 
     click.echo(f'grouping students from {surveyfile}')
     groups = alg.group_students()

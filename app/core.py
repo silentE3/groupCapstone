@@ -4,7 +4,7 @@ Core grouping class for general functionality
 
 
 from app import models
-from app.data import formatter
+from app.data import reporter
 from app.file import xlsx
 
 
@@ -59,7 +59,7 @@ def write_report(groups: list[models.GroupRecord], config: models.Configuration,
     '''
     writes out the grouping report
     '''
-    report_formatter = formatter.ReportFormatter(config)
+    report_formatter = reporter.ReportFormatter(config)
 
     formatted_data = report_formatter.format_individual_report(
         groups)

@@ -3,6 +3,7 @@ module for the implementation of the grouping algorithm
 """
 import copy
 from random import randint
+import random
 from app import models
 from app.group import validate, scoring
 
@@ -12,7 +13,7 @@ class Grouper:
     class with operations that perform the algorithm to group students
     '''
 
-    def __init__(self, students, target_group_size: int, grouping_passes: int) -> None:
+    def __init__(self, students, config, target_group_size: int, grouping_passes: int) -> None:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
@@ -20,6 +21,7 @@ class Grouper:
         self.target_group_size = target_group_size
         self.target_group_margin = 1
         self.grouping_passes = grouping_passes
+        self.config = config
         for idx in range(self.max_group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
@@ -31,70 +33,50 @@ class Grouper:
         while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
-        print('fixing groups and adding in any members not matched')
-        self.fix_bad_groups()
         print('optimizing groups for best solution')
         self.optimize_groups()
         return self.groups
-
-    # def balance_groups(self):
-    #     for g in self.groups:
-    #         if len(g.members) < self.target_group_size-self.target_group_margin:
-
-    def fix_bad_groups(self):
-        '''
-        fix bad groups looks at the groups that were created and attempts to fix them
-        '''
-        self.students.extend(self.bad_students)
-        while len(self.students) > 0:
-            student = self.students.pop()
-            self.add_bad_student_to_group(student)
 
     def optimize_groups(self):
         '''
         creates grouping optimizations by swapping users
         '''
-        for x in range(self.grouping_passes):
-            print(f'optimization pass #{x+1}')
+        for group_pass in range(self.grouping_passes):
+            print(self.grade_groups())
+            print(f'optimization pass #{group_pass+1}')
             for group in self.groups:
                 for mem in group.members:
                     scenario = self.run_swap_scenarios(group, mem)
                     if scenario is None:
-                        print('no scenarios found')
                         continue
-                    print('found a scenario')
-
-                    for g in self.groups:
-                        if g.group_id == scenario.group_1.group_id:
-                            print(f'switching group members {g.group_id}')
-                            g.members = scenario.group_1.members
-                        elif g.group_id == scenario.group_2.group_id:
-                            g.members = scenario.group_2.members
-
+                    for other_group in self.groups:
+                        if other_group.group_id == scenario.group_1.group_id:
+                            other_group.members = scenario.group_1.members
+                        elif other_group.group_id == scenario.group_2.group_id:
+                            other_group.members = scenario.group_2.members
                     break
 
-    def add_bad_student_to_group(self, student: models.SurveyRecord):
-        """
-        adds a student to a given group. This is slightly different than the original add student. There is more margin for variability
-        """
-        for group in self.groups:
-            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
-                group.members.append(student)
-                return
+    def grade_groups(self):
+        num_disliked_pairings: int = validate.total_disliked_pairings(
+            self.groups)
+        num_groups_no_avail: int = validate.total_groups_no_availability(
+            self.groups)
+        num_liked_pairings: int = validate.total_liked_pairings(self.groups)
+        num_additional_overlap: int = sum(
+            # subtract one to get "additional"
+            max(validate.availability_overlap_count(group) - 1, 0) for group in self.groups)
 
-        scenarios = self.run_bad_scenarios(
-            student,  self.target_group_size + self.target_group_margin)
-        if len(scenarios) == 0:
-            print(f'no scenarios for student: {student.student_id} :(')
-            return
-
-        randidx = randint(0, len(scenarios)-1)
-        chosen_scenario = scenarios.pop(randidx)
-        for group in self.groups:
-            if group.group_id == chosen_scenario.group.group_id:
-                group.members = chosen_scenario.group.members
-                if chosen_scenario.removed_user is not None:
-                    self.students.append(chosen_scenario.removed_user)
+        scoring_vars = models.GroupSetData("solution_1",
+                                           self.target_group_size,
+                                           4,
+                                           sum(len(group.members)
+                                               for group in self.groups),
+                                           8,
+                                           num_groups_no_avail,
+                                           num_disliked_pairings,
+                                           num_liked_pairings,
+                                           num_additional_overlap)
+        return scoring.score_groups(scoring_vars)
 
     def add_student_to_group(self, student: models.SurveyRecord):
         """
@@ -107,50 +89,69 @@ class Grouper:
                 group.members.append(student)
                 return
 
-        scenarios = self.run_scenarios(student, self.target_group_size)
+        scenarios = self.run_scenarios(student)
+        if len(scenarios) > 0:
+            target_scenario = scenarios.pop(0)
+            matched_scenarios = [target_scenario]
+            for scenario in scenarios:
+                if scenario.score == target_scenario.score:
+                    matched_scenarios.append(scenario)
+
+            randidx = randint(0, len(matched_scenarios)-1)
+            chosen_scenario = matched_scenarios[randidx]
+            for group in self.groups:
+                if group.group_id == chosen_scenario.group.group_id:
+                    group.members = chosen_scenario.group.members
+                    if chosen_scenario.removed_user is not None:
+                        self.students.append(chosen_scenario.removed_user)
+                        return
+
+        for group in self.groups:
+            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
+                group.members.append(student)
+                return
+
+        scenarios = self.run_bad_scenarios(student)
+
         if len(scenarios) == 0:
-            self.bad_students.append(student)
+            self.students.append(student)
+            print('stuck here')
+            random.shuffle(self.students)
             return
 
-        target_scenario = scenarios.pop(0)
-        matched_scenarios = [target_scenario]
-        for scenario in scenarios:
-            if scenario.score == target_scenario.score:
-                matched_scenarios.append(scenario)
-
-        randidx = randint(0, len(matched_scenarios)-1)
-        chosen_scenario = matched_scenarios[randidx]
+        randidx = randint(0, len(scenarios)-1)
+        chosen_scenario = scenarios[randidx]
         for group in self.groups:
             if group.group_id == chosen_scenario.group.group_id:
                 group.members = chosen_scenario.group.members
                 if chosen_scenario.removed_user is not None:
                     self.students.append(chosen_scenario.removed_user)
 
-    def run_scenarios(self, student, max_size):
+    def run_scenarios(self, student):
         """
         runs all of the available scenarios for adding this user to a group
         """
 
         scenarios: list[models.Scenario] = []
         for group in self.groups:
-            scenarios.extend(group_scenarios(student, group, max_size))
+            scenarios.extend(self.group_scenarios(student, group))
 
         scenarios.sort(reverse=True)
 
         return scenarios
 
-    def run_bad_scenarios(self, student, max_size):
+    def run_bad_scenarios(self, student):
         """
         runs all of the available scenarios for adding this user to a group
         """
 
         scenarios: list[models.Scenario] = []
         for group in self.groups:
-            scenarios.extend(group_scenarios_doesnt_have_to_be_better(
-                student, group, max_size))
+            scenarios.extend(self.group_scenarios_doesnt_have_to_be_better(
+                student, group))
 
         for idx, scenario in enumerate(scenarios):
-            if scenario.score == 0:
+            if scenario.score <= 0:
                 scenarios.pop(idx)
 
         scenarios.sort(reverse=True)
@@ -167,96 +168,98 @@ class Grouper:
             if group.group_id == other_group.group_id:
                 continue
             copy_group = copy.deepcopy(group)
-            scenarios.extend(swap_members_and_rate(
+            scenarios.extend(self.swap_members_and_rate(
                 student, copy_group, other_group))
         scenarios.sort(reverse=True)
+
         if len(scenarios) > 1:
             best_scenario = scenarios[0]
             for scenario in scenarios:
-                if best_scenario.score1 + best_scenario.score2 > scenario.score1+scenario.score2:
+                if scenario.score1 + scenario.score2 >= best_scenario.score1 + best_scenario.score2:
                     best_scenario = scenario
             return best_scenario
 
         return None
 
+    def swap_members_and_rate(self, student: models.SurveyRecord, group: models.GroupRecord, other_group: models.GroupRecord):
+        '''
+        removes the student from the group and checks adding them to the other group with certain members removed
+        '''
 
-def swap_members_and_rate(student: models.SurveyRecord, group: models.GroupRecord, other_group: models.GroupRecord):
-    '''
-    removes the student from the group and checks adding them to the other group with certain members removed
-    '''
-    group.members.remove(student)
+        scenarios: list[models.SwapScenario] = []
+        for member in other_group.members:
+            oth_group_copy = copy.deepcopy(other_group)
+            oth_group_copy.members.remove(member)
+            oth_group_copy.members.append(student)
+            group_copy = copy.deepcopy(group)
+            group_copy.members.remove(student)
+            group_copy.members.append(member)
+            score_1 = self.rank_group(group_copy)
+            score_2 = self.rank_group(oth_group_copy)
+            if score_1 == 0 or score_2 == 0:
+                continue
 
-    scenarios: list[models.SwapScenario] = []
-    for i, member in enumerate(other_group.members):
-        oth_group_copy = copy.deepcopy(other_group)
-        oth_group_copy.members.pop(i)
-        oth_group_copy.members.append(student)
-        group_copy = copy.deepcopy(group)
-        group_copy.members.append(member)
-        score_1 = rank_group(group_copy)
-        score_2 = rank_group(oth_group_copy)
-        if score_1 == 0 or score_2 == 0:
-            continue
+            if score_1 + score_2 >= self.rank_group(group) + self.rank_group(other_group):
+                scenario = models.SwapScenario(
+                    group_copy, oth_group_copy, score_1, score_2)
+                scenarios.append(scenario)
 
-        if (score_1 >= rank_group(group) and score_2 > rank_group(other_group)) or (score_1 > rank_group(group) and score_2 >= rank_group(other_group)):
-            scenario = models.SwapScenario(
-                group_copy, oth_group_copy, score_1, score_2)
+        return scenarios
+
+    def group_scenarios(self, student: models.SurveyRecord, group: models.GroupRecord):
+        """
+        creates scenarios for all possible situations with the group
+        """
+        scenarios: list[models.Scenario] = []
+        if len(group.members) < 5:
+            group_new = copy.deepcopy(group)
+            group_new.members.append(student)
+            scenario = models.Scenario(group_new, self.rank_group(group_new))
             scenarios.append(scenario)
 
-    return scenarios
-
-
-def group_scenarios(student: models.SurveyRecord, group: models.GroupRecord, max_size: int):
-    """
-    creates scenarios for all possible situations with the group
-    1. just adding the user to the group
-    2. swapping the user for another
-
-    returns a list of scenarios
-    """
-    scenarios: list[models.Scenario] = []
-
-    if len(group.members) == max_size:
         for mem in group.members:
             group_new = copy.deepcopy(group)
             group_new.members.remove(mem)
             group_new.members.append(student)
-            if rank_group(group) < rank_group(group_new):
+            if self.rank_group(group) < self.rank_group(group_new):
                 scenario = models.Scenario(
-                    group_new, rank_group(group_new), mem)
+                    group_new, self.rank_group(group_new), mem)
                 scenarios.append(scenario)
 
-    return scenarios
+        return scenarios
 
+    def group_scenarios_doesnt_have_to_be_better(self, student: models.SurveyRecord, group: models.GroupRecord):
+        """
+        creates scenarios for all possible situations with the group
 
-def group_scenarios_doesnt_have_to_be_better(student: models.SurveyRecord, group: models.GroupRecord, max_size: int):
-    """
-    creates scenarios for all possible situations with the group
-    1. swapping the user for another
+        returns a list of scenarios
+        """
+        scenarios: list[models.Scenario] = []
 
-    returns a list of scenarios
-    """
-    scenarios: list[models.Scenario] = []
-
-    if len(group.members) == max_size:
         for mem in group.members:
             group_new = copy.deepcopy(group)
             group_new.members.remove(mem)
             group_new.members.append(student)
-            if rank_group(group) <= rank_group(group_new):
+            if self.rank_group(group) <= self.rank_group(group_new):
                 scenario = models.Scenario(
-                    group_new, rank_group(group_new), mem)
+                    group_new, self.rank_group(group_new), mem)
                 scenarios.append(scenario)
 
-    return scenarios
+        return scenarios
 
-
-def rank_group(group: models.GroupRecord) -> float:
-    '''
-    uses the scoring algorithm to rank the group
-    '''
-
-    return scoring.score_individual_group(group)
+    def rank_group(self, group: models.GroupRecord) -> float:
+        '''
+        uses the scoring algorithm to rank the group
+        '''
+        scoring_vars = models.GroupSetData(group.group_id,
+                                           self.config["target_group_size"],
+                                           len((self.config["field_mappings"])[
+                                               "preferred_students_field_names"]),
+                                           sum(len(group.members)
+                                               for group in self.groups) + len(self.students),
+                                           len((self.config["field_mappings"])[
+                                               "availability_field_names"]))
+        return scoring.score_individual_group(group, scoring_vars)
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
