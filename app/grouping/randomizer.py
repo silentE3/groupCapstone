@@ -41,7 +41,7 @@ class RandomGrouper:
         survey_num = 0  # counter for which student we're assigning currently
         for i in range(0, num_groups):
             # result.append([])  # create the group
-            members = list()
+            members = []
 
             group_size = target_group_size
             if i >= (num_groups - num_non_targ_groups):

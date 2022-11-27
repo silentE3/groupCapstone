@@ -48,7 +48,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
                    ''')
         return
 
-    # Run the grouping algorithm for all possible group sizes
+    # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
     best_solution_found_grouper: Grouper = Grouper(data, config_data, 0)
     for num_groups in range(min_max_num_groups[0], min_max_num_groups[-1] + 1):
         grouper = Grouper(data, config_data, num_groups)
@@ -59,7 +59,8 @@ def group(surveyfile: str, outputfile: str, configfile: str, verify: bool, repor
                 (scoring.standard_dev_groups(best_solution_found_grouper.best_solution_found, best_solution_found_grouper.scoring_vars) >=
                     scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars))):
             best_solution_found_grouper = grouper
-        # For now, simply print the groups to the terminal (until file output is implemented)
+
+    # Print the groups to the terminal (also output via CSV)
     for grouping in best_solution_found_grouper.best_solution_found:
         print(f'***** Group #{grouping.group_id} *****')
         for student in grouping.members:

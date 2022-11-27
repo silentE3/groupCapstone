@@ -33,13 +33,13 @@ def get_num_groups(survey_data: list, target_group_size: int) -> int:
 
 def get_min_max_num_groups(survey_data: list, target_group_size: int) -> list[int]:
     '''
-    Function for determining the number of groups that the 
-        students can be seperated into based upon the number of students 
+    Function for determining the number of groups that the
+        students can be seperated into based upon the number of students
         and the target group size +/- 1.
 
     Returns an empty list if it is not possible to adhere to the target group
         size +/-1 (e.g. target = 6 with 8 total students)
-    Returns the min and max value otherwise
+    Returns [min, max] values otherwise
     '''
     # calculate the number of groups based on number of students and target group size +/- 1
     if target_group_size <= 0 or len(survey_data) < 1:
