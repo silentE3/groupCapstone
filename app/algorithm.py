@@ -40,8 +40,20 @@ class Grouper:
     def optimize_groups(self):
         '''
         creates grouping optimizations by swapping users
+        if 5 operations result in the same score, it will end with the assumption that it has done the best it will do
         '''
+        prev_score = 0
+        dup_score_count = 0
         for group_pass in range(self.grouping_passes):
+            if prev_score == self.grade_groups():
+                dup_score_count += 1
+            else:
+                dup_score_count = 1
+
+            if dup_score_count >= 5:
+                break
+
+            prev_score = self.grade_groups()
             print(self.grade_groups())
             print(f'optimization pass #{group_pass+1}')
             for group in self.groups:
@@ -57,6 +69,9 @@ class Grouper:
                     break
 
     def grade_groups(self):
+        '''
+        computes the score of the overall grouping
+        '''
         num_disliked_pairings: int = validate.total_disliked_pairings(
             self.groups)
         num_groups_no_avail: int = validate.total_groups_no_availability(
@@ -89,6 +104,7 @@ class Grouper:
                 group.members.append(student)
                 return
 
+        # starts running scenarios for swapping a student into another's spot
         scenarios = self.run_scenarios(student)
         if len(scenarios) > 0:
             target_scenario = scenarios.pop(0)
@@ -105,27 +121,20 @@ class Grouper:
                     if chosen_scenario.removed_user is not None:
                         self.students.append(chosen_scenario.removed_user)
                         return
+            return
+
+        if len(scenarios) == 0:
+            self.students.append(student)
+            random.shuffle(self.students)
+            print(student.student_id)
+            return
 
         for group in self.groups:
             if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
                 group.members.append(student)
                 return
 
-        scenarios = self.run_bad_scenarios(student)
-
-        if len(scenarios) == 0:
-            self.students.append(student)
-            print('stuck here')
-            random.shuffle(self.students)
-            return
-
-        randidx = randint(0, len(scenarios)-1)
-        chosen_scenario = scenarios[randidx]
-        for group in self.groups:
-            if group.group_id == chosen_scenario.group.group_id:
-                group.members = chosen_scenario.group.members
-                if chosen_scenario.removed_user is not None:
-                    self.students.append(chosen_scenario.removed_user)
+        print('made it here and I shouldnt have')
 
     def run_scenarios(self, student):
         """
@@ -136,22 +145,13 @@ class Grouper:
         for group in self.groups:
             scenarios.extend(self.group_scenarios(student, group))
 
-        scenarios.sort(reverse=True)
-
-        return scenarios
-
-    def run_bad_scenarios(self, student):
-        """
-        runs all of the available scenarios for adding this user to a group
-        """
-
-        scenarios: list[models.Scenario] = []
-        for group in self.groups:
-            scenarios.extend(self.group_scenarios_doesnt_have_to_be_better(
-                student, group))
+        if len(scenarios) == 0:
+            for group in self.groups:
+                scenarios.extend(
+                    self.group_scenarios_doesnt_have_to_be_better(student, group))
 
         for idx, scenario in enumerate(scenarios):
-            if scenario.score <= 0:
+            if scenario.score < 0:
                 scenarios.pop(idx)
 
         scenarios.sort(reverse=True)
@@ -211,7 +211,7 @@ class Grouper:
         creates scenarios for all possible situations with the group
         """
         scenarios: list[models.Scenario] = []
-        if len(group.members) < 5:
+        if len(group.members) < self.target_group_size:
             group_new = copy.deepcopy(group)
             group_new.members.append(student)
             scenario = models.Scenario(group_new, self.rank_group(group_new))
@@ -235,6 +235,11 @@ class Grouper:
         returns a list of scenarios
         """
         scenarios: list[models.Scenario] = []
+        if len(group.members) < self.target_group_size+self.target_group_margin:
+            group_new = copy.deepcopy(group)
+            group_new.members.append(student)
+            scenario = models.Scenario(group_new, self.rank_group(group_new))
+            scenarios.append(scenario)
 
         for mem in group.members:
             group_new = copy.deepcopy(group)
