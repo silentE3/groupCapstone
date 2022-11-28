@@ -2,6 +2,7 @@
 Output tests
 '''
 import csv
+import datetime
 import os
 from app import output, models
 
@@ -32,19 +33,20 @@ def test_group_output_to_csv():
     '''
 
     survey1 = models.SurveyRecord(
-        "a1", "Bobby Boucher", "bboucher@asu.edu", "bobouch", "UTC-7")
+        "a1", datetime.datetime.now(), "Bobby Boucher", "bboucher@asu.edu", "bobouch", "UTC-7")
     survey2 = models.SurveyRecord(
-        "a2", "Spongebob Squarepants", "sspuare@asu.edu", "sposqu", "UTC-7")
+        "a2", datetime.datetime.now(), "Spongebob Squarepants", "sspuare@asu.edu", "sposqu", "UTC-7")
     survey3 = models.SurveyRecord(
-        "a3", "Homelander", "hlander@asu.edu", "hland", "UTC-7")
+        "a3", datetime.datetime.now(), "Homelander", "hlander@asu.edu", "hland", "UTC-7")
     survey4 = models.SurveyRecord(
-        "a4", "Some Guy", "sguy@asu.edu", "someguy", "UTC-7")
+        "a4", datetime.datetime.now(), "Some Guy", "sguy@asu.edu", "someguy", "UTC-7")
     group1 = models.GroupRecord("Group #1", [survey1, survey2])
     group2 = models.GroupRecord("Group #2", [survey3, survey4])
 
     groups = [group1, group2]
     mapping: models.SurveyFieldMapping = {
         "student_id_field_name": "",
+        "submission_timestamp_field_name": "",
         "student_name_field_name": "",
         "student_email_field_name": "",
         "student_login_field_name": "",
@@ -60,11 +62,13 @@ def test_group_output_to_csv():
         "report_fields": {
             "show_preferred_students": False,
             "show_disliked_students": False,
-            "show_availability_overlap": False
+            "show_availability_overlap": False,
+            "show_scores": True
         },
         "output_student_name": True,
         "output_student_email": True,
-        "output_student_login": True}
+        "output_student_login": True
+    }
 
     filename = "test_group_csv_output.csv"
     writer = output.WriteGroupingData(config)
@@ -78,5 +82,5 @@ def test_group_output_to_csv():
             results += line
 
     assert results == expected
-    
+
     os.remove(filename)

@@ -40,7 +40,7 @@ def total_availability_matches(student: models.SurveyRecord, students: list[mode
     return totals
 
 
-def set_wildcard_availability(student: models.SurveyRecord):
+def wildcard_availability(student: models.SurveyRecord):
     '''
     sets the availability to all days/times
     '''
@@ -62,7 +62,7 @@ def has_availability(student: models.SurveyRecord):
     return avail > 0
 
 
-def __preprocess_survey_data(students: list[models.SurveyRecord]):
+def preprocess_survey_data(students: list[models.SurveyRecord]):
     '''
     performs some basic "preprocessing" of the survey data to ensure the grouping algorithm can function expected.
     This includes the following:
@@ -75,14 +75,14 @@ def __preprocess_survey_data(students: list[models.SurveyRecord]):
         if not student.provided_availability:
             print(
                 f"student '{student.student_id}' did not provide any availability")
-            set_wildcard_availability(student)
+            student.availability = wildcard_availability(student)
         if total_availability_matches(student, students) == 0:
             print(
                 f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
 
 
-def __parse_survey_record(config, row) -> models.SurveyRecord:
+def parse_survey_record(config, row) -> models.SurveyRecord:
     '''
     parses a survey record from a row in the dataset
     '''
@@ -127,7 +127,7 @@ def read_survey(config: models.SurveyFieldMapping, data_file_path: str) -> list[
         reader = csv.DictReader(data_file)
         surveys: list[models.SurveyRecord] = []
         for row in reader:
-            survey = __parse_survey_record(config, row)
+            survey = parse_survey_record(config, row)
 
             skip_user = False
             for idx, existing_survey_record in enumerate(surveys):
@@ -143,7 +143,7 @@ def read_survey(config: models.SurveyFieldMapping, data_file_path: str) -> list[
 
             if not skip_user:
                 surveys.append(survey)
-    __preprocess_survey_data(surveys)
+    preprocess_survey_data(surveys)
 
     return surveys
 
