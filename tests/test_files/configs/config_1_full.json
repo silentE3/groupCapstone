@@ -6,6 +6,7 @@
     "student_login_field_name": "Please enter your Github username (NOT your email address)",
     "student_name_field_name": "Please enter your full name",
     "timezone_field_name": "In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.",
+    "submission_timestamp_field_name": "Timestamp",
     "preferred_students_field_names": [
       "Preferred team member 1",
       "Preferred team member 2",
