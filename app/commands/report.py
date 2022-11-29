@@ -9,28 +9,31 @@ from app.data import load
 
 
 @click.command("report")
-@click.argument('surveyfile', type=click.Path(exists=True), default="dataset.csv")
 @click.argument('groupfile', type=click.Path(exists=True), default="output.csv")
+@click.argument('surveyfile', type=click.Path(exists=True), default="dataset.csv")
 @click.option('-c', '--configfile', type=click.Path(exists=True), show_default=True, default="config.json", help="Enter the path to the config file.")
-@click.option('-r', '--reportfile', show_default=True, default="grouptreport.xlsx",
+@click.option('-r', '--reportfile', show_default=True, default="grouping_results_report.xlsx",
               help="Enter the path to the group report output file.")
-#temp disable. Will enable in next task
-# pylint: disable=unused-argument        
-def report(surveyfile: str, groupfile: str, reportfile: str, configfile: str):
+        
+def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
     '''Generate report- Creates a report on the results of the groups that were generated. 
     It uses the raw survey file to verify the data.
 
-    SURVEYFILE is path to the raw survey output. [default=dataset.csv]
-
     GROUPFILE is the path to the grouped dataset. [default=output.csv]
+    
+    SURVEYFILE is path to the raw survey output. [default=dataset.csv]
     '''
 
     # load config data and survey data reader
     config_data: models.Configuration = config.read_json(configfile)
-    records = load.read_survey(config_data['field_mappings'], surveyfile)
+
+
+    # load the survey data
+    survey_data = load.read_survey(config_data['field_mappings'], surveyfile)
+
 
     # redefine the reader and read in the grouping data
-    groups = load.GroupingDataReader().load(groupfile)
+    groups = load.read_groups(groupfile, survey_data)
 
     # create the verifier and run the verification
     # verifier.VerifyGrouping(config_data).verify(records, groups, reportfile)

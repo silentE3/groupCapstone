@@ -708,3 +708,17 @@ def test_parse_asurite():
     for asurite in asurites:
         assert load.parse_asurite(asurite) == 'asurite'
         a = load.parse_asurite(asurite)
+
+def test_load_group_data():
+    '''
+    Tests the loading of grouping data
+    '''
+    config_data: models.Configuration = config.read_json("./tests/test_files/dev_data/config-dev.json")
+    survey_data = load.read_survey(config_data['field_mappings'], "./tests/test_files/dev_data/dataset-dev.csv")
+    groups = load.read_groups("./tests/test_files/dev_data/output.csv", survey_data)
+
+    assert len(groups) == 4
+    assert len(groups[0].members) == 5
+    assert len(groups[1].members) == 5
+    assert len(groups[2].members) == 5
+    assert len(groups[3].members) == 5
