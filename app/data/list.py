@@ -10,9 +10,7 @@ def add_missing_students(survey: list[models.SurveyRecord], roster: list[str]) -
     to the survey data. This will be based on student id.
     '''
     new_survey_data = survey
-    survey_students = []
-    for entry in survey:
-        survey_students.append(entry.student_id)
+    survey_students = list(map(lambda x: x.student_id, survey))
 
     #At this point, the survey_student list should have every student name from the survey data.
     #Next, we will check if all the students have answered the survey.
