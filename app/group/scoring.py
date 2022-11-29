@@ -100,7 +100,7 @@ def score_individual_group(group: models.GroupRecord, variables) -> float:
     return score_groups(variables)
 
 
-def standard_dev_groups(groups: list[models.GroupRecord]) -> float:
+def standard_dev_groups(groups: list[models.GroupRecord], variables) -> float:
     '''
     This function computes the standard deviation of the individual group scores within
     a Group Set.
@@ -112,7 +112,7 @@ def standard_dev_groups(groups: list[models.GroupRecord]) -> float:
     mean_groups: float = 0
     group_scores: list[float] = []
     for group in groups:
-        score = score_individual_group(group)
+        score = score_individual_group(group, variables)
         mean_groups += score
         group_scores.append(score)
     mean_groups = mean_groups / len(groups)

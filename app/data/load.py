@@ -75,9 +75,9 @@ def __preprocess_survey_data(students: list[models.SurveyRecord]):
     '''
     for student in students:
         if not student.provided_availability:
+            student.availability = set_wildcard_availability(student)
             print(
                 f"student '{student.student_id}' did not provide any availability")
-            set_wildcard_availability(student)
         if total_availability_matches(student, students) == 0:
             print(
                 f"student '{student.student_id}' did not have matching availability with anyone else")
@@ -102,7 +102,11 @@ def __parse_survey_record(config, row) -> models.SurveyRecord:
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in config['availability_field_names']:
-        survey.availability[field] = row[field].lower().split(';')
+        avail_str = row[field].lower()
+        if not avail_str == '':
+            survey.availability[field] = avail_str.split(';')
+        else: 
+            survey.availability[field] = []
 
     if config.get('timezone_field_name'):
         survey.timezone = row[config['timezone_field_name']]

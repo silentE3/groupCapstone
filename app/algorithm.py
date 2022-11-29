@@ -3,7 +3,6 @@ module for the implementation of the grouping algorithm
 """
 import copy
 from random import randint
-import random
 from app import models
 from app.group import validate, scoring
 
@@ -123,18 +122,17 @@ class Grouper:
                         return
             return
 
-        if len(scenarios) == 0:
-            self.students.append(student)
-            random.shuffle(self.students)
-            print(student.student_id)
-            return
-
         for group in self.groups:
             if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
                 group.members.append(student)
                 return
 
-        print('made it here and I shouldnt have')
+        # if all else fails, just find an open group and add them
+        for g in self.groups:
+            if len(g.members) < self.target_group_size+self.target_group_margin:
+                g.members.append(student)
+                return
+            
 
     def run_scenarios(self, student):
         """
