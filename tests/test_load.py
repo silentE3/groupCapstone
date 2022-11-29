@@ -3,6 +3,7 @@ Testing loader
 '''
 import copy
 import datetime
+import pytest
 from app import models
 from app import config
 from app.data import load
@@ -803,7 +804,8 @@ def test_preprocess_survey_data_bad_avail():
     assert students[2].availability['1'] == ['sunday']
     assert not students[1].availability == []
 
-def test_parse_survey_record_maps_single_field():
+
+def test_parse_survey_record_fails_on_student_id():
     config: models.SurveyFieldMapping = {
         'student_id_field_name': 'asurite',
         'student_name_field_name': 'name',
@@ -815,9 +817,9 @@ def test_parse_survey_record_maps_single_field():
         'disliked_students_field_names': ['disl 1', 'disl 2'],
         'availability_field_names': ['1']
     }
-    
+
     row: dict = {
-        'asurite': 'asurite1',
+        'asurite': '',
         'name': 'billy',
         'email': 'billy@hotmail.com',
         'github user': 'billy123',
@@ -829,14 +831,9 @@ def test_parse_survey_record_maps_single_field():
         'pref 2': '',
         '1': 'monday;tuesday'
     }
-    
-    record = load.parse_survey_record(config, row)
-    
-    assert len(record.availability['1']) == 2
-    assert not len(record.disliked_students) == 2
-    assert 'asurite3' in record.preferred_students
-    assert len(record.student_id) > 0 
-    
+    with pytest.raises(AttributeError):
+        record = load.parse_survey_record(config, row)
+
 
 def test_parse_survey_record_maps_single_field():
     config: models.SurveyFieldMapping = {
@@ -871,6 +868,7 @@ def test_parse_survey_record_maps_single_field():
     assert not len(record.disliked_students) == 2
     assert 'asurite3' in record.preferred_students
     assert len(record.student_id) > 0
+
 
 def test_parse_asurite():
 
