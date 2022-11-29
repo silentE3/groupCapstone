@@ -3,7 +3,9 @@ Provides the ability to load data into the program including raw survey data and
 """
 
 import csv
+
 import datetime as dt
+from typing import Union
 from app import models
 from app.group import validate
 
@@ -152,15 +154,40 @@ def read_survey(config: models.SurveyFieldMapping, data_file_path: str) -> list[
     return surveys
 
 
-class GroupingDataReader:
+def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
     '''
-    Reads in grouping data from a CSV and stores it in a data structure.
+    Reads in grouping data into a list of GroupRecord objects
+    '''
+    groups: dict[str, models.GroupRecord] = {}
+    is_header: bool = False
+    with open(group_file, 'r', encoding='utf-8-sig') as data_file:
+        reader = csv.DictReader(data_file)
+
+        for row in reader:
+
+            if is_header:
+                is_header = False
+                continue
+
+            group_id = row["group id"]
+
+            if not group_id in groups:
+                groups[group_id] = models.GroupRecord(group_id, [])
+
+            user = __get_user_by_id(row["student id"], survey_data)
+
+            if not user is None:
+                groups[group_id].members.append(user)
+
+    return list(groups.values())
+
+def __get_user_by_id(student_id: str, survey_data: list[models.SurveyRecord]) -> Union[models.SurveyRecord, None]:
+    '''
+    Gets a SurveyRecord based on the student id
     '''
 
-    def load(self, groupfile: str) -> list[models.GroupRecord]:
-        '''
-        Reads in grouping data into a list of GroupRecord objects
-        '''
-        print(groupfile)
-        groups = []
-        return groups
+    for user in survey_data:
+        if user.student_id == student_id:
+            return user
+
+    return None
