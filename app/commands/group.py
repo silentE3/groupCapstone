@@ -5,7 +5,7 @@ Also includes reading in the configuration file.
 
 import click
 
-from app import algorithm, models, config, output
+from app import algorithm, models, config, core
 from app.data import load, reporter
 
 
@@ -28,12 +28,13 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     # loop through the data and if they don't match any availability, set them to be a wildcard
     algorithm.rank_students(records)
     # Perform pre-grouping error checking
-    alg = algorithm.Grouper(records, config_data, config_data['target_group_size'], config_data['grouping_passes'])
-
+    size = core.get_min_max_num_groups(records, config_data['target_group_size'])
+    for group_size in range(size[0], size[1]):
+        alg = algorithm.Grouper(records, config_data, config_data['target_group_size'], config_data['grouping_passes'], group_count=group_size)
+        groups = alg.group_students()
+        
     click.echo(f'grouping students from {surveyfile}')
-    groups = alg.group_students()
     click.echo(f'writing groups to {outputfile}')
-    output.GroupingDataWriter(config_data).write_csv(groups, outputfile)
 
     if report:
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'

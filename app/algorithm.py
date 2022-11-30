@@ -12,17 +12,16 @@ class Grouper:
     class with operations that perform the algorithm to group students
     '''
 
-    def __init__(self, students, config, target_group_size: int, grouping_passes: int) -> None:
+    def __init__(self, students, config, target_group_size: int, grouping_passes: int, group_count: int) -> None:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
-        self.max_group_count = get_group_count(
-            len(self.students), target_group_size)
+        self.group_count = group_count
         self.target_group_size = target_group_size
         self.target_group_margin = 1
         self.grouping_passes = grouping_passes
         self.config = config
-        for idx in range(self.max_group_count):
+        for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
     def group_students(self) -> list[models.GroupRecord]:
@@ -33,9 +32,34 @@ class Grouper:
         while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
+        print('balancing groups that need more members')
+        self.balance_groups()
         print('optimizing groups for best solution')
         self.optimize_groups()
+        print(f'group size={self.group_count}, score={self.grade_groups()}')
         return self.groups
+
+    def balance_groups(self):
+        '''
+        balances groups
+        '''
+        for group in self.groups:
+            if len(group.members) < self.target_group_size - self.target_group_margin:
+                print(f'balancing group: {group.group_id}')
+                self.balance_group(group)
+
+    def balance_group(self, group: models.GroupRecord):
+        '''
+        balancing group to ensure there are enough members
+        '''
+        groups_with_enough_mems = filter(lambda group: len(
+            group.members) >= self.target_group_size, self.groups)
+        while len(group.members) < self.target_group_size-self.target_group_margin:
+            for g in groups_with_enough_mems:
+                for member in g.members:
+                    if meets_hard_requirement(member, group, self.target_group_size):
+                        g.members.remove(member)
+                        group.members.append(member)
 
     def optimize_groups(self):
         '''
@@ -270,7 +294,7 @@ def get_group_count(student_count: int, target_group_size: int) -> int:
     gets the number of groups based on the student count and the target size
     '''
 
-    size = student_count // target_group_size
+    size = student_count // target_group_size + 3
     if size == 0:
         raise Exception(
             f'Cannot form a group from the given parameters: student count: {student_count}, target group size: {target_group_size}')
