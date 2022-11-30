@@ -42,18 +42,18 @@ def total_availability_matches(student: models.SurveyRecord, students: list[mode
     return totals
 
 
-def set_wildcard_availability(student: models.SurveyRecord):
+def wildcard_availability(availability_fields: list) -> dict[str, list[str]]:
     '''
-    sets the availability to all days/times
+    constructs availability to match all of the time fields provided for any given day
     '''
     avail = {}
-    for key in student.availability:
-        avail[key] = validate.WEEK_DAYS
+    for field in availability_fields:
+        avail[field] = validate.WEEK_DAYS
 
     return avail
 
 
-def has_availability(student: models.SurveyRecord):
+def has_availability(student: models.SurveyRecord) -> bool:
     '''
     checks if the student marked any days that they were available during the allotted time
     '''
@@ -64,11 +64,11 @@ def has_availability(student: models.SurveyRecord):
     return avail > 0
 
 
-def __preprocess_survey_data(students: list[models.SurveyRecord]):
+def preprocess_survey_data(students: list[models.SurveyRecord], config: models.SurveyFieldMapping):
     '''
     performs some basic "preprocessing" of the survey data to ensure the grouping algorithm can function expected.
     This includes the following:
-    - checking for students that didn't add availability
+    - checking for students that didn't add availability and setting it to match any
     - checking for students that have availability that didn't match to anyone else's
     - checking for students that have preferred students that in turn disliked them (Not yet implemented)
     - checking for students that have preferred students that didn't match in their availability (Not yet implemented)
@@ -78,16 +78,21 @@ def __preprocess_survey_data(students: list[models.SurveyRecord]):
             student.availability = set_wildcard_availability(student)
             print(
                 f"student '{student.student_id}' did not provide any availability")
+            student.availability = wildcard_availability(
+                config["availability_field_names"])
         if total_availability_matches(student, students) == 0:
             print(
                 f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
 
 
-def __parse_survey_record(config, row) -> models.SurveyRecord:
+def parse_survey_record(config: models.SurveyFieldMapping, row: dict) -> models.SurveyRecord:
     '''
     parses a survey record from a row in the dataset
     '''
+    if not config.get('student_id_field_name') or len(row[config['student_id_field_name']]) == 0:
+        raise AttributeError('student id not specified or is empty')
+
     survey = models.SurveyRecord(row[config['student_id_field_name']])
 
     for field in config['preferred_students_field_names']:
@@ -103,10 +108,9 @@ def __parse_survey_record(config, row) -> models.SurveyRecord:
 
     for field in config['availability_field_names']:
         avail_str = row[field].lower()
+        survey.availability[field] = []
         if not avail_str == '':
             survey.availability[field] = avail_str.split(';')
-        else: 
-            survey.availability[field] = []
 
     if config.get('timezone_field_name'):
         survey.timezone = row[config['timezone_field_name']]
@@ -126,18 +130,19 @@ def __parse_survey_record(config, row) -> models.SurveyRecord:
 
 def read_survey(config: models.SurveyFieldMapping, data_file_path: str) -> list[models.SurveyRecord]:
     '''
-    loads the data from the survey
+    loads the data from the survey. 
+    If there is a duplicate record, it will use the one with the submission date that is equal to or greater
     '''
     with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
         reader = csv.DictReader(data_file)
         surveys: list[models.SurveyRecord] = []
         for row in reader:
-            survey = __parse_survey_record(config, row)
+            survey = parse_survey_record(config, row)
 
             skip_user = False
             for idx, existing_survey_record in enumerate(surveys):
                 if existing_survey_record.student_id == survey.student_id:
-                    if survey.submission_date > existing_survey_record.submission_date:
+                    if survey.submission_date >= existing_survey_record.submission_date:
                         print(
                             f'found duplicate record for id: {existing_survey_record.student_id}. Using record with timestamp: {survey.submission_date}')
                         surveys[idx] = survey
@@ -148,7 +153,7 @@ def read_survey(config: models.SurveyFieldMapping, data_file_path: str) -> list[
 
             if not skip_user:
                 surveys.append(survey)
-    __preprocess_survey_data(surveys)
+    preprocess_survey_data(surveys, config)
 
     return surveys
 

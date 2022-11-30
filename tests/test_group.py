@@ -153,27 +153,4 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1.csv')
-
-
-def test_with_minimal_command_args():
-    '''
-    This tests the CLI to ensure that the minimum number of command line args works
-    '''
-
-    if exists("./output.csv"):
-        os.remove("output.csv")
-
-    response = runner.invoke(group.group, [])
-    assert response.exit_code == 0
-    assert exists("./output.csv")
-    os.remove('output.csv')
-
-
-def test_group_algorithm():
-    '''
-    Test of grouping six students with a target group size of 2 (divides evenly).
-    '''
-
-    response = runner.invoke(group.group, [
-                             'testdata/S7_Anon (1).csv', '--verify'])
+    os.remove('test_verify_and_report_file_name_1.csv')    
