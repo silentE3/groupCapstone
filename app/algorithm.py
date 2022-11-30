@@ -45,7 +45,8 @@ class Grouper:
         '''
         for group in self.groups:
             if len(group.members) < self.target_group_size - self.target_group_margin:
-                print(f'balancing group: {group.group_id} with size {len(group.members)}')
+                print(
+                    f'balancing group: {group.group_id} with size {len(group.members)}')
                 self.balance_group(group)
 
     def balance_group(self, group: models.GroupRecord):
@@ -160,14 +161,13 @@ class Grouper:
                         return
             return
 
-
         # if all else fails, just find an open group and add them
         for group in self.groups:
             if len(group.members) < self.target_group_size+self.target_group_margin:
                 group.members.append(student)
                 print('made it to the end')
                 return
-            
+
     def run_scenarios(self, student):
         """
         runs all of the available scenarios for adding this user to a group
@@ -257,19 +257,6 @@ class Grouper:
                                            len((self.config["field_mappings"])[
                                                "availability_field_names"]))
         return scoring.score_individual_group(group, scoring_vars)
-
-
-def get_group_count(student_count: int, target_group_size: int) -> int:
-    '''
-    gets the number of groups based on the student count and the target size
-    '''
-
-    size = student_count // target_group_size + 3
-    if size == 0:
-        raise Exception(
-            f'Cannot form a group from the given parameters: student count: {student_count}, target group size: {target_group_size}')
-
-    return size
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
