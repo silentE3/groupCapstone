@@ -16,7 +16,8 @@ class Grouper:
         self.students: list[models.SurveyRecord] = students
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
-        self.max_group_count = len(self.students) // target_group_size
+        self.max_group_count = get_group_count(
+            len(self.students), target_group_size)
         self.target_group_size = target_group_size
         self.target_group_margin = 1
         self.grouping_passes = grouping_passes
@@ -128,11 +129,10 @@ class Grouper:
                 return
 
         # if all else fails, just find an open group and add them
-        for g in self.groups:
-            if len(g.members) < self.target_group_size+self.target_group_margin:
-                g.members.append(student)
+        for group in self.groups:
+            if len(group.members) < self.target_group_size+self.target_group_margin:
+                group.members.append(student)
                 return
-            
 
     def run_scenarios(self, student):
         """
@@ -263,6 +263,19 @@ class Grouper:
                                            len((self.config["field_mappings"])[
                                                "availability_field_names"]))
         return scoring.score_individual_group(group, scoring_vars)
+
+
+def get_group_count(student_count: int, target_group_size: int) -> int:
+    '''
+    gets the number of groups based on the student count and the target size
+    '''
+
+    size = student_count // target_group_size
+    if size == 0:
+        raise Exception(
+            f'Cannot form a group from the given parameters: student count: {student_count}, target group size: {target_group_size}')
+
+    return size
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
