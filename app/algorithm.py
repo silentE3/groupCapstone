@@ -13,7 +13,7 @@ class Grouper:
     '''
 
     def __init__(self, students, config, target_group_size: int, grouping_passes: int, group_count: int) -> None:
-        self.students: list[models.SurveyRecord] = students
+        self.students: list[models.SurveyRecord] = copy.deepcopy(students)
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
         self.group_count = group_count
@@ -21,7 +21,7 @@ class Grouper:
         self.target_group_margin = 1
         self.grouping_passes = grouping_passes
         self.config = config
-        for idx in range(self.group_count):
+        for idx in range(self.group_count-1):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
     def group_students(self) -> list[models.GroupRecord]:
@@ -45,21 +45,28 @@ class Grouper:
         '''
         for group in self.groups:
             if len(group.members) < self.target_group_size - self.target_group_margin:
-                print(f'balancing group: {group.group_id}')
+                print(f'balancing group: {group.group_id} with size {len(group.members)}')
                 self.balance_group(group)
 
     def balance_group(self, group: models.GroupRecord):
         '''
         balancing group to ensure there are enough members
         '''
-        groups_with_enough_mems = filter(lambda group: len(
-            group.members) >= self.target_group_size, self.groups)
+        groups_with_enough_mems = list(filter(lambda group: len(
+            group.members) > self.target_group_size-self.target_group_margin, self.groups))
         while len(group.members) < self.target_group_size-self.target_group_margin:
             for g in groups_with_enough_mems:
                 for member in g.members:
                     if meets_hard_requirement(member, group, self.target_group_size):
                         g.members.remove(member)
                         group.members.append(member)
+                        break
+                if len(group.members) >= self.target_group_size-self.target_group_margin:
+                    break
+            for g in groups_with_enough_mems:
+                member = g.members.pop()
+                group.members.append(member)
+                break
 
     def optimize_groups(self):
         '''
@@ -74,7 +81,7 @@ class Grouper:
             else:
                 dup_score_count = 1
 
-            if dup_score_count >= 5:
+            if dup_score_count >= 15:
                 break
 
             prev_score = self.grade_groups()
@@ -128,6 +135,12 @@ class Grouper:
                 group.members.append(student)
                 return
 
+        # if finding a scenario with the target group size isn't feasible, attempt to just append them
+        for group in self.groups:
+            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
+                group.members.append(student)
+                return
+
         # starts running scenarios for swapping a student into another's spot
         scenarios = self.run_scenarios(student)
         if len(scenarios) > 0:
@@ -147,17 +160,14 @@ class Grouper:
                         return
             return
 
-        for group in self.groups:
-            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
-                group.members.append(student)
-                return
 
         # if all else fails, just find an open group and add them
         for group in self.groups:
             if len(group.members) < self.target_group_size+self.target_group_margin:
                 group.members.append(student)
+                print('made it to the end')
                 return
-
+            
     def run_scenarios(self, student):
         """
         runs all of the available scenarios for adding this user to a group
@@ -166,15 +176,6 @@ class Grouper:
         scenarios: list[models.Scenario] = []
         for group in self.groups:
             scenarios.extend(self.group_scenarios(student, group))
-
-        if len(scenarios) == 0:
-            for group in self.groups:
-                scenarios.extend(
-                    self.group_scenarios_doesnt_have_to_be_better(student, group))
-
-        for idx, scenario in enumerate(scenarios):
-            if scenario.score < 0:
-                scenarios.pop(idx)
 
         scenarios.sort(reverse=True)
 
@@ -218,8 +219,6 @@ class Grouper:
             group_copy.members.append(member)
             score_1 = self.rank_group(group_copy)
             score_2 = self.rank_group(oth_group_copy)
-            if score_1 == 0 or score_2 == 0:
-                continue
 
             if score_1 + score_2 >= self.rank_group(group) + self.rank_group(other_group):
                 scenario = models.SwapScenario(
@@ -233,43 +232,14 @@ class Grouper:
         creates scenarios for all possible situations with the group
         """
         scenarios: list[models.Scenario] = []
-        if len(group.members) < self.target_group_size:
-            group_new = copy.deepcopy(group)
-            group_new.members.append(student)
-            scenario = models.Scenario(group_new, self.rank_group(group_new))
-            scenarios.append(scenario)
-
         for mem in group.members:
             group_new = copy.deepcopy(group)
             group_new.members.remove(mem)
             group_new.members.append(student)
-            if self.rank_group(group) < self.rank_group(group_new):
+            score = self.rank_group(group_new)
+            if self.rank_group(group) < score and score >= 0:
                 scenario = models.Scenario(
-                    group_new, self.rank_group(group_new), mem)
-                scenarios.append(scenario)
-
-        return scenarios
-
-    def group_scenarios_doesnt_have_to_be_better(self, student: models.SurveyRecord, group: models.GroupRecord):
-        """
-        creates scenarios for all possible situations with the group
-
-        returns a list of scenarios
-        """
-        scenarios: list[models.Scenario] = []
-        if len(group.members) < self.target_group_size+self.target_group_margin:
-            group_new = copy.deepcopy(group)
-            group_new.members.append(student)
-            scenario = models.Scenario(group_new, self.rank_group(group_new))
-            scenarios.append(scenario)
-
-        for mem in group.members:
-            group_new = copy.deepcopy(group)
-            group_new.members.remove(mem)
-            group_new.members.append(student)
-            if self.rank_group(group) <= self.rank_group(group_new):
-                scenario = models.Scenario(
-                    group_new, self.rank_group(group_new), mem)
+                    group_new, score, mem)
                 scenarios.append(scenario)
 
         return scenarios

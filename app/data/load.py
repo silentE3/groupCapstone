@@ -75,7 +75,6 @@ def preprocess_survey_data(students: list[models.SurveyRecord], config: models.S
     '''
     for student in students:
         if not student.provided_availability:
-            student.availability = set_wildcard_availability(student)
             print(
                 f"student '{student.student_id}' did not provide any availability")
             student.availability = wildcard_availability(
@@ -184,6 +183,7 @@ def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list
                 groups[group_id].members.append(user)
 
     return list(groups.values())
+
 
 def __get_user_by_id(student_id: str, survey_data: list[models.SurveyRecord]) -> Union[models.SurveyRecord, None]:
     '''

@@ -3,6 +3,7 @@ group contains all the commands for reading in the .csv data files and generatin
 Also includes reading in the configuration file.
 '''
 
+import threading
 import click
 
 from app import algorithm, models, config, core
@@ -23,16 +24,23 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    records: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
+    records: list[models.SurveyRecord] = load.read_survey(
+        config_data['field_mappings'], surveyfile)
 
     # loop through the data and if they don't match any availability, set them to be a wildcard
     algorithm.rank_students(records)
     # Perform pre-grouping error checking
-    size = core.get_min_max_num_groups(records, config_data['target_group_size'])
+    size = core.get_min_max_num_groups(
+        records, config_data['target_group_size'])
+    score = 0
+    groups = []
     for group_size in range(size[0], size[1]):
-        alg = algorithm.Grouper(records, config_data, config_data['target_group_size'], config_data['grouping_passes'], group_count=group_size)
-        groups = alg.group_students()
-        
+        alg = algorithm.Grouper(
+            records, config_data, config_data['target_group_size'], config_data['grouping_passes'], group_size)
+        group_result = alg.group_students()
+        if alg.grade_groups() > score:
+            score = alg.grade_groups()
+            groups = group_result
     click.echo(f'grouping students from {surveyfile}')
     click.echo(f'writing groups to {outputfile}')
 
