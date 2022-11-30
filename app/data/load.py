@@ -181,6 +181,7 @@ def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list
 
     return list(groups.values())
 
+
 def __get_user_by_id(student_id: str, survey_data: list[models.SurveyRecord]) -> Union[models.SurveyRecord, None]:
     '''
     Gets a SurveyRecord based on the student id

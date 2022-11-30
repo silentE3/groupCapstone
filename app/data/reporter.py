@@ -7,18 +7,24 @@ from app.group import scoring
 from app.file import xlsx
 
 
-def write_report(groups: list[models.GroupRecord], data_config: models.Configuration, filename: str):
+def write_report(solutions: list[list[models.GroupRecord]], data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
-    formatter = ReportFormatter(data_config)
-    formatted_data = formatter.format_individual_report(groups)
-    group_formatted_report = formatter.format_group_report(groups)
-    overall_formatted_report = formatter.format_overall_report(groups)
+
     xlsx_writer = xlsx.XLSXWriter(filename)
-    xlsx_writer.write_sheet('individual_report', formatted_data)
-    xlsx_writer.write_sheet('group_report', group_formatted_report)
-    xlsx_writer.write_sheet('overall_report', overall_formatted_report)
+    for index, solution in enumerate(solutions):
+        formatter = ReportFormatter(data_config)
+        formatted_data = formatter.format_individual_report(solution)
+        group_formatted_report = formatter.format_group_report(solution)
+        overall_formatted_report = formatter.format_overall_report(solution)
+        xlsx_writer.write_sheet('individual_report_' +
+                                str(index + 1), formatted_data)
+        xlsx_writer.write_sheet(
+            'group_report_' + str(index + 1), group_formatted_report)
+        xlsx_writer.write_sheet(
+            'overall_report_' + str(index + 1), overall_formatted_report)
+
     xlsx_writer.save()
 
 

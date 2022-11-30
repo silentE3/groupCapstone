@@ -22,7 +22,7 @@ class WriteSurveyData:
             writer.writerows(body)
 
 
-class WriteGroupingData:
+class GroupingDataWriter:
     '''
     This class outputs a list of group data to a csv
     '''
@@ -30,7 +30,7 @@ class WriteGroupingData:
     def __init__(self, configuration: models.Configuration) -> None:
         self.config = configuration
 
-    def output_groups_csv(self, groups: list[models.GroupRecord], filename: str):
+    def write_csv(self, groups: list[models.GroupRecord], filename: str):
         '''
         Outputs group data, from a list to a csv using the config file for fields
         '''
