@@ -3,12 +3,10 @@ group contains all the commands for reading in the .csv data files and generatin
 Also includes reading in the configuration file.
 '''
 
-import threading
 import click
 
-from app import algorithm, models, config, core
+from app import algorithm, models, config, core, output
 from app.data import load, reporter
-
 
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
@@ -34,16 +32,16 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
         records, config_data['target_group_size'])
     score = 0
     groups = []
-    for group_size in range(size[0], size[1]):
+    for group_size in range(size[0], size[1]+1):
         alg = algorithm.Grouper(
             records, config_data, config_data['target_group_size'], config_data['grouping_passes'], group_size)
         group_result = alg.group_students()
-        if alg.grade_groups() > score:
+        if alg.grade_groups() > score or group_size == size[0]:
             score = alg.grade_groups()
             groups = group_result
     click.echo(f'grouping students from {surveyfile}')
     click.echo(f'writing groups to {outputfile}')
-
+    output.GroupingDataWriter(config_data).write_csv(groups, outputfile)
     if report:
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
         if reportfile:

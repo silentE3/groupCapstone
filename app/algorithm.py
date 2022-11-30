@@ -21,7 +21,7 @@ class Grouper:
         self.target_group_margin = 1
         self.grouping_passes = grouping_passes
         self.config = config
-        for idx in range(self.group_count-1):
+        for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
 
     def group_students(self) -> list[models.GroupRecord]:
@@ -165,8 +165,10 @@ class Grouper:
         for group in self.groups:
             if len(group.members) < self.target_group_size+self.target_group_margin:
                 group.members.append(student)
-                print('made it to the end')
                 return
+
+        # if we made it here, all of the groups are full
+        print(f'unable to group student with id: {student.student_id}')
 
     def run_scenarios(self, student):
         """
