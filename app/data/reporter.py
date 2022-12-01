@@ -120,6 +120,17 @@ class ReportFormatter():
                 record.append(';'.join(pairs))
                 record.append(len(pairs))
 
+            #Create the pairs of user dislikes
+            pairs = []
+            for member in group.members:
+                dislikes = validate.user_dislikes_group(member, group)
+                for dislike in dislikes:
+                    pairs.append(member.student_id + "/" + dislike)
+
+            if self.report_config['show_disliked_students']:
+                record.append(';'.join(pairs))
+                record.append(len(pairs))
+
             if self.report_config['show_scores']:
                 # Note: the first 4 values are "don't care" for individual group scoring
                 scoring_vars = models.GroupSetData(group.group_id,
@@ -152,6 +163,10 @@ class ReportFormatter():
         if self.report_config['show_preferred_students']:
             headers.append('Preferred pairs in group')
             headers.append('Preferred pair count')
+
+        if self.report_config['show_disliked_students']:
+            headers.append('Disliked pairs in group')
+            headers.append('Disliked pair count')
 
         if self.report_config['show_scores']:
             headers.append('Score')

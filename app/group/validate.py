@@ -214,7 +214,8 @@ def users_disliked_in_group(group: models.GroupRecord) -> list[str]:
     disliked_users = list(itertools.chain.from_iterable(
         group_dislike_occurrences(group).values()))
 
-    return disliked_users
+    #dedup before return
+    return [*set(disliked_users)]
 
 
 def meets_dislike_requirement(group: models.GroupRecord, max_dislike_count=0):

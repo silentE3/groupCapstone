@@ -64,7 +64,7 @@ def test_format_group_report_check_header_show_disliked():
     report = report_formatter.format_group_report(groups)
 
     assert report[0] == ['Group Id', 'Meets Dislike Requirement', 'Disliked students in group',
-                         'Meets Availability Requirement', 'Meets Preferred Goal', 'Score']
+                         'Meets Availability Requirement', 'Meets Preferred Goal', 'Disliked pairs in group', 'Disliked pair count', 'Score']
 
 
 def test_format_group_report_check_group():
