@@ -133,4 +133,5 @@ def test_format_individual_report_check_header_all_enabled():
     report = report_formatter.format_individual_report(groups)
 
     assert report[0] == ['Student Id', 'Meets Dislike Requirement', 'Disliked students in group', 'Meets Availability Requirement', 'Availability Overlap',
-                         'Meets Preferred Goal', 'Preferred students in group',  'Group Id']
+                         'Meets Preferred Goal', 'Preferred students in group', 'Supplied Availability in Survey', 'Availability overlaps with others', 
+                         'Group Id']

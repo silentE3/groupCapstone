@@ -37,9 +37,10 @@ class ReportFormatter():
         '''
         records: list[list] = [self.__individual_report_header()]
         user_perfs = validate.generate_preferred_list_per_user(groups)
-
+        
         for group in groups:
             for user in group.members:
+    
                 record = []
                 record.append(user.student_id)
 
@@ -59,6 +60,10 @@ class ReportFormatter():
                     # for preferred list
                     record.append(";".join(user_perfs[user.student_id]))
 
+                # calc if user provided any availability 
+                record.append(str(user.provided_availability))
+                record.append(str(user.has_matching_availability))
+
                 record.append(group.group_id)
                 records.append(record)
 
@@ -77,6 +82,9 @@ class ReportFormatter():
         header.append('Meets Preferred Goal')
         if self.report_config['show_preferred_students']:
             header.append('Preferred students in group')
+
+        header.append('Supplied Availability in Survey')
+        header.append('Availability overlaps with others')
 
         header.append('Group Id')
 
