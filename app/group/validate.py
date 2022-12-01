@@ -69,6 +69,8 @@ def group_availability(group: models.GroupRecord) -> dict[str, dict[str, bool]]:
     The boolean value will be set to true if everyone that matches the given weekday in the timeslot
     '''
     group_available: dict[str, dict[str, bool]] = {}
+    if len(group.members) < 1:
+        return group_available
 
     # create a map with each time and set to true for every day
     for key in group.members[0].availability.keys():
@@ -460,3 +462,18 @@ def __contains_id(student_id: str, members: list[models.SurveyRecord]) -> bool:
         if member.student_id.lower() == student_id.lower():
             return True
     return False
+
+
+def stud_prev_overlap_idx(group: models.GroupRecord) -> int:
+    '''
+    This function determines if there is a single student preventing overlap
+        within a group, and returns that student's index within the group list.
+    If no such student is found, then -1 is returned.
+    '''
+    for idx, _ in enumerate(group.members):
+        test_group: models.GroupRecord = models.GroupRecord(
+            group.group_id, group.members.copy())
+        test_group.members.pop(idx)
+        if meets_group_availability_requirement(test_group):
+            return idx
+    return -1  # No single student preventing overlap found

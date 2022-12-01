@@ -28,7 +28,8 @@ def test_get_num_groups_1():
     target_group_size = 2
     expected_num_groups = 3
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_get_num_groups_2():
@@ -58,7 +59,8 @@ def test_get_num_groups_2():
     target_group_size = 5
     expected_num_groups = 2
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_get_num_groups_3():
@@ -88,7 +90,8 @@ def test_get_num_groups_3():
     target_group_size = 7
     expected_num_groups = 1
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_get_num_groups_invalid_1():
@@ -118,7 +121,8 @@ def test_get_num_groups_invalid_1():
     target_group_size = 6
     expected_num_groups = -1
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_get_num_groups_zero_target():
@@ -146,7 +150,8 @@ def test_get_num_groups_zero_target():
     target_group_size = 0
     expected_num_groups = 7
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_get_num_groups_negative_target():
@@ -174,7 +179,8 @@ def test_get_num_groups_negative_target():
     target_group_size = -1
     expected_num_groups = 7
 
-    assert core.get_num_groups(group, target_group_size) == expected_num_groups
+    assert core.get_stand_num_groups(
+        group, target_group_size) == expected_num_groups
 
 
 def test_pre_group_error_checking_invalid_target_1():

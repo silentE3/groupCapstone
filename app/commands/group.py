@@ -6,7 +6,9 @@ Also includes reading in the configuration file.
 import click
 from app import config, core, models, output
 from app.data import load, reporter
-from app.grouping.randomizer import RandomGrouper
+from app.group import scoring
+from app.grouping.grouper_1 import Grouper1
+from app.grouping import grouper_2
 
 
 @click.command("group")
@@ -23,41 +25,83 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     config_data: models.Configuration = config.read_json(configfile)
 
-    data: list[models.SurveyRecord] = load.read_survey(config_data['field_mappings'], surveyfile)
+    records: list[models.SurveyRecord] = load.read_survey(
+        config_data['field_mappings'], surveyfile)
+
     # Perform pre-grouping error checking
-    if core.pre_group_error_checking(config_data["target_group_size"], data):
+    if core.pre_group_error_checking(config_data["target_group_size"], records):
         return  # error found -- don't continue
 
-    # Determine number of groups
-    num_groups: int = core.get_num_groups(
-        data, config_data["target_group_size"])
+    # Run grouping algorithms
+    click.echo(f'grouping students from {surveyfile}')
 
-    if num_groups < 0:
-        click.echo('''
-                   **********************
-                   Error: Not possible to adhere to the target_group_size (+/- 1) defined in the config file (config.json) in use.
-                   **********************
-                   ''')
-        return
+    # Determine min and max possible number of groups
+    min_max_num_groups: list[int] = core.get_min_max_num_groups(
+        records, config_data["target_group_size"])
 
-    # Create random groupings
-    groups: list[models.GroupRecord]
-    groups = RandomGrouper().create_groups(
-        data, config_data["target_group_size"], num_groups)
-    # For now, simply print the groups to the terminal (until file output is implemented)
-    for grouping in groups:
-        print(f'***** Group #{grouping.group_id} *****')
-        for student in grouping.members:
-            click.echo(student.student_id)
-    click.echo("**********************")
-    click.echo(outputfile)
+    ########## Run "first" grouping algorithm ##########
 
-    output.WriteGroupingData(config_data).output_groups_csv(groups, outputfile)
+    # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
+    best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
+        records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
+    # Output results
+    outputfile_1: str = f'{outputfile.removesuffix(".csv")}_1.csv'
+    click.echo(f'writing groups to {outputfile_1}')
+    output.GroupingDataWriter(config_data).write_csv(
+        best_solution_grouper_1.best_solution_found, outputfile_1)
+
+    ########## Run "second" grouping algorithm ##########
+
+    # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
+    best_solution_grouper_2: list[models.GroupRecord] = __run_grouping_alg_2(
+        records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+
+    # Output results
+    outputfile_2: str = f'{outputfile.removesuffix(".csv")}_2.csv'
+    click.echo(f'writing groups to {outputfile_2}')
+    output.GroupingDataWriter(config_data).write_csv(
+        best_solution_grouper_2, outputfile_2)
+
+    ########## Output solutions report if configured ##########
     if report:
+        solutions: list[list[models.GroupRecord]] = [
+            best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
         if reportfile:
             report_filename = reportfile
         click.echo(f'Writing report to: "{report_filename}"')
         reporter.write_report(
-            groups, config_data, report_filename)
+            solutions, config_data, report_filename)
+
+
+def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,
+                         min_num_groups: int, max_num_groups: int) -> Grouper1:
+    best_solution_found: Grouper1 = Grouper1(records, config_data, 0)
+    for num_groups in range(min_num_groups, max_num_groups + 1):
+        grouper = Grouper1(records, config_data, num_groups)
+        grouper.create_groups()
+        if (num_groups == min_num_groups or
+            (best_solution_found.best_solution_score <= grouper.best_solution_score) or
+            (best_solution_found.best_solution_score == grouper.best_solution_score) and
+                (scoring.standard_dev_groups(best_solution_found.best_solution_found, best_solution_found.scoring_vars) >=
+                    scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars))):
+            best_solution_found = grouper
+    return best_solution_found
+
+
+def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models.Configuration,
+                         min_num_groups: int, max_num_groups: int) -> list[models.GroupRecord]:
+
+    # Additional pre-processing: rank students based on their availability and num of people they are compatible with
+    grouper_2.rank_students(records)
+
+    best_solution_found: list[models.GroupRecord] = []
+    score: float = 0
+    for num_groups in range(min_num_groups, max_num_groups + 1):
+        grouper2 = grouper_2.Grouper2(records, config_data, num_groups)
+        group_result = grouper2.group_students()
+        if grouper2.grade_groups() > score or num_groups == min_num_groups:
+            score = grouper2.grade_groups()
+            best_solution_found = group_result
+    return best_solution_found

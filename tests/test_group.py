@@ -1,8 +1,9 @@
 import os
 from click.testing import CliRunner
 import click
+import math
 from app.commands import group
-from tests.test_utils.helper_functions import verify_rand_groups
+from tests.test_utils.helper_functions import verify_groups
 from os.path import exists
 
 runner = CliRunner()
@@ -15,23 +16,32 @@ runner = CliRunner()
 
 def test_group_1():
     '''
-    Test of grouping six students with a target group size of 2 (divides evenly).
+    Test of grouping 6 students with a target group size of 2 (divides evenly).
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
+        './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
     assert response.exit_code == 0
 
-    expected_num_groups = 3
+    expected_min_num_groups = math.ceil(6/(2+1))
+    expected_max_num_groups = 6//(2-1)
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
-                      
-    verify_rand_groups(response.output, expected_num_groups, expected_students)
+
+    verify_groups("output_1.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    verify_groups("output_2.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('output_1.csv')
+    os.remove('output_2.csv')
 
 
 def test_group_2():
     '''
-    Test of grouping eight students with a target group size of 5 (does not divide evenly,
+    Test of grouping 8 students with a target group size of 5 (does not divide evenly,
     but still possible to maintain +/- 1 with rounding UP to two groups).
     '''
 
@@ -39,18 +49,29 @@ def test_group_2():
                              './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_3.json'])
     assert response.exit_code == 0
 
-    expected_num_groups = 2
+    expected_min_num_groups = math.ceil(8/(5+1))
+    expected_max_num_groups = 8//(5-1)
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_rand_groups(response.output, expected_num_groups, expected_students)
+    verify_groups("output_1.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    verify_groups("output_2.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('output_1.csv')
+    os.remove('output_2.csv')
 
 
 def test_group_3():
     '''
-    Test of grouping eight students with a target group size of 7 (does not divide evenly,
+    Test of grouping 8 students with a target group size of 7 (does not divide evenly,
     but still possible to maintain +/- 1 with rounding DOWN to one group).
     '''
 
+    expected_min_num_groups = math.ceil(8/(7+1))
+    expected_max_num_groups = 8//(7-1)
     response = runner.invoke(group.group, [
                              './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_4.json'])
     assert response.exit_code == 0
@@ -58,7 +79,15 @@ def test_group_3():
     expected_num_groups = 1
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_rand_groups(response.output, expected_num_groups, expected_students)
+    verify_groups("output_1.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    verify_groups("output_2.csv", expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('output_1.csv')
+    os.remove('output_2.csv')
 
 
 def test_group_size_not_possible():
@@ -125,6 +154,7 @@ def test_group_bad_configfile():
     assert response.exit_code == 2
     assert response.exception
 
+
 def test_group_verify_and_report_file_name_1():
     '''
     Test of grouping six students with a target group size of 2 (divides evenly).
@@ -137,13 +167,14 @@ def test_group_verify_and_report_file_name_1():
     assert response.output.endswith(
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1.csv')
+    os.remove('test_verify_and_report_file_name_1_1.csv')
+    os.remove('test_verify_and_report_file_name_1_2.csv')
+
 
 def test_alt_command_args_1():
     '''
     Should be same as test_group_verify_and_report_file_name_1 but using the altername command line args
     '''
-
 
     response = runner.invoke(group.group, [
                              './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
@@ -152,4 +183,5 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1.csv')    
+    os.remove('test_verify_and_report_file_name_1_1.csv')
+    os.remove('test_verify_and_report_file_name_1_2.csv')

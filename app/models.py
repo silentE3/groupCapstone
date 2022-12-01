@@ -2,7 +2,7 @@
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
 import datetime as dt
-from typing import TypedDict
+from typing import TypedDict, Optional
 
 
 @dataclass
@@ -66,8 +66,14 @@ class SurveyRecord:
     preferred_students: list[str] = field(default_factory=list)
     disliked_students: list[str] = field(default_factory=list)
     availability: dict[str, list[str]] = field(default_factory=dict)
+    okay_with_rank = 0
+    avail_rank = 0
     has_matching_availability: bool = True
     provided_availability: bool = True
+
+    def __lt__(self, other):
+        return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank
+
 
 @dataclass
 class GroupRecord:
@@ -75,7 +81,7 @@ class GroupRecord:
     Class that holds group infomation for a single group
     '''
     group_id: str
-    members: list[SurveyRecord]
+    members: list[SurveyRecord] = field(default_factory=list)
 
 
 @dataclass
@@ -94,3 +100,30 @@ class GroupSetData:
     num_disliked_pairs: int = 0
     num_preferred_pairs: int = 0
     num_additional_overlap: int = 0
+
+
+@dataclass
+class Scenario:
+    '''
+    scenario for a new group. includes the score, result group, and the removed user if they exist
+    '''
+    group: GroupRecord
+    score: float
+    removed_user: Optional[SurveyRecord] = field(default=None)
+
+    def __lt__(self, other):
+        return self.score < other.score
+
+
+@dataclass
+class SwapScenario:
+    '''
+    scenario for swapping a group
+    '''
+    group_1: GroupRecord
+    group_2: GroupRecord
+    score1: float
+    score2: float
+
+    def __lt__(self, other):
+        return (self.score1 < other.score1 and self.score2 < other.score2)

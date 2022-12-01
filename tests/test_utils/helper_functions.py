@@ -1,51 +1,41 @@
 '''
 Contains helper functions for test scripts.
 '''
-# pylint: disable=unnecessary-dunder-call
-def verify_rand_groups(output: str, expected_num_groups: int, expected_students: list[str]):
+
+
+def verify_groups(output_filename: str, expected_min_num_groups: int, expected_max_num_groups: int, expected_students: list[str]):
     '''
-    Helper function that verifies the following for the random student grouping:
+    Helper function that verifies the following for a grouping solution:
     - The proper/expected number of groups were created
     - The expected students (and only thoses students) were grouped
 
-    output: str -- String that is output to the terminal describing the groups formed.
+    output_filename: str -- String contiaing csv filename for the grouping results.
     expected_num_groups: int -- The expected number of groups.
     expected_students: list[str] -- list containing the expected students' asurite.
     '''
-    # try:
 
-    # Verify that all students were assigned to a group
-    for student in expected_students:
-        assert student in output
+    file = open(output_filename, "r", encoding="utf-8-sig")
+    content = file.readlines()
+    file.close()
 
-    output_lines: list[str]
-    output_lines = output.split('\n')  # individual lines of output
-    # Verify that ONLY the expected students were assigned to a group and only once
-    student_count = 0
-    group_count = 0
-    while len(output_lines) >= 1 and not (output_lines[0]).__contains__("Group #"):
-        # get rid of any lines prior to the start of the grouping
-        output_lines.pop(0)
-    for line in output_lines:
-        if line.__contains__("Group #"):
-            group_count += 1
-        elif line.__contains__("**********************"):
-            break
-        else:
-            assert expected_students.__contains__(line)
-            student_count += 1
-    assert student_count == len(expected_students)
-
+    # Verify that:
+    #   - all students were assigned to a group
+    #   - only the expected students were assigned to a group and only once
+    students = []
+    groups = []
+    # get rid of the header
+    content.pop(0)
+    for line in content:
+        # first item is group, second item is student
+        group = line.split(",")[0].strip()
+        student = line.split(",")[1].strip()
+        if not group in groups:
+            groups.append(group)
+        assert student.strip() in expected_students
+        assert student not in students
+        students.append(student)
+    # Verify the expected number of students were in the groupings
+    assert len(students) == len(expected_students)
     # Verify that the proper number of groups were created
-    assert group_count == expected_num_groups
-    for i in range(0, expected_num_groups):
-        statement = "Group #" + str(i+1)
-        assert statement in output
-    statement = "Group #" + str(expected_num_groups + 1)
-    assert statement not in output  # no "extra" groups
-
-    # Verify "Error:" is NOT included in the output
-    assert "Error:" not in output
-    # except AssertionError as ex:
-    #     ex_type, ex_value, ex_traceback = sys.exc_info()
-    #     print("Exception message : %s" %ex_value)
+    assert len(groups) >= expected_min_num_groups and len(
+        groups) <= expected_max_num_groups

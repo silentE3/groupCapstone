@@ -1,7 +1,7 @@
 from app.group import validate
 from app.data import load
 from app import config, models, core
-from app.grouping import randomizer
+from app.grouping import grouper_1
 
 
 def test_user_availability():
@@ -1068,11 +1068,10 @@ def test_all_users_are_grouped():
         config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
 
     # get the number of groups and create a list of groups
-    num_groups = core.get_num_groups(
+    num_groups = core.get_stand_num_groups(
         surveys_result, config_data["target_group_size"])
-    grouper = randomizer.RandomGrouper()
-    groupings = grouper.create_groups(
-        surveys_result, config_data["target_group_size"], num_groups)
+    grouper = grouper_1.Grouper1(surveys_result, config_data, num_groups)
+    groupings = grouper.create_groups()
 
     # verify that all users have been grouped
     ungrouped = validate.verify_all_users_grouped(surveys_result, groupings)

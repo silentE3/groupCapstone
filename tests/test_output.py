@@ -71,8 +71,8 @@ def test_group_output_to_csv():
     }
 
     filename = "test_group_csv_output.csv"
-    writer = output.WriteGroupingData(config)
-    writer.output_groups_csv(groups, filename)
+    writer = output.GroupingDataWriter(config)
+    writer.write_csv(groups, filename)
 
     expected = "group id,student id,student name,student email,student login\ngroup_1,a1,Bobby Boucher,bboucher@asu.edu,bobouch\ngroup_1,a2,Spongebob Squarepants,sspuare@asu.edu,sposqu\ngroup_2,a3,Homelander,hlander@asu.edu,hland\ngroup_2,a4,Some Guy,sguy@asu.edu,someguy\n"
 
