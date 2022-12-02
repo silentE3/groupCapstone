@@ -70,6 +70,7 @@ class SurveyRecord:
     avail_rank = 0
     has_matching_availability: bool = True
     provided_availability: bool = True
+    provided_survey_data: bool = True
 
     def __lt__(self, other):
         return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank

@@ -1022,3 +1022,138 @@ def test_load_group_data():
     assert len(groups[1].members) == 5
     assert len(groups[2].members) == 5
     assert len(groups[3].members) == 5
+
+def test_load_missing_students_1():
+    '''
+    Tests the add missing student function with 2 missing students.
+    '''
+    result = []
+
+    ids = []
+    ids.append("asurite1")
+    ids.append("asurite2")
+    ids.append("asurite3")
+    ids.append("asurite4")
+    ids.append("asurite5")
+    ids.append("asurite6")
+
+    survey = []
+    student1 = models.SurveyRecord("asurite1")
+    student2 = models.SurveyRecord("asurite2")
+    student3 = models.SurveyRecord("asurite3")
+    student4 = models.SurveyRecord("asurite4")
+    survey.append(student1)
+    survey.append(student2)
+    survey.append(student3)
+    survey.append(student4)
+
+    fields = [
+      "0 to 3 AM",
+      "3 to 6 AM",
+      "6 to 9 AM",
+      "9 to 12 PM",
+      "12 to 3 PM",
+      "3 to 6 PM",
+      "6 to 9 PM",
+      "9 to 12 AM"
+    ]
+
+    result = load.add_missing_students(survey, ids, fields)
+
+    assert len(result) == 6
+    assert result[4].availability == {
+        "0 to 3 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "12 to 3 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    assert result[5].availability == {
+        "0 to 3 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "12 to 3 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    assert result[4].provided_survey_data == False
+    assert result[5].provided_survey_data == False
+
+def test_load_missing_students_2():
+    '''
+    Tests the add missing student function with 0 missing students.
+    '''
+    result = []
+
+    ids = []
+    ids.append("asurite1")
+    ids.append("asurite2")
+    ids.append("asurite3")
+    ids.append("asurite4")
+
+    survey = []
+    student1 = models.SurveyRecord("asurite1")
+    student2 = models.SurveyRecord("asurite2")
+    student3 = models.SurveyRecord("asurite3")
+    student4 = models.SurveyRecord("asurite4")
+    survey.append(student1)
+    survey.append(student2)
+    survey.append(student3)
+    survey.append(student4)
+
+    fields = [
+      "0 to 3 AM",
+      "3 to 6 AM",
+      "6 to 9 AM",
+      "9 to 12 PM",
+      "12 to 3 PM",
+      "3 to 6 PM",
+      "6 to 9 PM",
+      "9 to 12 AM"
+    ]
+
+    result = load.add_missing_students(survey, ids, fields)
+
+    assert len(result) == 4
+    assert result[0].provided_survey_data == True
+    assert result[1].provided_survey_data == True
+    assert result[2].provided_survey_data == True
+    assert result[3].provided_survey_data == True
+
+def test_load_missing_students_3():
+    '''
+    Tests the add missing student function with 0 missing students.
+    '''
+    result = []
+
+    ids = []
+    ids.append("asurite1")
+    ids.append("asurite2")
+    ids.append("asurite3")
+    ids.append("asurite4")
+
+    survey = []
+
+    fields = [
+      "0 to 3 AM",
+      "3 to 6 AM",
+      "6 to 9 AM",
+      "9 to 12 PM",
+      "12 to 3 PM",
+      "3 to 6 PM",
+      "6 to 9 PM",
+      "9 to 12 AM"
+    ]
+
+    result = load.add_missing_students(survey, ids, fields)
+
+    assert len(result) == 4
+    assert result[0].provided_survey_data == False
+    assert result[1].provided_survey_data == False
+    assert result[2].provided_survey_data == False
+    assert result[3].provided_survey_data == False
