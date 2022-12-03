@@ -68,11 +68,15 @@ class Grouper2:
                     if meets_hard_requirement(member, group, self.target_group_size):
                         other_group.members.remove(member)
                         group.members.append(member)
+                        if len(other_group.members) <= self.target_group_size-self.target_group_margin:
+                            groups_with_enough_mems.remove(other_group)
                         break
                 if len(group.members) >= self.target_group_size-self.target_group_margin:
                     break
             for other_group in groups_with_enough_mems:
                 member = other_group.members.pop()
+                if len(other_group.members) <= self.target_group_size-self.target_group_margin:
+                    groups_with_enough_mems.remove(other_group)
                 group.members.append(member)
                 break
 
