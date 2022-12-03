@@ -225,3 +225,17 @@ def add_missing_students(survey: list[models.SurveyRecord], roster: list[str], a
         new_survey_data.append(record)
 
     return new_survey_data
+
+def read_roster(filename: str) -> list[str]:
+    '''
+    This method reads the roster file and returns the full roster of students
+    '''
+    roster = []
+
+    with open(filename, 'r', encoding='utf-8-sig') as data_file:
+        reader = csv.reader(data_file)
+        next(reader)
+        for row in reader:
+            roster.append(row[0])
+    
+    return roster

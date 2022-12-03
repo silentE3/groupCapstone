@@ -11,7 +11,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "--report"],
+            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "--report", "-a",  "roster.csv"],
             "console": "integratedTerminal",
             "justMyCode": true
         },

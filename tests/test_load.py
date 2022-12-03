@@ -1157,3 +1157,32 @@ def test_load_missing_students_3():
     assert result[1].provided_survey_data == False
     assert result[2].provided_survey_data == False
     assert result[3].provided_survey_data == False
+
+def test_read_roster():
+    '''
+    Tests to see if program reads the roster file correctly
+    '''
+    students = []
+    students = load.read_roster("roster.csv")
+
+    assert len(students) == 20
+    students[0] = "asurite1"
+    students[1] = "asurite2"
+    students[2] = "asurite3"
+    students[3] = "asurite4"
+    students[4] = "asurite5"
+    students[5] = "asurite6"
+    students[6] = "asurite7"
+    students[7] = "asurite8"
+    students[8] = "asurite9"
+    students[9] = "asurite10"
+    students[10] = "asurite11"
+    students[11] = "asurite12"
+    students[12] = "asurite13"
+    students[13] = "asurite14"
+    students[14] = "asurite15"
+    students[15] = "asurite16"
+    students[16] = "asurite17"
+    students[17] = "asurite18"
+    students[18] = "asurite19"
+    students[19] = "asurite20"
