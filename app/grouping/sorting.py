@@ -11,6 +11,7 @@ class UniqueGrouper:
     def create_groups(self, survey_data: list[models.SurveyRecord], target_group_size: int, num_groups: int) -> list[models.GroupRecord]:
         '''
         This method finds all possible group combinations in the survey and removes any duplicates.
+        This method will not be considered due to it's stubborn approach to the problem.
         '''
         # Determine if non-target groups are larger or smaller (or if N/A)
         # (0 = all standard, 1 = some larger, -1 = some smaller)
@@ -44,9 +45,6 @@ class UniqueGrouper:
         
         groups2 = list(combinations(students, target_group_size))
         print(len(groups2))
-
-        for group in groups2:
-            
 
             
 
