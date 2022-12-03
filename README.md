@@ -3,7 +3,7 @@
 There are three different functions that this application can perform:
 1. Generation: This function generates test survey data
 2. Grouping: This function performs grouping on survey data
-3. Verification: This function creates a report of the grouping results
+3. Reporting: This function creates a report of the grouping results
 
 Each of these functions are accessible from the CLI (Command Line Interface)
 
@@ -23,7 +23,7 @@ The gen file generates random survey data. The gen command will output the gener
 
 ## group
 
-group SURVEYFILE [-o,--outputfile PATH_TO_OUTPUT_FILE] [-c,--configfile PATH_TO_CONFIG_FILE] [--verify|--no-verify] [-r,--reportfile PATH_TO_REPORT_FILE]
+group SURVEYFILE [-o,--outputfile PATH_TO_OUTPUT_FILE] [-c,--configfile PATH_TO_CONFIG_FILE] [--report|--no-report] [-r,--reportfile PATH_TO_REPORT_FILE][-a, --allstudentsfile PATH_TO_ROSTER_OF_ALL_STUDENTS]
 
 The group command performs grouping on survey data. The survey data is expected to be in CSV format with the first record being a header for the column names.
 The group command takes one required parameter and four optional parameters. 
@@ -36,6 +36,9 @@ The group command takes one required parameter and four optional parameters.
 5. **-r, --reportfile** : this is the path for the output file for the report generated from the grouping results. Note that this option is ignored if the --verify option is 
     not used. If --verify is used and this option is not set, the file name will be report-{outputfile}.xlsx, where {outputfile} is the file name used for the grouping
     data. Also note that the file is of type xlsx, an Excel file, and will have multiple sheets.
+6. **-a, --allstudentsfile** : this is the path for a CSV file whose first column contains a list of all of the student IDs in the class. If this option is provided, the "roster" file will be used to add students that did not fill out the survey. This ensures that all students in the class will be grouped. The student IDs in the file must be the same format as the student IDs in the survey file.
+
+NOTE: Any student who does not indicate any availability in the survey will be assigned full availability for all time slots for the purpose of grouping. This also means any student added automaticaly from the list of all students (the allstudentsfile option) will also be assigned full availability for the purpose of grouping.
 
 ## report
 
@@ -101,7 +104,9 @@ JSON format. The following is the structure and explination of the configruation
         /*boolean, include the mappings of each student's preference to not be on a team with another student*/
         "show_disliked_students": false,
         /*boolean, include a list of the date/time slices that overlap for all students in each group*/
-        "show_availability_overlap": false
+        "show_availability_overlap": false,
+        /*boolean, include the scoring results for each group*/
+        "show_scores": true,
     },
     /*boolean, include the stunent's full name in the grouping output*/
     "output_student_name": false,
