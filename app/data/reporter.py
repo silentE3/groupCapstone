@@ -105,6 +105,7 @@ class ReportFormatter():
         for group in groups:
             record = []
             record.append(group.group_id)
+            record.append(len(group.members))
 
             record.append(validate.meets_dislike_requirement(group))
             if self.report_config['show_disliked_students']:
@@ -156,6 +157,7 @@ class ReportFormatter():
     def __group_report_header(self) -> list[str]:
         headers = []
         headers.append('Group Id')
+        headers.append('Group Size')
         headers.append('Meets Dislike Requirement')
         if self.report_config['show_disliked_students']:
             headers.append('Disliked students in group')
@@ -186,6 +188,7 @@ class ReportFormatter():
 
         record = []
 
+        num_groups_total: int = len(groups)
         num_disliked_pairings: int = validate.total_disliked_pairings(groups)
         num_groups_no_avail: int = validate.total_groups_no_availability(
             groups)
@@ -195,6 +198,7 @@ class ReportFormatter():
             max(validate.availability_overlap_count(group) - 1, 0)
             for group in groups)
 
+        record.append(str(num_groups_total))
         record.append(str(num_disliked_pairings))
         record.append(str(num_groups_no_avail))
         record.append(str(num_liked_pairings))
@@ -223,6 +227,7 @@ class ReportFormatter():
 
     def __overall_report_header(self) -> list[str]:
         headers = []
+        headers.append("Number of Groups")
         headers.append('Disliked Pairings')
         headers.append('Number of Groups Without Overlapping Time Slot')
         headers.append('Preferred Pairings')
