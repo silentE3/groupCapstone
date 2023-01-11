@@ -146,5 +146,10 @@ A Github action has been configured in this repository for managing the Continuo
 - unit tests - pytest is used to run unit tests
 - linter - pylint is our linter of choice
 
+Sponsor Feedback:
+
+- After testing out the algorithm, the sponsor found it to be a success.
+- It would be great if the report wasn't overwritten and instead created a new one.
+- Might be good if the report and output file are names similar to the initial file.
 
 
