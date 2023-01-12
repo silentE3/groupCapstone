@@ -13,10 +13,11 @@ from app.grouping import grouper_2
 
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
-@click.option('-o', '--outputfile', show_default=False, default=None, help="Enter the path to the output file. [default: <SURVEYFILE>]")
+@click.option('-o', '--outputfile', show_default=False, default=None, help="Enter the path to the output file. [default: <SURVEYFILE>_groups]")
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
 @click.option('--report/--no-report', show_default=True, default=False, help="Use this option to output a report on the results of the goruping.")
-@click.option('-r', '--reportfile', show_default=False, default=None, help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
+@click.option('-r', '--reportfile', show_default=False, default=None,
+              help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
 #pylint: disable=too-many-arguments, too-many-locals
 def group(surveyfile: str, outputfile: str, configfile: str, report: bool, reportfile: str, allstudentsfile: str):
@@ -25,10 +26,13 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
     '''
 
-    # Set the default outputfile value to the input file (SURVEYFILE) value (if
-    #  an output file value was not specified)
+    # Set the default output filename values per the input filename (SURVEYFILE) value (if
+    #  output file values were not specified)
     if outputfile is None:
-        outputfile = surveyfile
+        outputfile = f'{surveyfile.removesuffix(".csv")}_groups'
+    if report and reportfile is None:
+        # the default report filename is based upon the output filename
+        reportfile = f'{outputfile.removesuffix(".csv")}_report'
 
     config_data: models.Configuration = config.read_json(configfile)
 
@@ -60,6 +64,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
         records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     # Output results
+    # ensure the output filename ends .csv
     outputfile_1: str = f'{outputfile.removesuffix(".csv")}_1.csv'
     click.echo(f'writing groups to {outputfile_1}')
     output.GroupingDataWriter(config_data).write_csv(
@@ -72,6 +77,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
         records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     # Output results
+    # ensure the output filename ends .csv
     outputfile_2: str = f'{outputfile.removesuffix(".csv")}_2.csv'
     click.echo(f'writing groups to {outputfile_2}')
     output.GroupingDataWriter(config_data).write_csv(
@@ -81,10 +87,8 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     if report:
         solutions: list[list[models.GroupRecord]] = [
             best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
-        report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
-        if reportfile:
-            # ensure the report filename ends .xlsx
-            report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
+        # ensure the report filename ends .xlsx
+        report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
         click.echo(f'Writing report to: "{report_filename}"')
         reporter.write_report(
             solutions, config_data, report_filename)
