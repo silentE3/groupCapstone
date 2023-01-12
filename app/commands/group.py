@@ -83,7 +83,8 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
             best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
         report_filename = f'{outputfile.removesuffix(".csv")}_report.xlsx'
         if reportfile:
-            report_filename = reportfile
+            # ensure the report filename ends .xlsx
+            report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
         click.echo(f'Writing report to: "{report_filename}"')
         reporter.write_report(
             solutions, config_data, report_filename)
