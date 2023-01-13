@@ -111,7 +111,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = row[field].lower()
         survey.availability[field] = []
         if not avail_str == '':
-            survey.availability[field] = avail_str.split(config.availability_values_delimiter)
+            survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']]
