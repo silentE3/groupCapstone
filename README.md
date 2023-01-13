@@ -153,5 +153,5 @@ Sponsor Feedback:
 - Might be good if the report and output file are names similar to the initial file.
 - When testing S10_anon.csv, the algorithm says there is no availability even though there are some matching time slots for these students.
 - Future add-on: everyone should be matched with 1-2 preferred people instead of as many as possible.
-- 
+- The program wasn't properly spliting the available days apart.
 
