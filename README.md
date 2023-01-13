@@ -151,5 +151,7 @@ Sponsor Feedback:
 - After testing out the algorithm, the sponsor found it to be a success.
 - It would be great if the report wasn't overwritten and instead created a new one.
 - Might be good if the report and output file are names similar to the initial file.
-
+- When testing S10_anon.csv, the algorithm says there is no availability even though there are some matching time slots for these students.
+- Future add-on: everyone should be matched with 1-2 preferred people instead of as many as possible.
+- 
 
