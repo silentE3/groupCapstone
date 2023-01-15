@@ -18,7 +18,6 @@ from app.grouping import grouper_2
 @click.option('--report/--no-report', show_default=True, default=False, help="Use this option to output a report on the results of the goruping.")
 @click.option('-r', '--reportfile', show_default=True, help="report filename, relies on --report flag being enabled")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
-
 #pylint: disable=too-many-arguments, too-many-locals
 def group(surveyfile: str, outputfile: str, configfile: str, report: bool, reportfile: str, allstudentsfile: str):
     '''Group Users - forms groups for the users from the survey.
@@ -32,9 +31,11 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
         config_data['field_mappings'], surveyfile)
 
     if allstudentsfile:
-        click.echo(f'checking roster for missing students in {allstudentsfile}')
+        click.echo(
+            f'checking roster for missing students in {allstudentsfile}')
         roster = load.read_roster(allstudentsfile)
-        records = load.add_missing_students(records, roster, config_data['field_mappings']['availability_field_names'])
+        records = load.add_missing_students(
+            records, roster, config_data['field_mappings']['availability_field_names'])
 
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], records):
