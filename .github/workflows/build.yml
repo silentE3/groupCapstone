@@ -1,7 +1,11 @@
 name: Build App
 
 on:
-  workflow_dispatch:
+  push:
+      tags:
+      branches:
+      - "master"
+      - "TSK#65-GH-release"
 
 jobs:
   Build:
@@ -23,3 +27,9 @@ jobs:
       - name: Run Pyinstaller
         run: |
           python ./build-scripts/build.py
+      - name: Upload release artifacts
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          files: | 
+            dist/*
