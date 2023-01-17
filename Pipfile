@@ -11,6 +11,7 @@ pytest-cov = "*"
 click = "*"
 pytest-mock = "*"
 xlsxwriter = "*"
+pyinstaller = "*"
 
 [dev-packages]
 yapf = "*"
