@@ -1,17 +1,21 @@
-name: Build App
+name: Build App and Upload Artifacts
 
 on:
   push:
       tags:
-      branches:
-      - "master"
-      - "TSK#65-GH-release"
-
+        - "*"
 jobs:
   Build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            file: dist/grouper
+            asset_name: grouper-linux-amd64
+          - os: windows-latest
+            file: dist/grouper.exe
+            asset_name: grouper-windows-amd64
+
     runs-on: ${{matrix.os}}
     name: Build ${{matrix.os}} binary
     steps:
@@ -28,8 +32,9 @@ jobs:
         run: |
           python ./build-scripts/build.py
       - name: Upload release artifacts
-        uses: "marvinpinto/action-automatic-releases@latest"
+        uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          files: | 
-            dist/*
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.file }}
+          tag: ${{ github.ref }}
+          asset_name: ${{ matrix.asset_name}}
