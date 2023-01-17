@@ -1,5 +1,6 @@
 {
   "class_name": "SER401",
+  "availability_values_delimiter":";",
   "field_mappings": {
     "student_id_field_name": "ASUrite ID",
     "timezone_field_name": "Timezone",
