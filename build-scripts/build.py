@@ -9,8 +9,5 @@ The following options are used:
 import PyInstaller.__main__
 
 PyInstaller.__main__.run([
-    'grouper.py',
-    '--onefile',
-    '--specpath',
     'grouper.spec'
 ])
