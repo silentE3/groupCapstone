@@ -53,7 +53,7 @@ class ReportFormatter():
                 if len(user.disliked_students) == 0:
                     record.append('none provided')
                 else:
-                    record.append(len(validate.user_dislikes_group(user, group)) > 0)
+                    record.append(len(validate.user_dislikes_group(user, group)) == 0)
                 if self.report_config['show_disliked_students']:
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
