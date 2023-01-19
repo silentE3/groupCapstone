@@ -2,7 +2,7 @@
 # ASU Group Forming Tool
 [![codecov](https://codecov.io/gh/zredinger/team-58/branch/main/graph/badge.svg?token=UEEKNFR2WG)](https://codecov.io/gh/zredinger/team-58)
 
-This application allows a user to provide student surveys and generate groups based on specific criteria. It uses 2 algorithms to group the students as best it can. It also provides reporting capabilities to identify where the grouping is at.
+This application allows a user to provide student surveys and generate groups based on specific criteria. It uses 2 algorithms to group the students as best it can. It also provides reporting capabilities to identify grouping statistics
 
 ## Setup
 
@@ -179,7 +179,7 @@ Releases should be created when a new version is ready. Releases can be created 
 3. Click "Draft Release"
 4. Add a release with a new tag
 5. Use the autogenerate option for release notes. 
-6. Upon completion, click "Publish Release". This will create the release and run a github action that compiles the linux and windows binaries.
+6. Upon completion, click "Publish Release". This will create the release and run a github action that compiles the linux and windows binaries. These will be uploaded to the release assets.
 
 ### Compiling locally
 
