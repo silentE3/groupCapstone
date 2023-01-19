@@ -20,7 +20,7 @@ jobs:
         python -m pip install --upgrade pip wheel
         pip install -r requirements.txt
     - name: Run linter
-      run: pylint app start.py
+      run: pylint app grouper.py
     - name: Run tests
       if: success() || failure()
       run: pytest tests --cov
