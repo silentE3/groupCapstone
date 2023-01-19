@@ -1,4 +1,23 @@
-# Usage
+
+# ASU Group Forming Tool
+[![codecov](https://codecov.io/gh/zredinger/team-58/branch/main/graph/badge.svg?token=UEEKNFR2WG)](https://codecov.io/gh/zredinger/team-58)
+
+This application allows a user to provide student surveys and generate groups based on specific criteria. It uses 2 algorithms to group the students as best it can. It also provides reporting capabilities to identify where the grouping is at.
+
+## Setup
+
+There are compiled binaries available for both windows and linux. They can be found under Github Releases. Download a release and it can be called directly from the command line.
+
+## Usage
+
+When the application has been downloaded, it is ready for use. The file can now be run from the CLI. 
+
+Note: For windows users, you may be prompted to allow the program to be executed.
+
+Example command:
+```
+./grouper-windows-amd64.exe group
+```
 
 There are three different functions that this application can perform:
 1. Generation: This function generates test survey data
@@ -54,16 +73,16 @@ the source for the **groupfile** and that the same configuration file is used th
 3. -c, --configfile : this should be the path to the configuration file used when creating the **groupfile**. Its default value is config.json
 4. -r, --reportfile: this is the path for the output file for the report generated from the grouping results. Its default value is grouping_results_report.xlsx. Note that this is an Excel file and will contain multiple sheets
 
-# Configuration File
+## Configuration File
 
-The configuration file controls how the application operates and identifies the fields used to generate grouping and verification data. The configruation file should be in
-JSON format. The following is the structure and explination of the configruation file:
+The configuration file controls how the application operates and identifies the fields used to generate grouping and verification data. The configuration file should be in
+JSON format. The following is the structure and explination of the configuration file:
 
 ```json
 {
     /*string, name of the class the grouping is for*/
     "class_name": "SER401",
-    /*number, target size of each group +/- 1 */ #Sponsor has decided to make this part target_group_size + 1.
+    /*number, target size of each group (or +1) */
     "target_group_size": 5,
     /*number, the number of passes that will happen to generate the group*/
     "grouping_passes": 2,
@@ -119,9 +138,11 @@ JSON format. The following is the structure and explination of the configruation
 }
 ```
 
-# Grooper
-[![codecov](https://codecov.io/gh/zredinger/team-58/branch/main/graph/badge.svg?token=UEEKNFR2WG)](https://codecov.io/gh/zredinger/team-58)
-## Setup
+---
+## Developer Setup
+
+This application is a python CLI app. For development purposes it should be executed using the python interpreter directly. Pipenv should be used for managing python packages and ensuring dependencies are up-to-date. This allows developers to maintain consistent environments.
+### Local Setup
 Run these commands in the root context of the repository
 
 1. Install python 3.10.* [Download here](https://www.python.org/downloads/)
@@ -137,14 +158,36 @@ pipenv install
  ```
  pipenv shell
  ```
-5. Run the code
+5. Run the code. This will run the cli.
 ```
-python start.py
+python grouper.py
 ```
-
 ## CI Configuration
 
 A Github action has been configured in this repository for managing the Continuous Integration flow after opening a PR. The action currently runs a couple of things against the source code and requires that they pass before merging pull requests:
 - unit tests - pytest is used to run unit tests
 - linter - pylint is our linter of choice
 
+## Creating Releases
+
+Releases should be created when a new version is ready. Releases can be created in github.
+
+### How To Create a release in Github
+
+1. Ensure all feature branches are merged into main branch. 
+2. Open the releases tab on the right in the github repository home
+3. Click "Draft Release"
+4. Add a release with a new tag
+5. Use the autogenerate option for release notes. 
+6. Upon completion, click "Publish Release". This will create the release and run a github action that compiles the linux and windows binaries.
+
+### Compiling locally
+
+The application can be compiled locally via pyinstaller to test the functionality using it as an executable file. This uses the same build script as the release workflow found in `/build-scripts/build.py`
+
+To build this locally, run the following:
+```
+python ./build-scripts/build.py
+```
+
+This will generate the file as grouper(.exe) in the root of your repository
