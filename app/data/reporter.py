@@ -80,10 +80,12 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             header.append('Disliked students in group')
 
+        header.append('Availability')
         header.append('Meets Availability Requirement')
         if self.report_config['show_availability_overlap']:
             header.append('Availability Overlap')
 
+        header.append('Preferred Students')
         header.append('Meets Preferred Goal')
         if self.report_config['show_preferred_students']:
             header.append('Preferred students in group')
@@ -162,12 +164,10 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             headers.append('Disliked students in group')
 
-        headers.append('Availability')
         headers.append('Meets Availability Requirement')
         if self.report_config['show_availability_overlap']:
             headers.append('Availability Overlap')
 
-        headers.append('Preferred Students')
         headers.append('Meets Preferred Goal')
         if self.report_config['show_preferred_students']:
             headers.append('Preferred pairs in group')
