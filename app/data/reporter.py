@@ -162,10 +162,12 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             headers.append('Disliked students in group')
 
+        headers.append('Availability')
         headers.append('Meets Availability Requirement')
         if self.report_config['show_availability_overlap']:
             headers.append('Availability Overlap')
 
+        headers.append('Preferred Students')
         headers.append('Meets Preferred Goal')
         if self.report_config['show_preferred_students']:
             headers.append('Preferred pairs in group')
