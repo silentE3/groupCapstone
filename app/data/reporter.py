@@ -54,7 +54,7 @@ class ReportFormatter():
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
 
-                record.append(';'.join(validate.user_availability()))
+                record.append(';'.join(validate.user_availability(user, group)))
                 
                 record.append(
                     validate.meets_group_availability_requirement(group))
@@ -62,7 +62,7 @@ class ReportFormatter():
                     record.append(
                         ';'.join(validate.group_availability_strings(group)))
 
-                record.append(';'.join(validate.user_perfs))
+                record.append(";".join(user_perfs[user.student_id]))
                 record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
