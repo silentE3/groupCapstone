@@ -1,13 +1,23 @@
-name: Build App
+name: Build App and Upload Artifacts
 
 on:
-  workflow_dispatch:
+  release:
+    types: [created]
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   Build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            file: dist/grouper
+            asset_name: grouper-linux-amd64
+          - os: windows-latest
+            file: dist/grouper.exe
+            asset_name: grouper-windows-amd64.exe
+
     runs-on: ${{matrix.os}}
     name: Build ${{matrix.os}} binary
     steps:
@@ -23,3 +33,11 @@ jobs:
       - name: Run Pyinstaller
         run: |
           python ./build-scripts/build.py
+      - name: Upload release artifacts
+        if: github.event_name == 'release'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ matrix.file }}
+          tag: ${{ github.ref }}
+          asset_name: ${{ matrix.asset_name}}
