@@ -1,5 +1,6 @@
 {
   "class_name": "SER401",
+  "availability_values_delimiter":";",
   "field_mappings": {
     "student_id_field_name": "Please select your ASURITE ID",
     "timezone_field_name": "In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.",

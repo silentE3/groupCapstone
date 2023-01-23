@@ -47,6 +47,7 @@ class Configuration(TypedDict):
     class_name: str
     target_group_size: int
     grouping_passes: int
+    availability_values_delimiter: str
     field_mappings: SurveyFieldMapping
     report_fields: ReportConfiguration
     output_student_name: bool

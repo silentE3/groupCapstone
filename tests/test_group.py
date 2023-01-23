@@ -28,15 +28,17 @@ def test_group_1():
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
 
-    verify_groups("output_1.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_2_groups_1.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
-    verify_groups("output_2.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_2_groups_2.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
-    os.remove('output_1.csv')
-    os.remove('output_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_2_groups_1.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_2_groups_2.csv')
 
 
 def test_group_2():
@@ -53,15 +55,17 @@ def test_group_2():
     expected_max_num_groups = 8//(5-1)
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_groups("output_1.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
-    verify_groups("output_2.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
-    os.remove('output_1.csv')
-    os.remove('output_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
 
 
 def test_group_3():
@@ -79,15 +83,17 @@ def test_group_3():
     expected_num_groups = 1
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_groups("output_1.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
-    verify_groups("output_2.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
-    os.remove('output_1.csv')
-    os.remove('output_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
 
 
 def test_group_size_not_possible():

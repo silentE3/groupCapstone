@@ -43,13 +43,17 @@ class ReportFormatter():
         records: list[list] = [self.__individual_report_header()]
         user_perfs = validate.generate_preferred_list_per_user(groups)
         
+        
         for group in groups:
             for user in group.members:
     
                 record = []
                 record.append(user.student_id)
 
-                record.append('')
+                if len(user.disliked_students) == 0:
+                    record.append('none provided')
+                else:
+                    record.append(len(validate.user_dislikes_group(user, group)) == 0)
                 if self.report_config['show_disliked_students']:
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
