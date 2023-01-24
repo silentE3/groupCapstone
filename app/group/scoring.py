@@ -58,30 +58,39 @@ def score_groups(variables: models.GroupSetData) -> float:
 
 
     '''
-    total_score: float = 0
+    try:
 
-    constant_1: float = 0.1 * variables.num_students * \
-        variables.num_survey_preferred_slots
-    constant_2: float = constant_1 + 1
+        total_score: float = 0
 
-    max_num_groups_pos: int  # based on target group size
-    if variables.target_group_size <= 1:
-        # divide by 0 and invalid target group size protection
-        variables.target_group_size = 1
-        max_num_groups_pos = trunc(
-            variables.num_students / variables.target_group_size)
-    else:
-        max_num_groups_pos = trunc(
-            variables.num_students / (variables.target_group_size - 1))
-    constant_3: float = constant_2 * max_num_groups_pos + constant_1 + 1
-    constant_4: float = 0.1/(max_num_groups_pos *
-                             variables.num_survey_time_slots)
+        constant_1: float = 0.1 * variables.num_students * \
+            variables.num_survey_preferred_slots
+        constant_2: float = constant_1 + 1
 
-    total_score = ((0.1 * variables.num_preferred_pairs) +
-                   (constant_4 * variables.num_additional_overlap) -
-                   (constant_2 * variables.num_groups_no_overlap) -
-                   (constant_3 * variables.num_disliked_pairs))
-    return round(total_score, 4)
+        max_num_groups_pos: int  # based on target group size
+        if variables.target_group_size <= 1:
+            # divide by 0 and invalid target group size protection
+            variables.target_group_size = 1
+            max_num_groups_pos = trunc(
+                variables.num_students / variables.target_group_size)
+        else:
+            max_num_groups_pos = trunc(
+                variables.num_students / (variables.target_group_size - 1))
+        constant_3: float = constant_2 * max_num_groups_pos + constant_1 + 1
+        constant_4: float = 0.1/(max_num_groups_pos *
+                                 variables.num_survey_time_slots)
+
+        total_score = ((0.1 * variables.num_preferred_pairs) +
+                       (constant_4 * variables.num_additional_overlap) -
+                       (constant_2 * variables.num_groups_no_overlap) -
+                       (constant_3 * variables.num_disliked_pairs))
+
+        return round(total_score, 4)
+
+    except Exception as e:
+        print(f"An exception ocurred while scoring the groups.")
+        print(f"This is likely due to a different survey or config file being \
+referenced than what was used to create the group output file.")
+        print(f"Exception: {e}")
 
 
 def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData) -> float:
