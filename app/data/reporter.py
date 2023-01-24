@@ -66,7 +66,7 @@ class ReportFormatter():
                     record.append(
                         ';'.join(validate.group_availability_strings(group)))
 
-                record.append(";".join(user_perfs[user.student_id]))
+                record.append(";".join(user.preferred_students))
                 record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
