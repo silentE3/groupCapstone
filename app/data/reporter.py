@@ -27,11 +27,12 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
     xlsx_writer.save()
 
 def get_user_availability(user: models.SurveyRecord):
-        '''
-        This method gets a user's availability and formats it for excel file.
-        '''
-        avail_list = ""
-        return avail_list
+    '''
+    This method gets a user's availability and formats it for excel file.
+    '''
+    avail_list = ""
+    for x in 7:
+    return avail_list
 
 class ReportFormatter():
     '''
