@@ -31,7 +31,6 @@ def get_user_availability(user: models.SurveyRecord):
     This method gets a user's availability and formats it for excel file.
     '''
     avail_list = ""
-    for x in 7:
     return avail_list
 
 class ReportFormatter():
