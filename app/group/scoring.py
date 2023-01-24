@@ -85,12 +85,13 @@ def score_groups(variables: models.GroupSetData) -> float:
                        (constant_3 * variables.num_disliked_pairs))
 
         return round(total_score, 4)
-
-    except Exception as e:
-        print(f"An exception ocurred while scoring the groups.")
-        print(f"This is likely due to a different survey or config file being \
+    # pylint: disable=broad-except
+    except Exception as exc:
+        print("An exception ocurred while scoring the groups.")
+        print("This is likely due to a different survey or config file being \
 referenced than what was used to create the group output file.")
-        print(f"Exception: {e}")
+        print(f"Exception: {exc}")
+        return 0
 
 
 def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData) -> float:
