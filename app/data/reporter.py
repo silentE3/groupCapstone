@@ -26,6 +26,12 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
 
     xlsx_writer.save()
 
+def get_user_availability(user: models.SurveyRecord):
+        '''
+        This method gets a user's availability and formats it for excel file.
+        '''
+        avail_list = ""
+        return avail_list
 
 class ReportFormatter():
     '''
@@ -58,7 +64,7 @@ class ReportFormatter():
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
 
-                record.append(';'.join(user.availability))
+                user_avail = get_user_availability(user)
                 
                 record.append(
                     validate.meets_group_availability_requirement(group))
