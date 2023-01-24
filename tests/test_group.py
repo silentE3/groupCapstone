@@ -39,6 +39,8 @@ def test_group_1():
         './tests/test_files/survey_results/Example_Survey_Results_2_groups_1.csv')
     os.remove(
         './tests/test_files/survey_results/Example_Survey_Results_2_groups_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_2_groups_report.xlsx')
 
 
 def test_group_2():
@@ -66,6 +68,8 @@ def test_group_2():
         './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
     os.remove(
         './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_report.xlsx')
 
 
 def test_group_3():
@@ -94,6 +98,8 @@ def test_group_3():
         './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
     os.remove(
         './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
+    os.remove(
+        './tests/test_files/survey_results/Example_Survey_Results_5_groups_report.xlsx')
 
 
 def test_group_size_not_possible():
@@ -171,7 +177,7 @@ def test_group_verify_and_report_file_name_1():
     assert response.exit_code == 0
 
     assert response.output.endswith(
-        'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
+        'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
     os.remove('test_verify_and_report_file_name_1_1.csv')
     os.remove('test_verify_and_report_file_name_1_2.csv')
@@ -187,7 +193,7 @@ def test_alt_command_args_1():
     assert response.exit_code == 0
 
     assert response.output.endswith(
-        'Writing report to: "test_verify_and_report_file_name_1_report.xlsx"\n')
+        'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
     os.remove('test_verify_and_report_file_name_1_1.csv')
     os.remove('test_verify_and_report_file_name_1_2.csv')
