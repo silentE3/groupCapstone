@@ -65,7 +65,7 @@ def score_groups(variables: models.GroupSetData) -> float:
     constant_2: float = constant_1 + 1
 
     max_num_groups_pos: int  # based on target group size
-    if variables.target_group_size <= 1:
+    if variables.target_group_size <= 1 or variables.num_students <= variables.target_group_size:
         # divide by 0 and invalid target group size protection
         variables.target_group_size = 1
         max_num_groups_pos = trunc(
@@ -73,6 +73,7 @@ def score_groups(variables: models.GroupSetData) -> float:
     else:
         max_num_groups_pos = trunc(
             variables.num_students / (variables.target_group_size - 1))
+
     constant_3: float = constant_2 * max_num_groups_pos + constant_1 + 1
     constant_4: float = 0.1/(max_num_groups_pos *
                              variables.num_survey_time_slots)
@@ -81,6 +82,7 @@ def score_groups(variables: models.GroupSetData) -> float:
                    (constant_4 * variables.num_additional_overlap) -
                    (constant_2 * variables.num_groups_no_overlap) -
                    (constant_3 * variables.num_disliked_pairs))
+
     return round(total_score, 4)
 
 
