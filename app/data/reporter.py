@@ -26,18 +26,19 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
 
     xlsx_writer.save()
 
+
 def get_user_availability(user: models.SurveyRecord):
     '''
     This method gets a user's availability and formats it for excel file.
     '''
     available_slots: list[str] = []
-    user_availability_dict = user.availability
-    for time_slot, availability_days in user_availability_dict.items():
-        if len(availability_days) != 0:
+    for time_slot, availability_days in user.availability.items():
+        for day in availability_days:
             available_slots.append(
-                    ''.join(availability_days) + " @ " + validate.extract_time(time_slot))
+                day + " @ " + validate.extract_time(time_slot))
 
     return available_slots
+
 
 class ReportFormatter():
     '''
@@ -54,26 +55,24 @@ class ReportFormatter():
         '''
         records: list[list] = [self.__individual_report_header()]
         user_perfs = validate.generate_preferred_list_per_user(groups)
-        
-        
+
         for group in groups:
             for user in group.members:
-    
+
                 record = []
                 record.append(user.student_id)
 
                 if len(user.disliked_students) == 0:
                     record.append('none provided')
                 else:
-                    record.append(len(validate.user_dislikes_group(user, group)) == 0)
+                    record.append(
+                        len(validate.user_dislikes_group(user, group)) == 0)
                 if self.report_config['show_disliked_students']:
                     record.append(
                         ';'.join(validate.user_dislikes_group(user, group)))
 
-                user_avail = get_user_availability(user)
+                record.append(';'.join(get_user_availability(user)))
 
-                record.append(';'.join(user_avail))
-                
                 record.append(
                     validate.meets_group_availability_requirement(group))
                 if self.report_config['show_availability_overlap']:
@@ -81,18 +80,18 @@ class ReportFormatter():
                         ';'.join(validate.group_availability_strings(group)))
 
                 record.append(";".join(user.preferred_students))
-                
+
                 if len(user.preferred_students) == 0:
                     record.append("none provided")
                 else:
                     record.append(len(user_perfs[user.student_id]) > 0)
-                
+
                 record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
                     record.append(";".join(user_perfs[user.student_id]))
 
-                # calc if user provided any availability 
+                # calc if user provided any availability
                 record.append(str(user.provided_availability))
                 record.append(str(user.has_matching_availability))
 
@@ -155,7 +154,7 @@ class ReportFormatter():
                 record.append(';'.join(pairs))
                 record.append(len(pairs))
 
-            #Create the pairs of user dislikes
+            # Create the pairs of user dislikes
             pairs = []
             for member in group.members:
                 dislikes = validate.user_dislikes_group(member, group)
