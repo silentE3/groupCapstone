@@ -32,12 +32,10 @@ def get_user_availability(user: models.SurveyRecord):
     '''
     available_slots: list[str] = []
     user_availability_dict = user.availability
-
     for time_slot, availability_days in user_availability_dict.items():
-        for day, available in availability_days:
-            if available:
-                available_slots.append(
-                    day + " @ " + time_slot)
+        if (len(availability_days) != 0):
+            available_slots.append(
+                    ''.join(availability_days) + " @ " + validate._extract_time_(time_slot))
 
     return available_slots
 
