@@ -81,6 +81,12 @@ class ReportFormatter():
                         ';'.join(validate.group_availability_strings(group)))
 
                 record.append(";".join(user.preferred_students))
+                
+                if len(user.preferred_students) == 0:
+                    record.append("none provided")
+                else:
+                    record.append(len(user_perfs[user.student_id]) > 0)
+                
                 record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
