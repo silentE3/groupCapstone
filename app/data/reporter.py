@@ -30,8 +30,16 @@ def get_user_availability(user: models.SurveyRecord):
     '''
     This method gets a user's availability and formats it for excel file.
     '''
-    avail_list = ""
-    return avail_list
+    available_slots: list[str] = []
+    user_availability_dict = user.availability
+
+    for time_slot, availability_days in user_availability_dict.items():
+        for day, available in availability_days:
+            if available:
+                available_slots.append(
+                    day + " @ " + time_slot)
+
+    return available_slots
 
 class ReportFormatter():
     '''
