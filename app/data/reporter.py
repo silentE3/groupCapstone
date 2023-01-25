@@ -71,6 +71,8 @@ class ReportFormatter():
                         ';'.join(validate.user_dislikes_group(user, group)))
 
                 user_avail = get_user_availability(user)
+
+                record.append(';'.join(user_avail))
                 
                 record.append(
                     validate.meets_group_availability_requirement(group))
