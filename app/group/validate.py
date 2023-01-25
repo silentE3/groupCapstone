@@ -105,11 +105,11 @@ def group_availability_strings(group: models.GroupRecord) -> list[str]:
         for day, available in availability_days.items():
             if available:
                 available_slots.append(
-                    day + " @ " + _extract_time_(time_slot))
+                    day + " @ " + extract_time(time_slot))
     return available_slots
 
 
-def _extract_time_(time_slot_str: str) -> str:
+def extract_time(time_slot_str: str) -> str:
     '''
     This function accepts a time slot header and attempts to extract the time portion
     from within it, under the assumption that the time is within two brackets.
