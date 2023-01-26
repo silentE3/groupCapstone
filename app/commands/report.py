@@ -35,3 +35,15 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
     click.echo(f'Writing report to: "{reportfile}"')
     reporter.write_report(
         [groups], config_data, reportfile)
+
+
+@click.command("read-report")
+@click.argument('reportfile', type=click.Path(exists=True), default="group_report.xlsx")
+def read_report(reportfile: str):
+    '''
+    read report- reads in a previously generated report
+    
+    REPORTFILE is the path to the xlsx based report file to read in
+    '''
+    _ = load.read_report(reportfile)
+    
