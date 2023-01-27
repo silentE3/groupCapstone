@@ -108,19 +108,19 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in field_mapping['availability_field_names']:
-        avail_str = row[field].lower()
+        avail_str = row[field].lower().replace(" ", "")
         survey.availability[field] = []
         if not avail_str == '':
             survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
-        survey.timezone = row[field_mapping['timezone_field_name']]
+        survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]]
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]]
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]]
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p',)
