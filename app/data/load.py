@@ -3,6 +3,7 @@ Provides the ability to load data into the program including raw survey data and
 """
 
 import csv
+import re
 
 import datetime as dt
 from typing import Union
@@ -96,21 +97,21 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     survey = models.SurveyRecord(row[field_mapping['student_id_field_name']])
 
     for field in field_mapping['preferred_students_field_names']:
-        if row[field] != "":
+        if re.search(r'\S', row[field]):
             survey.preferred_students.append(
                 parse_asurite(row[field]).lower())
     survey.preferred_students = list(set(survey.preferred_students))
 
     for field in field_mapping['disliked_students_field_names']:
-        if row[field] != "":
+        if re.search(r'\S', row[field]):
             survey.disliked_students.append(
                 parse_asurite(row[field]).lower())
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in field_mapping['availability_field_names']:
-        avail_str = row[field].lower().replace(" ", "", "\t", "", "\n", "")
+        avail_str = re.sub('\s', '', row[field].lower())
         survey.availability[field] = []
-        if not avail_str == '':
+        if avail_str and re.search(r'\S', avail_str):
             survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
