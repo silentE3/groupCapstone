@@ -108,7 +108,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in field_mapping['availability_field_names']:
-        avail_str = row[field].lower().replace(" ", "")
+        avail_str = row[field].lower().replace(" ", "", "\t", "", "\n", "")
         survey.availability[field] = []
         if not avail_str == '':
             survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
