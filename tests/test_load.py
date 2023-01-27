@@ -997,6 +997,54 @@ def test_parse_survey_record_maps_single_field():
     assert 'asurite3' in record.preferred_students
     assert len(record.student_id) > 0
 
+
+def test_parse_survey_record_with_white_space():
+    config: models.SurveyFieldMapping = {
+        'student_id_field_name': 'asurite',
+        'student_name_field_name': 'name',
+        'student_email_field_name': 'email',
+        'student_login_field_name': 'github user',
+        'timezone_field_name': 'timezone',
+        'submission_timestamp_field_name': 'submission_date',
+        'preferred_students_field_names': ['pref 1', 'pref 2'],
+        'disliked_students_field_names': ['disl 1'],
+        'availability_field_names': ['1', '2', '3', '4', '5']
+    }
+
+    row: dict = {
+        'asurite': 'asurite1 ',
+        'name': 'billy ',
+        'email': 'billy@hotmail.com ',
+        'github user': 'billy123 ',
+        'timezone': 'UTC-3 ',
+        'submission_date': '2022/10/22 6:30:11 PM MDT ',
+        'disl 1': 'asurite2 ',
+        'pref 1': ' asurite3',
+        'pref 2': ' ',
+        '1': 'monday ;tuesday',
+        '2': 'wednesday\t;thursday',
+        '3': 'friday\n,saturday',
+        '4': 'monday; tuesday',
+        '5': ' '
+    }
+
+    record = load.parse_survey_record(config, row)
+
+    assert record.availability['1'][0] == 'monday'
+    assert record.availability['2'][0] == 'wednesday'
+    assert record.availability['3'][0] == 'friday'
+    assert record.availability['4'][1] == 'tuesday'
+    assert not record.availability['5'][0]
+    assert record.timezone == 'UTC-3'
+    assert record.student_email == 'billy@hotmail.com'
+    assert record.student_name == 'billy'
+    assert record.student_login == 'billy123'
+    assert record.student_id == 'asurite1'
+    assert record.preferred_students[0] == 'asurite3'
+    assert not record.preferred_students[1]
+    assert record.disliked_students[0] == 'asurite2'
+
+
 def test_read_survey():
     print('hi')
 
@@ -1186,3 +1234,6 @@ def test_read_roster():
     students[17] = "asurite18"
     students[18] = "asurite19"
     students[19] = "asurite20"
+
+
+
