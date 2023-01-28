@@ -17,7 +17,7 @@ def parse_asurite(val: str) -> str:
     parses a student's id from the string.
     Returns the first value when splitting a str on a space character
     '''
-    return val.strip().split(" ", 1)[0]
+    return re.search(r"\S+", val).group()
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -94,7 +94,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
         raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(row[field_mapping['student_id_field_name']])
+    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
         if re.search(r'\S', row[field]):
