@@ -1041,7 +1041,7 @@ def test_parse_survey_record_with_white_space():
     assert record.student_login == 'billy123'
     assert record.student_id == 'asurite1'
     assert record.preferred_students[0] == 'asurite3'
-    assert not record.preferred_students[1]
+    assert len(record.preferred_students) == 1
     assert record.disliked_students[0] == 'asurite2'
 
 
