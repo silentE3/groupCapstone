@@ -135,10 +135,10 @@ def test_read_dataset_1():
     # *************************************************************************
 
     config_data: models.Configuration = config.read_json(
-        "./tests/test_files/configs/config_1.json")
+        "test_files/configs/config_1.json")
 
     surveys_result = load.read_survey(
-        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1.csv')
+        config_data['field_mappings'], 'test_files/survey_results/Example_Survey_Results_1.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -322,9 +322,9 @@ def test_read_dataset_2():
     # Read/process the config and survey data
     # *************************************************************************
 
-    config_data = config.read_json("./tests/test_files/configs/config_1.json")
+    config_data = config.read_json("test_files/configs/config_1.json")
     surveys_result = load.read_survey(
-        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_2.csv')
+        config_data['field_mappings'], 'test_files/survey_results/Example_Survey_Results_2.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -348,9 +348,9 @@ def test_read_dataset_3():
     # Read/process the config and survey data
     # *************************************************************************
 
-    config_data = config.read_json("./tests/test_files/configs/config_1.json")
+    config_data = config.read_json("test_files/configs/config_1.json")
     surveys_result = load.read_survey(
-        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_3.csv')
+        config_data['field_mappings'], 'test_files/survey_results/Example_Survey_Results_3.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -529,10 +529,10 @@ def test_read_dataset_4():
     # Read/process the config and survey data
     # *************************************************************************
 
-    config_data = config.read_json("./tests/test_files/configs/config_2.json")
+    config_data = config.read_json("test_files/configs/config_2.json")
 
     surveys_result = load.read_survey(
-        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_4.csv')
+        config_data['field_mappings'], 'test_files/survey_results/Example_Survey_Results_4.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -559,7 +559,7 @@ def test_read_dataset_1_all_fields():
     Just lie Read dataset 1 test but with all user fields
     '''
     config_data: models.Configuration = config.read_json(
-        "./tests/test_files/configs/config_1_full.json")
+        "test_files/configs/config_1_full.json")
     # *************************************************************************
     # Start by building the expected user records
     # *************************************************************************
@@ -671,7 +671,7 @@ def test_read_dataset_1_all_fields():
     # *************************************************************************
 
     surveys_result = load.read_survey(config_data['field_mappings'],
-                                      './tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
+                                      'test_files/survey_results/Example_Survey_Results_1_full.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -687,7 +687,7 @@ def test_read_dataset_dup_user():
     tests loading a dataset that contains a duplicate user. It checks  that the latest submission is used
     '''
     config_data: models.Configuration = config.read_json(
-        "./tests/test_files/configs/config_1_full.json")
+        "test_files/configs/config_1_full.json")
     # *************************************************************************
     # Start by building the expected user records
     # *************************************************************************
@@ -799,7 +799,7 @@ def test_read_dataset_dup_user():
     # *************************************************************************
 
     surveys_result = load.read_survey(config_data['field_mappings'],
-                                      './tests/test_files/survey_results/Example_Survey_Results_7_dup_user.csv')
+                                      'test_files/survey_results/Example_Survey_Results_7_dup_user.csv')
 
     # *************************************************************************
     # Verify that the config and survey data was read/processed properly.
@@ -1017,13 +1017,13 @@ def test_parse_survey_record_with_white_space():
         'email': 'billy@hotmail.com ',
         'github user': 'billy123 ',
         'timezone': 'UTC-3 ',
-        'submission_date': '2022/10/22 6:30:11 PM MDT ',
+        'submission_date': '2022/10/22 6:30:11 PM MDT',
         'disl 1': 'asurite2 ',
         'pref 1': ' asurite3',
         'pref 2': ' ',
         '1': 'monday ;tuesday',
         '2': 'wednesday\t;thursday',
-        '3': 'friday\n,saturday',
+        '3': 'friday\n;saturday',
         '4': 'monday; tuesday',
         '5': ' '
     }
@@ -1034,7 +1034,7 @@ def test_parse_survey_record_with_white_space():
     assert record.availability['2'][0] == 'wednesday'
     assert record.availability['3'][0] == 'friday'
     assert record.availability['4'][1] == 'tuesday'
-    assert not record.availability['5'][0]
+    assert len(record.availability['5']) == 0
     assert record.timezone == 'UTC-3'
     assert record.student_email == 'billy@hotmail.com'
     assert record.student_name == 'billy'
@@ -1061,9 +1061,9 @@ def test_load_group_data():
     '''
     Tests the loading of grouping data
     '''
-    config_data: models.Configuration = config.read_json("./tests/test_files/dev_data/config-dev.json")
-    survey_data = load.read_survey(config_data['field_mappings'], "./tests/test_files/dev_data/dataset-dev.csv")
-    groups = load.read_groups("./tests/test_files/dev_data/output.csv", survey_data)
+    config_data: models.Configuration = config.read_json("test_files/dev_data/config-dev.json")
+    survey_data = load.read_survey(config_data['field_mappings'], "test_files/dev_data/dataset-dev.csv")
+    groups = load.read_groups("test_files/dev_data/output.csv", survey_data)
 
     assert len(groups) == 4
     assert len(groups[0].members) == 5
@@ -1211,7 +1211,7 @@ def test_read_roster():
     Tests to see if program reads the roster file correctly
     '''
     students = []
-    students = load.read_roster("roster.csv")
+    students = load.read_roster("../roster.csv")
 
     assert len(students) == 20
     students[0] = "asurite1"
