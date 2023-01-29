@@ -18,7 +18,7 @@ def parse_asurite(val: str) -> str:
     parses a student's id from the string.
     Returns the first value when splitting a str on a space character
     '''
-    return re.search(r"\S+", val).group()
+    return re.search(r'\S+', val).group()
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -110,7 +110,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in field_mapping['availability_field_names']:
-        avail_str = re.sub('\s', '', row[field].lower())
+        avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
         if avail_str and re.search(r'\S', avail_str):
             survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
