@@ -12,6 +12,7 @@ click = "*"
 pytest-mock = "*"
 xlsxwriter = "*"
 pyinstaller = "*"
+openpyxl = "*"
 
 [dev-packages]
 yapf = "*"

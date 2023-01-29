@@ -6,6 +6,7 @@ import csv
 
 import datetime as dt
 from typing import Union
+from openpyxl import load_workbook, workbook
 from app import models
 from app.group import validate
 from app import config
@@ -111,7 +112,8 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = row[field].lower()
         survey.availability[field] = []
         if not avail_str == '':
-            survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
+            survey.availability[field] = avail_str.split(
+                config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']]
@@ -186,6 +188,7 @@ def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list
 
     return list(groups.values())
 
+
 def __get_user_by_id(student_id: str, survey_data: list[models.SurveyRecord]) -> Union[models.SurveyRecord, None]:
     '''
     Gets a SurveyRecord based on the student id
@@ -197,6 +200,7 @@ def __get_user_by_id(student_id: str, survey_data: list[models.SurveyRecord]) ->
 
     return None
 
+
 def add_missing_students(survey: list[models.SurveyRecord], roster: list[str], avail_field: list[str]) -> list[models.SurveyRecord]:
     '''
     This method involves reading the survey data and adding any missing students from the student list
@@ -205,20 +209,20 @@ def add_missing_students(survey: list[models.SurveyRecord], roster: list[str], a
     new_survey_data = survey
     survey_students = list(map(lambda x: x.student_id, survey))
 
-    #At this point, the survey_student list should have every student name from the survey data.
-    #Next, we will check if all the students have answered the survey.
+    # At this point, the survey_student list should have every student name from the survey data.
+    # Next, we will check if all the students have answered the survey.
 
     missing_students = []
     for student in roster:
         if survey_students.count(student) == 0:
             missing_students.append(student)
 
-    #At this point, all missing students should be in the missing students list.
+    # At this point, all missing students should be in the missing students list.
     for asurite in missing_students:
-        record = models.SurveyRecord (
+        record = models.SurveyRecord(
             student_id=asurite,
         )
-        #This code will use the function that adds availiability to all time slots.
+        # This code will use the function that adds availiability to all time slots.
         record.availability = wildcard_availability(avail_field)
         record.provided_survey_data = False
         record.provided_availability = False
@@ -226,6 +230,7 @@ def add_missing_students(survey: list[models.SurveyRecord], roster: list[str], a
         new_survey_data.append(record)
 
     return new_survey_data
+
 
 def read_roster(filename: str) -> list[str]:
     '''
@@ -238,5 +243,19 @@ def read_roster(filename: str) -> list[str]:
         next(reader)
         for row in reader:
             roster.append(row[0])
-    
+
     return roster
+
+
+def read_report(filename: str) -> list[models.SurveyRecord]:
+    '''
+    reads a report from an xlsx file. Only the 1st tab containing the individual_report_1 is read
+    '''
+
+    book: workbook.Workbook = load_workbook(filename)
+    for row in book['individual_report_1'].iter_rows():
+        for cell in row:
+            print(cell.value)
+
+    book.close()
+    return []
