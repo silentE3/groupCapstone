@@ -13,7 +13,7 @@ from app.data import load
 
 
 # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
-# stored in the .test_files folder) are read and processed correctly.
+# stored in the test_files folder) are read and processed correctly.
 #
 # Example_Survey_Results_1 consists of 4 records, three of are which are typical
 #   records (some fields have values, others are blank) and a fourth where
@@ -148,7 +148,7 @@ def test_read_dataset_1():
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_2.csv (both
-# stored in the .test_files folder) are read and processed correctly.
+# stored in the test_files folder) are read and processed correctly.
 #
 # Example_Survey_Results_2 consists of 6 user records, all of are filled out
 # "completely" (no blank fields).
@@ -334,7 +334,7 @@ def test_read_dataset_2():
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_3.csv (both
-# stored in the .test_files folder) are read and processed correctly.
+# stored in the test_files folder) are read and processed correctly.
 #
 # Example_Survey_Results_3 is testing a bit of a corner case where there are
 # no user records.
@@ -360,7 +360,7 @@ def test_read_dataset_3():
     assert (surveys_result == surveys_expected)
 
 # This test verifies that config_2.json and Example_Survey_Results_4.csv (both
-# stored in the .test_files folder) are read and processed correctly.
+# stored in the test_files folder) are read and processed correctly.
 #
 # Note here that we are changing the config file to verify that this "configurability"
 #  works as expected.
@@ -542,7 +542,7 @@ def test_read_dataset_4():
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
-# stored in the .test_files folder) are read and processed correctly.
+# stored in the test_files folder) are read and processed correctly.
 #
 # Example_Survey_Results_1 consists of 4 records, three of are which are typical
 #   records (some fields have values, others are blank) and a fourth where
@@ -1234,6 +1234,3 @@ def test_read_roster():
     students[17] = "asurite18"
     students[18] = "asurite19"
     students[19] = "asurite20"
-
-
-
