@@ -1186,3 +1186,13 @@ def test_read_roster():
     students[17] = "asurite18"
     students[18] = "asurite19"
     students[19] = "asurite20"
+
+
+def test_read_report():
+    '''
+    tests reading in a report file that is in xlsx format. 
+    '''
+    
+    load.read_report('./tests/test_files/report_files/dataset_groups_report.xlsx')
+    
+    
