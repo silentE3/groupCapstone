@@ -3,6 +3,7 @@ Provides the ability to load data into the program including raw survey data and
 """
 
 import csv
+import re
 
 import datetime as dt
 from typing import Union
@@ -17,7 +18,7 @@ def parse_asurite(val: str) -> str:
     parses a student's id from the string.
     Returns the first value when splitting a str on a space character
     '''
-    return val.strip().split(" ", 1)[0]
+    return re.search(r'\S+', val).group()
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -94,35 +95,34 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
         raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(row[field_mapping['student_id_field_name']])
+    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
-        if row[field] != "":
+        if re.search(r'\S', row[field]):
             survey.preferred_students.append(
                 parse_asurite(row[field]).lower())
     survey.preferred_students = list(set(survey.preferred_students))
 
     for field in field_mapping['disliked_students_field_names']:
-        if row[field] != "":
+        if re.search(r'\S', row[field]):
             survey.disliked_students.append(
                 parse_asurite(row[field]).lower())
     survey.disliked_students = list(set(survey.disliked_students))
 
     for field in field_mapping['availability_field_names']:
-        avail_str = row[field].lower()
+        avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
-        if not avail_str == '':
-            survey.availability[field] = avail_str.split(
-                config.CONFIG_DATA["availability_values_delimiter"])
+        if avail_str and re.search(r'\S', avail_str):
+            survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
-        survey.timezone = row[field_mapping['timezone_field_name']]
+        survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]]
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]]
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]]
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p',)
