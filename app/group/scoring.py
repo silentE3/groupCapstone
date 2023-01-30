@@ -42,7 +42,7 @@ def score_groups(variables: models.GroupSetData) -> float:
                 Where,
                     N = the total number of students being grouped
                     P = number of preferred/liked student slots on the student survey
-                    G = max number of groups possible (based on the target group size +/- 1)
+                    G = max number of groups possible (based on the target group size - 1)
                     T = number of time slots on the student survey
 
         NOTE: This equation guarantees the following about a solution (groupings), relative to
