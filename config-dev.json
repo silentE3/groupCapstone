@@ -3,7 +3,7 @@
   "target_group_size": 5,
   "target_plus_one_allowed": true,
   "target_minus_one_allowed": false,  
-  "grouping_passes": 10,
+  "grouping_passes": 100,
   "availability_values_delimiter":";",
   "field_mappings": {
     "student_id_field_name": "asurite",
