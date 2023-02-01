@@ -21,6 +21,15 @@ def parse_asurite(val: str) -> str:
     return re.search(r'\S+', val).group()
 
 
+def split_on_delimiters(availability_str):
+    del_list = [*config.CONFIG_DATA["availability_values_delimiter"]]
+    s_list = []
+    for c in del_list:
+        if availability_str.find(c) != -1:
+            s_list = s_list + (availability_str.split(c))
+    return s_list
+
+
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
     """
     checks the student's availability against everyone elses and counts the number of times that they match
