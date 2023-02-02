@@ -4,7 +4,6 @@
     "target_plus_one_allowed": true,
     "target_minus_one_allowed": false,    
     "grouping_passes": 10,
-//    TODO: add comma here?
     "availability_values_delimiter":";",
     "field_mappings": {
         "student_id_field_name": "Please select your ASURITE ID",
