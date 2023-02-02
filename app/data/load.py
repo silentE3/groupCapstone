@@ -28,8 +28,10 @@ def split_on_delimiters(availability, delimiters = config.CONFIG_DATA["availabil
     split_str = ''
     for c in delimiters[:-1]:
         split_str += c + '|'
-    split_str += delimiters[len(delimiters) - 1]
-    print(split_str + '\n')
+    try:
+        split_str += delimiters[len(delimiters) - 1]
+    except IndexError:
+        print("Configuration file has no availability delimiters defined")
     return re.split(split_str, availability)
 
 
