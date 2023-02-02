@@ -216,7 +216,7 @@ def users_disliked_in_group(group: models.GroupRecord) -> list[str]:
     disliked_users = list(itertools.chain.from_iterable(
         group_dislike_occurrences(group).values()))
 
-    #dedup before return
+    # dedup before return
     return [*set(disliked_users)]
 
 
@@ -343,15 +343,17 @@ def duplicate_user_in_dataset(groups: list[models.GroupRecord]) -> bool:
     return check
 
 
-def size_limit_in_dataset(groups: list[models.GroupRecord], limit: int) -> bool:
+def groups_meet_size_constraint(groups: list[models.GroupRecord], target: int, target_plus_one_allowed: bool, target_minus_one_allowed: bool) -> bool:
     '''
-    This method checks to see if all of the groups size fit in the limit of the given target +/- 1.
+    This method checks to see if the size of each group is within the range of the given target +/- the allowed margin.
     This will return true if they fit. False otherwise.
     '''
-    size = 0
+    max_size_allowed: int = target + 1 if target_plus_one_allowed else target
+    min_size_allowed: int = target - 1 if target_minus_one_allowed else target
+    size: int = 0
     for group in groups:
         size = len(group.members)
-        if size > limit + 1 or size < limit - 1:
+        if size > max_size_allowed or size < min_size_allowed:
             return False
     return True
 

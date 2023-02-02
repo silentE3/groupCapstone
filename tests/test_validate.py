@@ -730,7 +730,7 @@ def test_size_limit():
     )
     group_list = [group1]
 
-    assert validate.size_limit_in_dataset(group_list, 4)
+    assert validate.groups_meet_size_constraint(group_list, 4, True, True)
 
 
 def test_size_limit_2():
@@ -768,7 +768,7 @@ def test_size_limit_2():
     )
     group_list = [group1, group2]
 
-    assert validate.size_limit_in_dataset(group_list, 4)
+    assert validate.groups_meet_size_constraint(group_list, 4, True, True)
 
 
 def test_size_limit_3():
@@ -803,7 +803,7 @@ def test_size_limit_3():
     )
     group_list = [group1, group2]
 
-    assert not validate.size_limit_in_dataset(group_list, 4)
+    assert not validate.groups_meet_size_constraint(group_list, 4, True, True)
 
 
 def test_size_limit_4():
@@ -844,7 +844,7 @@ def test_size_limit_4():
     )
     group_list = [group1, group2]
 
-    assert not validate.size_limit_in_dataset(group_list, 4)
+    assert not validate.groups_meet_size_constraint(group_list, 4, True, True)
 
 
 def test_total_disliked_pairings():
@@ -1068,8 +1068,8 @@ def test_all_users_are_grouped():
         config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
 
     # get the number of groups and create a list of groups
-    num_groups = core.get_stand_num_groups(
-        surveys_result, config_data["target_group_size"])
+    num_groups = core.get_min_max_num_groups(
+        surveys_result, config_data["target_group_size"], config_data["target_plus_one_allowed"], config_data["target_minus_one_allowed"])[0]
     grouper = grouper_1.Grouper1(surveys_result, config_data, num_groups)
     groupings = grouper.create_groups()
 

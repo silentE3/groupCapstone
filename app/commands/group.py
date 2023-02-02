@@ -52,7 +52,8 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     ########## Grouping ##########
 
     # Perform pre-grouping error checking
-    if core.pre_group_error_checking(config_data["target_group_size"], records):
+    if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
+                                     config_data["target_minus_one_allowed"], records):
         return  # error found -- don't continue
 
     # Run grouping algorithms
@@ -60,7 +61,10 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     # Determine min and max possible number of groups
     min_max_num_groups: list[int] = core.get_min_max_num_groups(
-        records, config_data["target_group_size"])
+        records,
+        config_data["target_group_size"],
+        config_data["target_plus_one_allowed"],
+        config_data["target_minus_one_allowed"])
 
     ########## Run "first" grouping algorithm ##########
 
