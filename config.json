@@ -1,6 +1,8 @@
 {
     "class_name": "SER401",
     "target_group_size": 5,
+    "target_plus_one_allowed": true,
+    "target_minus_one_allowed": false,    
     "grouping_passes": 10,
     "availability_values_delimiter":";",
     "field_mappings": {

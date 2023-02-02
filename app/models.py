@@ -46,6 +46,8 @@ class Configuration(TypedDict):
     """Data class for the app configuration"""
     class_name: str
     target_group_size: int
+    target_plus_one_allowed: bool
+    target_minus_one_allowed: bool
     grouping_passes: int
     availability_values_delimiter: str
     field_mappings: SurveyFieldMapping

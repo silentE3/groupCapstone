@@ -32,6 +32,8 @@
     ]
   },
   "target_group_size": 2,
+  "target_plus_one_allowed": true,
+  "target_minus_one_allowed": false,  
   "grouping_passes": 2,
   "report_fields": {
     "show_preferred_students": false,
