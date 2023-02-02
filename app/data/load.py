@@ -26,8 +26,8 @@ def split_on_delimiters(availability, delimiters):
     allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
     '''
     split_str = ''
-    for c in delimiters[:-1]:
-        split_str += c + '|'
+    for character in delimiters[:-1]:
+        split_str += character + '|'
     try:
         split_str += delimiters[len(delimiters) - 1]
     except IndexError:
