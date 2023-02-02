@@ -21,13 +21,16 @@ def parse_asurite(val: str) -> str:
     return re.search(r'\S+', val).group()
 
 
-def split_on_delimiters(availability_str):
-    del_list = [*config.CONFIG_DATA["availability_values_delimiter"]]
-    s_list = []
-    for c in del_list:
-        if availability_str.find(c) != -1:
-            s_list = s_list + (availability_str.split(c))
-    return s_list
+def split_on_delimiters(availability, delimiters = config.CONFIG_DATA["availability_values_delimiter"]):
+    '''
+    allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
+    '''
+    split_str = ''
+    for c in delimiters[:-1]:
+        split_str += c + '|'
+    split_str += delimiters[len(delimiters) - 1]
+    print(split_str + '\n')
+    return re.split(split_str, availability)
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -122,8 +125,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
         if avail_str and re.search(r'\S', avail_str):
-            # TODO: change the way this uses the availability deliminator?
-            survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
+            survey.availability[field] = split_on_delimiters(avail_str)
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
