@@ -251,11 +251,12 @@ def read_report(filename: str) -> list[models.SurveyRecord]:
     '''
     reads a report from an xlsx file. Only the 1st tab containing the individual_report_1 is read
     '''
-
+    records: list[models.SurveyRecord] = []
     book: workbook.Workbook = load_workbook(filename)
     for row in book['individual_report_1'].iter_rows():
-        for cell in row:
-            print(cell.value)
+        print(row[0].value)
+
+            # We should base this off of the report header file
 
     book.close()
     return []
