@@ -191,3 +191,6 @@ python ./build-scripts/build.py
 ```
 
 This will generate the file as grouper(.exe) in the root of your repository
+
+### Task 194
+The program will be able to read the contents of the excel file so that you can run the report command but use the excel file as a parameters.
