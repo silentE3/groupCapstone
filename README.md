@@ -85,6 +85,10 @@ JSON format. The following is the structure and explination of the configuration
     /*number, target size of each group (or +1) */
     "target_group_size": 5,
     /*number, the number of passes that will happen to generate the group*/
+    "target_plus_one_allowed": true,
+    /*allow groups to have one more member than the target group size*/
+    "target_minus_one_allowed": true,
+    /*allow groups to have one less member than the target group size*/    
     "grouping_passes": 2,
     /*structure, matches the names of the fields found in the survey data to the fields required for grouping*/
     "field_mappings": {
