@@ -95,7 +95,8 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
         raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
+    survey = models.SurveyRecord(parse_asurite(
+        row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
         if re.search(r'\S', row[field]):
@@ -113,16 +114,20 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
         if avail_str and re.search(r'\S', avail_str):
-            survey.availability[field] = avail_str.split(config.CONFIG_DATA["availability_values_delimiter"])
+            survey.availability[field] = avail_str.split(
+                config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
+        )
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
+        )
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
+        )
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p',)
@@ -249,14 +254,18 @@ def read_roster(filename: str) -> list[str]:
 
 def read_report(filename: str) -> list[models.SurveyRecord]:
     '''
-    reads a report from an xlsx file. Only the 1st tab containing the individual_report_1 is read
+    reads a report from an xlsx file. Only the 1st tab is read
     '''
     records: list[models.SurveyRecord] = []
     book: workbook.Workbook = load_workbook(filename)
-    for row in book['individual_report_1'].iter_rows():
-        print(row[0].value)
-
+    for idx, row in enumerate(book['individual_report_1'].rows):
+        if idx != 0:
+            student_id = row[0].value
+            disliked_students: str = row[2].value
+            availability: str = row[3].value
+            preferred_students: str = row[4].value
             # We should base this off of the report header file
+            record : models.SurveyRecord = models.SurveyRecord(student_id=student_id)
 
     book.close()
-    return []
+    return records
