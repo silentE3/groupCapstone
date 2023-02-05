@@ -87,11 +87,11 @@ JSON format. The following is the structure and explication of the configuration
     "target_group_size": 5,
     /*number, the number of passes that will happen to generate the group*/
     "grouping_passes": 2,
-    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be conscidered a delimitor.  As written below, it will separate on either a colon or a semicolon*/
+    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/
     "availability_values_delimiter":";:",
     /*structure, matches the names of the fields found in the survey data to the fields required for grouping*/
-    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be conscidered a delimitor.  As written below, it will separate on either a colon or a semicolon*/
     "availability_values_delimiter":";:",    
+    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/    
     "field_mappings": {
         /*string, name of the field that contains the student's asurite ID*/
         "student_id_field_name": "Please select your ASURITE ID",
@@ -105,7 +105,7 @@ JSON format. The following is the structure and explication of the configuration
             "Preferred team member 4",
             "Preferred team member 5"
         ],
-        /*array of strings, names of the fields that contain an ID for a student who is not preffered to be on the same team*/
+        /*array of strings, names of the fields that contain an ID for a student who is not preferred to be on the same team*/
         "disliked_students_field_names": [
             "Non-preferred student 1",
             "Non-preferred student 2",
