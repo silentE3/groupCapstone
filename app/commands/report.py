@@ -48,13 +48,7 @@ def update_report(reportfile: str, configfile: str):
     '''
     config_data: models.Configuration = config.read_json(configfile)
 
-    report_records = load.read_report(reportfile)
+    groups = load.read_report(reportfile)
 
-    groups : dict[str, models.GroupRecord] = {}
-    
-    for record in report_records:
-        if groups.get(record.group_id) is None:
-            groups[record.group_id] = models.GroupRecord(record.group_id, [record])
-        else:
-            groups[record.group_id].members.append(record)
-    reporter.write_report([list(groups.values())], config_data, reportfile)
+
+    reporter.write_report(groups, config_data, reportfile)

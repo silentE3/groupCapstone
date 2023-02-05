@@ -138,7 +138,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
 
 def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> list[models.SurveyRecord]:
     '''
-    loads the data from the survey. 
+    loads the data from the survey.
     If there is a duplicate record, it will use the one with the submission date that is equal to or greater
     '''
     with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
@@ -252,36 +252,49 @@ def read_roster(filename: str) -> list[str]:
     return roster
 
 
-def read_report(filename: str) -> list[models.SurveyRecord]:
+def read_report(filename: str) -> list[list[models.GroupRecord]]:
     '''
-    reads a report from an xlsx file. Only the 1st tab is read
+    reads a previously generated report. This is an xlsx file and currently only the `individual_report_1` tab is read.
     '''
     records: list[models.SurveyRecord] = []
     book: workbook.Workbook = load_workbook(filename)
     for idx, row in enumerate(book['individual_report_1'].rows):
         if idx != 0:
-            student_id = row[0].value
-            disliked_students: str = row[2].value
-            availability: str = row[3].value
-            preferred_students: str = row[6].value
-            group_id: str = row[11].value
-            # We should base this off of the report header file
-            record: models.SurveyRecord = models.SurveyRecord(
-                student_id=student_id, group_id=group_id)
-            if disliked_students is not None:
-                record.disliked_students = disliked_students.split(';')
+            records.append(__parse_record(row))
 
-            if preferred_students is not None:
-                record.preferred_students = preferred_students.split(';')
+    groups: dict[str, models.GroupRecord] = {}
 
-            if availability is not None:
-                record.availability = __parse_availability(availability)
-
-            records.append(record)
+    for record in records:
+        if groups.get(record.group_id) is None:
+            groups[record.group_id] = models.GroupRecord(
+                record.group_id, [record])
+        else:
+            groups[record.group_id].members.append(record)
 
     book.close()
-    return records
 
+    return [list(groups.values())]
+
+
+def __parse_record(row) -> models.SurveyRecord:
+    student_id = row[0].value
+    disliked_students: str = row[2].value
+    availability: str = row[3].value
+    preferred_students: str = row[6].value
+    group_id: str = row[11].value
+    # We should base this off of the report header file
+    record: models.SurveyRecord = models.SurveyRecord(
+        student_id=student_id, group_id=group_id)
+    if disliked_students is not None:
+        record.disliked_students = disliked_students.split(';')
+
+    if preferred_students is not None:
+        record.preferred_students = preferred_students.split(';')
+
+    if availability is not None:
+        record.availability = __parse_availability(availability)
+    
+    return record
 
 def __parse_availability(availability_str: str) -> dict[str, list[str]]:
     '''
