@@ -37,13 +37,24 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
         [groups], config_data, reportfile)
 
 
-@click.command("read-report")
+@click.command("update-report")
 @click.argument('reportfile', type=click.Path(exists=True), default="group_report.xlsx")
-def read_report(reportfile: str):
+@click.option('-c', '--configfile', type=click.Path(exists=True), show_default=True, default="config.json", help="Enter the path to the config file.")
+def update_report(reportfile: str, configfile: str):
     '''
-    read report- reads in a previously generated report
-    
+    update-report - reads in a previously generated report and updates it based on changes made to it
+
     REPORTFILE is the path to the xlsx based report file to read in
     '''
-    _ = load.read_report(reportfile)
+    config_data: models.Configuration = config.read_json(configfile)
+
+    report_records = load.read_report(reportfile)
+
+    groups : dict[str, models.GroupRecord] = {}
     
+    for record in report_records:
+        if groups.get(record.group_id) is None:
+            groups[record.group_id] = models.GroupRecord(record.group_id, [record])
+        else:
+            groups[record.group_id].members.append(record)
+    reporter.write_report([list(groups.values())], config_data, reportfile)

@@ -73,7 +73,7 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
     This includes the following:
     - checking for students that didn't add availability and setting it to match any
     - checking for students that have availability that didn't match to anyone else's
-    - checking for students that have preferred students that in turn disliked them (Not yet implemented)
+    - checking for students that have preferred students that in turn disliked them (Not yet implemented)d
     - checking for students that have preferred students that didn't match in their availability (Not yet implemented)
     '''
     for student in students:
@@ -263,9 +263,45 @@ def read_report(filename: str) -> list[models.SurveyRecord]:
             student_id = row[0].value
             disliked_students: str = row[2].value
             availability: str = row[3].value
-            preferred_students: str = row[4].value
+            preferred_students: str = row[6].value
+            group_id: str = row[11].value
             # We should base this off of the report header file
-            record : models.SurveyRecord = models.SurveyRecord(student_id=student_id)
+            record: models.SurveyRecord = models.SurveyRecord(
+                student_id=student_id, group_id=group_id)
+            if disliked_students is not None:
+                record.disliked_students = disliked_students.split(';')
+
+            if preferred_students is not None:
+                record.preferred_students = preferred_students.split(';')
+
+            if availability is not None:
+                record.availability = __parse_availability(availability)
+
+            records.append(record)
 
     book.close()
     return records
+
+
+def __parse_availability(availability_str: str) -> dict[str, list[str]]:
+    '''
+    parses the availability into a dictionary assuming the format is `day @ time`
+    '''
+    availability: dict[str, list[str]] = {}
+    avail_arr: list[str] = availability_str.split(";")
+    availability = {
+        "0:00 AM - 3:00 AM": [],
+        "3:00 AM - 6:00 AM": [],
+        "6:00 AM - 9:00 AM": [],
+        "9:00 AM - 12:00 PM": [],
+        "12:00 PM - 3:00 PM": [],
+        "3:00 PM - 6:00 PM": [],
+        "6:00 PM - 9:00 PM": [],
+        "9:00 PM - 12:00 PM": []
+    }
+    for key, val in availability.items():
+        for avail in avail_arr:
+            if key in avail:
+                val.append(avail.split()[0])
+
+    return availability

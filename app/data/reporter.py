@@ -86,7 +86,6 @@ class ReportFormatter():
                 else:
                     record.append(len(user_perfs[user.student_id]) > 0)
 
-                record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
                     record.append(";".join(user_perfs[user.student_id]))
