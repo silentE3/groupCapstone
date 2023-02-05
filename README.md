@@ -88,6 +88,8 @@ JSON format. The following is the structure and explication of the configuration
     /*number, the number of passes that will happen to generate the group*/
     "grouping_passes": 2,
     /*structure, matches the names of the fields found in the survey data to the fields required for grouping*/
+    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be conscidered a delimitor.  As written below, it will separate on either a colon or a semicolon*/
+    "availability_values_delimiter":";:",    
     "field_mappings": {
         /*string, name of the field that contains the student's asurite ID*/
         "student_id_field_name": "Please select your ASURITE ID",
