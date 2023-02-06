@@ -275,10 +275,10 @@ def read_report(filename: str) -> list[list[models.GroupRecord]]:
 
 def __parse_record(row) -> models.SurveyRecord:
     student_id = row[0].value
-    disliked_students: str = row[2].value
-    availability: str = row[3].value
-    preferred_students: str = row[6].value
-    group_id: str = row[11].value
+    disliked_students: str = row[1].value
+    availability: str = row[4].value
+    preferred_students: str = row[7].value
+    group_id: str = row[12].value
     record: models.SurveyRecord = models.SurveyRecord(
         student_id=student_id, group_id=group_id)
     if disliked_students is not None:
