@@ -21,12 +21,12 @@ def parse_asurite(val: str) -> str:
     return re.search(r'\S+', val).group()
 
 
-def split_on_delimiters(availability, delimiters):
+def split_on_delimiters(availability: str, delimiters: str):
     '''
     allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
     '''
     split_str = ''
-    for character in delimiters[:-1]:
+    for character in delimiters:
         split_str += character + '|'
     try:
         split_str += delimiters[len(delimiters) - 1]

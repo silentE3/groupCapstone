@@ -13,6 +13,7 @@ There are compiled binaries available for both windows and linux. They can be fo
 When the application has been downloaded, it is ready for use. The file can now be run from the CLI. 
 
 Note: For windows users, you may be prompted to allow the program to be executed.
+
 Note: Input values (the data that is coming in from the survey file) will automatically be scrubbed for extraneous white spaces where appropriate.
 
 Example command:
