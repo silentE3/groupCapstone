@@ -21,6 +21,20 @@ def parse_asurite(val: str) -> str:
     return re.search(r'\S+', val).group()
 
 
+def split_on_delimiters(availability: str, delimiters: str):
+    '''
+    allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
+    '''
+    split_str = ''
+    for character in delimiters:
+        split_str += character + '|'
+    try:
+        split_str += delimiters[len(delimiters) - 1]
+    except IndexError:
+        print("Configuration file has no availability delimiters defined")
+    return re.split(split_str, availability)
+
+
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
     """
     checks the student's availability against everyone elses and counts the number of times that they match
@@ -114,8 +128,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
         if avail_str and re.search(r'\S', avail_str):
-            survey.availability[field] = avail_str.split(
-                config.CONFIG_DATA["availability_values_delimiter"])
+            survey.availability[field] = split_on_delimiters(avail_str, config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
