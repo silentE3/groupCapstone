@@ -73,7 +73,7 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
     This includes the following:
     - checking for students that didn't add availability and setting it to match any
     - checking for students that have availability that didn't match to anyone else's
-    - checking for students that have preferred students that in turn disliked them (Not yet implemented)d
+    - checking for students that have preferred students that in turn disliked them (Not yet implemented)
     - checking for students that have preferred students that didn't match in their availability (Not yet implemented)
     '''
     for student in students:
@@ -120,17 +120,14 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
-        )
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
-        )
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
-        )
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
-            row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p',)
+            row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
     survey.provided_availability = has_availability(survey)
 
     return survey
@@ -282,7 +279,6 @@ def __parse_record(row) -> models.SurveyRecord:
     availability: str = row[3].value
     preferred_students: str = row[6].value
     group_id: str = row[11].value
-    # We should base this off of the report header file
     record: models.SurveyRecord = models.SurveyRecord(
         student_id=student_id, group_id=group_id)
     if disliked_students is not None:
@@ -293,8 +289,9 @@ def __parse_record(row) -> models.SurveyRecord:
 
     if availability is not None:
         record.availability = __parse_availability(availability)
-    
+
     return record
+
 
 def __parse_availability(availability_str: str) -> dict[str, list[str]]:
     '''
