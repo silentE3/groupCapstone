@@ -14,6 +14,8 @@ When the application has been downloaded, it is ready for use. The file can now 
 
 Note: For windows users, you may be prompted to allow the program to be executed.
 
+Note: Input values (the data that is coming in from the survey file) will automatically be scrubbed for extraneous white spaces where appropriate.
+
 Example command:
 ```
 ./grouper-windows-amd64.exe group
@@ -26,9 +28,9 @@ There are three different functions that this application can perform:
 
 Each of these functions are accessible from the CLI (Command Line Interface)
 
-Starting the program will display general help for using the applicatoins, including the three commands for the three functions this applcation can perform,
+Starting the program will display general help for using the applications, including the three commands for the three functions this application can perform,
 along with a short description of what each command does.
-Additionally, using any of these commands followed by --help will provide usage infromation for that command.
+Additionally, using any of these commands followed by --help will provide usage information for that command.
 
 These are the commands and their usage:
 
@@ -47,10 +49,10 @@ group SURVEYFILE [-o,--outputfile PATH_TO_OUTPUT_FILE] [-c,--configfile PATH_TO_
 The group command performs grouping on survey data. The survey data is expected to be in CSV format with the first record being a header for the column names.
 The group command takes one required parameter and four optional parameters.
 The group command should make sure that algorithm correctly determines availability based on time slots, and that students are assigned with at least 1-2 preferred students instead of as many as possible.
-1. **surveyfile** : the first requried parameter after the group command should be the path to the survey data.
+1. **surveyfile** : the first required parameter after the group command should be the path to the survey data.
 2. **-o, --outputfile** : the file where the grouping data will be stored. This will be a simple list of user IDs with auto-generated group IDs in CSV format. 
     The default is output.csv.
-3. **-c, --configfile** : this is a JSON-formatted configuration file. The default name for this file is config.json with the file being in the same locaiton as the program.
+3. **-c, --configfile** : this is a JSON-formatted configuration file. The default name for this file is config.json with the file being in the same location as the program.
     More details on the structure of the configuration file are included later in this README.
 4. **--verify|--no-verify**: this option indicates if a verification report should be generated automatically for the grouping results. The default is no-verify
 5. **-r, --reportfile** : this is the path for the output file for the report generated from the grouping results. Note that this option is ignored if the --verify option is 
@@ -58,25 +60,25 @@ The group command should make sure that algorithm correctly determines availabil
     data. Also note that the file is of type xlsx, an Excel file, and will have multiple sheets.
 6. **-a, --allstudentsfile** : this is the path for a CSV file whose first column contains a list of all of the student IDs in the class. If this option is provided, the "roster" file will be used to add students that did not fill out the survey. This ensures that all students in the class will be grouped. The student IDs in the file must be the same format as the student IDs in the survey file.
 
-NOTE: Any student who does not indicate any availability in the survey will be assigned full availability for all time slots for the purpose of grouping. This also means any student added automaticaly from the list of all students (the allstudentsfile option) will also be assigned full availability for the purpose of grouping.
+NOTE: Any student who does not indicate any availability in the survey will be assigned full availability for all time slots for the purpose of grouping. This also means any student added automatically from the list of all students (the allstudentsfile option) will also be assigned full availability for the purpose of grouping.
 ## report
 
 report GROUPFILE SURVEYFILE  [-c,--configfile PATH_TO_CONFIG_FILE] [-r,--reportfile PATH_TO_REPORT_FILE]
 
-The report command creates a report from the grouping results. The report command takes 2 additional optional paramters. Ensure that the **surveyfile** is the data used as
+The report command creates a report from the grouping results. The report command takes 2 additional optional parameters. Ensure that the **surveyfile** is the data used as
 the source for the **groupfile** and that the same configuration file is used that was used when generating **groupfile**.
 #Eventually, we should be able to generate the report whenever we use the group command. Also, we already implemented the output and report file names to match the input file names by default.
 #
 1. **groupfile** : the second required parameter after the verify command. This should be the grouping CSV file generated by a group command (or manually edited) whose 
-2. **surveyfile** : the first required parameter after the verify command. This should be the same file that was used to genereate the **groupfile**.
-    source survey data was the **surveyfile** provided to the first paramter.
+2. **surveyfile** : the first required parameter after the verify command. This should be the same file that was used to generate the **groupfile**.
+    source survey data was the **surveyfile** provided to the first parameter.
 3. -c, --configfile : this should be the path to the configuration file used when creating the **groupfile**. Its default value is config.json
 4. -r, --reportfile: this is the path for the output file for the report generated from the grouping results. Its default value is grouping_results_report.xlsx. Note that this is an Excel file and will contain multiple sheets
 
 ## Configuration File
 
 The configuration file controls how the application operates and identifies the fields used to generate grouping and verification data. The configuration file should be in
-JSON format. The following is the structure and explination of the configuration file:
+JSON format. The following is the structure and explication of the configuration file:
 
 ```json
 {
@@ -86,7 +88,11 @@ JSON format. The following is the structure and explination of the configuration
     "target_group_size": 5,
     /*number, the number of passes that will happen to generate the group*/
     "grouping_passes": 2,
+    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/
+    "availability_values_delimiter":";:",
     /*structure, matches the names of the fields found in the survey data to the fields required for grouping*/
+    "availability_values_delimiter":";:",    
+    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/    
     "field_mappings": {
         /*string, name of the field that contains the student's asurite ID*/
         "student_id_field_name": "Please select your ASURITE ID",
@@ -100,7 +106,7 @@ JSON format. The following is the structure and explination of the configuration
             "Preferred team member 4",
             "Preferred team member 5"
         ],
-        /*array of strings, names of the fields that contain an ID for a student who is not preffered to be on the same team*/
+        /*array of strings, names of the fields that contain an ID for a student who is not preferred to be on the same team*/
         "disliked_students_field_names": [
             "Non-preferred student 1",
             "Non-preferred student 2",
@@ -118,7 +124,7 @@ JSON format. The following is the structure and explination of the configuration
             "Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]"
         ]
     },
-    /*structure, settings for what information is inculded in the verification report */
+    /*structure, settings for what information is included in the verification report */
     "report_fields": {
         /*boolean, include the mappings of each student's preferred teammates*/
         "show_preferred_students": false,
@@ -129,11 +135,11 @@ JSON format. The following is the structure and explination of the configuration
         /*boolean, include the scoring results for each group*/
         "show_scores": true,
     },
-    /*boolean, include the stunent's full name in the grouping output*/
+    /*boolean, include the student's full name in the grouping output*/
     "output_student_name": false,
-    /*boolean, include the stunent's email address in the grouping output*/
+    /*boolean, include the student's email address in the grouping output*/
     "output_student_email": true,
-    /*boolean, include the stunent's login name in the grouping output*/
+    /*boolean, include the student's login name in the grouping output*/
     "output_student_login": true
 }
 ```
