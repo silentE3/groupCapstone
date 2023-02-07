@@ -1180,3 +1180,48 @@ def test_groups_meet_size_constraint_2():
     This method tests if the groups_meet_size_constraint method works after
     being reworked with different group sizes.
     '''
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    )])
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )])
+
+    groups = []
+    groups.append(group_1)
+    groups.append(group_2)
+
+    assert validate.groups_meet_size_constraint(groups, 4, False, True) == True
+
+    group_3 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    )])
+
+    group_4 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite5",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    ), models.SurveyRecord(
+        student_id="asurite7",
+    )])
+
+    groups_2 = []
+    groups_2.append(group_3)
+    groups_2.append(group_4)
+
+    assert validate.groups_meet_size_constraint(groups_2, 3, True, False) == True
