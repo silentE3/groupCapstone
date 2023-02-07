@@ -1239,3 +1239,31 @@ def test_split_on_delimiter():
     '''
     Tests to see if the program splits on delimiter correctly.
     '''
+    availability = "Monday|Tuesday|Wednesday|Thursday|Friday"
+    delimiter = "|"
+
+    list = load.split_on_delimiters(availability, delimiter)
+    print(list)
+
+    print(list[35])
+
+    days = []
+    day = ""
+    for i in range(len(list)):
+        print(i)
+        print(day)
+        if (list[i] != "|"):
+            day += list[i]
+            if (i == len(list)-1):
+                days.append(day)
+        else:
+            days.append(day)
+            day = ""
+    
+    print(days)
+    assert days[0] == "Monday"
+    assert days[1] == "Tuesday"
+    assert days[2] == "Wednesday"
+    assert days[3] == "Thursday"
+    assert days[4] == "Friday"
+
