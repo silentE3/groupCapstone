@@ -125,3 +125,28 @@ def test_pre_group_error_checking_valid_2():
 
     assert core.pre_group_error_checking(
         target_group_size, target_plus_one_allowed, target_minus_one_allowed, group) == False
+
+
+def test_get_min_max_num_groups():
+    '''
+    This method tests the updated get_min_max_num_groups.
+    '''
+    group = [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    ), models.SurveyRecord(
+        student_id="asurite4",
+    )]
+
+    group2 = [models.SurveyRecord(
+        student_id="asurite5",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    ), models.SurveyRecord(
+        student_id="asurite7",
+    ), models.SurveyRecord(
+        student_id="asurite8",
+    )]
