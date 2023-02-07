@@ -21,12 +21,12 @@ def parse_asurite(val: str) -> str:
     return re.search(r'\S+', val).group()
 
 
-def split_on_delimiters(availability, delimiters):
+def split_on_delimiters(availability: str, delimiters: str):
     '''
     allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
     '''
     split_str = ''
-    for character in delimiters[:-1]:
+    for character in delimiters:
         split_str += character + '|'
     try:
         split_str += delimiters[len(delimiters) - 1]
@@ -109,7 +109,8 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
         raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
+    survey = models.SurveyRecord(parse_asurite(
+        row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
         if re.search(r'\S', row[field]):
@@ -139,7 +140,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
-            row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p',)
+            row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
     survey.provided_availability = has_availability(survey)
 
     return survey
@@ -147,7 +148,7 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
 
 def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> list[models.SurveyRecord]:
     '''
-    loads the data from the survey. 
+    loads the data from the survey.
     If there is a duplicate record, it will use the one with the submission date that is equal to or greater
     '''
     with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
@@ -261,15 +262,69 @@ def read_roster(filename: str) -> list[str]:
     return roster
 
 
-def read_report(filename: str) -> list[models.SurveyRecord]:
+def read_report(filename: str) -> list[list[models.GroupRecord]]:
     '''
-    reads a report from an xlsx file. Only the 1st tab containing the individual_report_1 is read
+    reads a previously generated report. This is an xlsx file and currently only the `individual_report_1` tab is read.
     '''
-
+    records: list[models.SurveyRecord] = []
     book: workbook.Workbook = load_workbook(filename)
-    for row in book['individual_report_1'].iter_rows():
-        for cell in row:
-            print(cell.value)
+    for idx, row in enumerate(book['individual_report_1'].rows):
+        if idx != 0:
+            records.append(__parse_record(row))
+
+    groups: dict[str, models.GroupRecord] = {}
+
+    for record in records:
+        if groups.get(record.group_id) is None:
+            groups[record.group_id] = models.GroupRecord(
+                record.group_id, [record])
+        else:
+            groups[record.group_id].members.append(record)
 
     book.close()
-    return []
+
+    return [list(groups.values())]
+
+
+def __parse_record(row) -> models.SurveyRecord:
+    student_id = row[0].value
+    disliked_students: str = row[1].value
+    availability: str = row[4].value
+    preferred_students: str = row[7].value
+    group_id: str = row[12].value
+    record: models.SurveyRecord = models.SurveyRecord(
+        student_id=student_id, group_id=group_id)
+    if disliked_students is not None:
+        record.disliked_students = disliked_students.split(';')
+
+    if preferred_students is not None:
+        record.preferred_students = preferred_students.split(';')
+
+    if availability is not None:
+        record.availability = __parse_availability(availability)
+
+    return record
+
+
+def __parse_availability(availability_str: str) -> dict[str, list[str]]:
+    '''
+    parses the availability into a dictionary assuming the format is `day @ time`
+    '''
+    availability: dict[str, list[str]] = {}
+    avail_arr: list[str] = availability_str.split(";")
+    availability = {
+        "0:00 AM - 3:00 AM": [],
+        "3:00 AM - 6:00 AM": [],
+        "6:00 AM - 9:00 AM": [],
+        "9:00 AM - 12:00 PM": [],
+        "12:00 PM - 3:00 PM": [],
+        "3:00 PM - 6:00 PM": [],
+        "6:00 PM - 9:00 PM": [],
+        "9:00 PM - 12:00 PM": []
+    }
+    for key, val in availability.items():
+        for avail in avail_arr:
+            if key in avail:
+                val.append(avail.split()[0])
+
+    return availability
