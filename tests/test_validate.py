@@ -1146,3 +1146,37 @@ def test_generate_preferred_list_per_user():
     assert len(perfs["a4"]) == 1
     assert len(perfs["a5"]) == 1
     assert len(perfs["a6"]) == 0
+
+
+def test_groups_meet_size_constraint():
+    '''
+    This method tests if the groups_meet_size_constraint method works after
+    being reworked.
+    '''
+    group_1 = models.GroupRecord("1", [models.SurveyRecord(
+        student_id="asurite1",
+    ), models.SurveyRecord(
+        student_id="asurite2",
+    ), models.SurveyRecord(
+        student_id="asurite3",
+    )])
+
+    group_2 = models.GroupRecord("2", [models.SurveyRecord(
+        student_id="asurite4",
+    ), models.SurveyRecord(
+        student_id="asurite5",
+    ), models.SurveyRecord(
+        student_id="asurite6",
+    )])
+
+    groups = []
+    groups.append(group_1)
+    groups.append(group_2)
+
+    assert validate.groups_meet_size_constraint(groups, 3, False, False) == True
+
+def test_groups_meet_size_constraint_2():
+    '''
+    This method tests if the groups_meet_size_constraint method works after
+    being reworked with different group sizes.
+    '''
