@@ -1234,3 +1234,8 @@ def test_read_roster():
     students[17] = "asurite18"
     students[18] = "asurite19"
     students[19] = "asurite20"
+
+def test_split_on_delimiter():
+    '''
+    Tests to see if the program splits on delimiter correctly.
+    '''
