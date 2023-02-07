@@ -13,6 +13,7 @@ There are compiled binaries available for both windows and linux. They can be fo
 When the application has been downloaded, it is ready for use. The file can now be run from the CLI. 
 
 Note: For windows users, you may be prompted to allow the program to be executed.
+Note: Input values (the data that is coming in from the survey file) will automatically be scrubbed for extraneous white spaces where appropriate.
 
 Note: Input values (the data that is coming in from the survey file) will automatically be scrubbed for extraneous white spaces where appropriate.
 
@@ -98,8 +99,6 @@ JSON format. The following is the structure and explication of the configuration
     /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/
     "availability_values_delimiter":";:",
     /*structure, matches the names of the fields found in the survey data to the fields required for grouping*/
-    "availability_values_delimiter":";:",    
-    /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/    
     "field_mappings": {
         /*string, name of the field that contains the student's asurite ID*/
         "student_id_field_name": "Please select your ASURITE ID",
