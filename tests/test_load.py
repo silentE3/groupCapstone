@@ -1243,15 +1243,10 @@ def test_split_on_delimiter():
     delimiter = "|"
 
     list = load.split_on_delimiters(availability, delimiter)
-    print(list)
-
-    print(list[35])
 
     days = []
     day = ""
     for i in range(len(list)):
-        print(i)
-        print(day)
         if (list[i] != "|"):
             day += list[i]
             if (i == len(list)-1):
@@ -1267,3 +1262,13 @@ def test_split_on_delimiter():
     assert days[3] == "Thursday"
     assert days[4] == "Friday"
 
+def test_split_on_delimiter_2():
+    '''
+    Tests to see if the program splits on multiple delimiters correctly.
+    '''
+    availability = "Monday;Tuesday;Wednesday)Thursday)Friday"
+    delimiter = ";)"
+
+    list = load.split_on_delimiters(availability, delimiter)
+
+    print(list)
