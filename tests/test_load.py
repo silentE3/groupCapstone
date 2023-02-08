@@ -1237,7 +1237,9 @@ def test_read_roster():
 
 def test_split_on_delimiter():
     '''
-    Tests to see if the program splits on delimiter correctly.
+    Tests to see if the program splits on delimiter correctly. This was found
+    as a limitation of the current implementation and that this test will be
+    revisited when split_on_delimiters is changed.
     '''
     availability = "Monday|Tuesday|Wednesday|Thursday|Friday"
     delimiter = "|"
