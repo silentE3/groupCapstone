@@ -129,24 +129,107 @@ def test_pre_group_error_checking_valid_2():
 
 def test_get_min_max_num_groups():
     '''
-    This method tests the updated get_min_max_num_groups.
+    This method tests the updated get_min_max_num_groups with a fix group size.
+    Note: survey data is models.SurveyRecord
     '''
-    group = [models.SurveyRecord(
-        student_id="asurite1",
-    ), models.SurveyRecord(
-        student_id="asurite2",
-    ), models.SurveyRecord(
-        student_id="asurite3",
-    ), models.SurveyRecord(
-        student_id="asurite4",
-    )]
 
-    group2 = [models.SurveyRecord(
+    student1 = models.SurveyRecord(
+        student_id="asurite1",
+    )
+    student2 = models.SurveyRecord(
+        student_id="asurite2",
+    )
+    student3 = models.SurveyRecord(
+        student_id="asurite3",
+    )
+    student4 = models.SurveyRecord(
+        student_id="asurite4",
+    )
+    student5 = models.SurveyRecord(
         student_id="asurite5",
-    ), models.SurveyRecord(
+    )
+    student6 = models.SurveyRecord(
         student_id="asurite6",
-    ), models.SurveyRecord(
+    )
+    student7 = models.SurveyRecord(
         student_id="asurite7",
-    ), models.SurveyRecord(
+    )
+    student8 = models.SurveyRecord(
         student_id="asurite8",
-    )]
+    )
+    
+    students = []
+    students.append(student1)
+    students.append(student2)
+    students.append(student3)
+    students.append(student4)
+    students.append(student5)
+    students.append(student6)
+    students.append(student7)
+    students.append(student8)
+
+    output = core.get_min_max_num_groups(students, 4, False, False)
+    print(output)
+
+    min = output[0]
+    max = output[1]
+
+    assert min == 2
+    assert max == 2
+
+def test_get_min_max_num_groups_2():
+    '''
+    This method tests the updated get_min_max_num_groups with plus one being true.
+    Note: survey data is models.SurveyRecord
+    '''
+    student1 = models.SurveyRecord(
+        student_id="asurite1",
+    )
+    student2 = models.SurveyRecord(
+        student_id="asurite2",
+    )
+    student3 = models.SurveyRecord(
+        student_id="asurite3",
+    )
+    student4 = models.SurveyRecord(
+        student_id="asurite4",
+    )
+    student5 = models.SurveyRecord(
+        student_id="asurite5",
+    )
+    student6 = models.SurveyRecord(
+        student_id="asurite6",
+    )
+    student7 = models.SurveyRecord(
+        student_id="asurite7",
+    )
+    student8 = models.SurveyRecord(
+        student_id="asurite8",
+    )
+    student9 = models.SurveyRecord(
+        student_id="asurite9",
+    )
+    student10 = models.SurveyRecord(
+        student_id="asurite10",
+    )
+
+    students = []
+    students.append(student1)
+    students.append(student2)
+    students.append(student3)
+    students.append(student4)
+    students.append(student5)
+    students.append(student6)
+    students.append(student7)
+    students.append(student8)
+    students.append(student9)
+    students.append(student10)
+
+    output = core.get_min_max_num_groups(students, 3, True, False)
+    print(output)
+
+    min = output[0]
+    max = output[1]
+
+    assert min == 3
+    assert max == 3
