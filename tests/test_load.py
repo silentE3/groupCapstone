@@ -1244,6 +1244,7 @@ def test_split_on_delimiter():
 
     list = load.split_on_delimiters(availability, delimiter)
 
+    print(list)
     days = []
     day = ""
     for i in range(len(list)):
@@ -1266,9 +1267,31 @@ def test_split_on_delimiter_2():
     '''
     Tests to see if the program splits on multiple delimiters correctly.
     '''
-    availability = "Monday;Tuesday;Wednesday)Thursday)Friday"
-    delimiter = ";)"
+    availability = "Monday;Tuesday;Wednesday:Thursday:Friday"
+    delimiter = ";:"
 
     list = load.split_on_delimiters(availability, delimiter)
 
     print(list)
+
+    assert list[0] == "Monday"
+    assert list[1] == "Tuesday"
+    assert list[2] == "Wednesday"
+    assert list[3] == "Thursday"
+    assert list[4] == "Friday"
+
+def test_split_on_delimiter_3():
+    '''
+    Tests to see if the program splits on delimiter correctly with a different delimiter other than |.
+    '''
+    availability = "Monday;Tuesday;Wednesday;Thursday;Friday"
+    delimiter = ";"
+
+    list = load.split_on_delimiters(availability, delimiter)
+
+    print(list)
+    assert list[0] == "Monday"
+    assert list[1] == "Tuesday"
+    assert list[2] == "Wednesday"
+    assert list[3] == "Thursday"
+    assert list[4] == "Friday"
