@@ -806,9 +806,13 @@ def test_read_dataset_dup_user():
     # *************************************************************************
 
     assert (len(surveys_result) == 3)
-    assert surveys_result[0].availability == surveys_expected[0].availability # cheks that the latest is used if it is greater
-    assert surveys_result[2].availability == surveys_expected[2].availability # checks that the latest is used if it is equal in timestamp
-    assert not surveys_result[1].availability == surveys_expected[1].availability # checks that it doesn't match to a dup record with older timestamp
+    # cheks that the latest is used if it is greater
+    assert surveys_result[0].availability == surveys_expected[0].availability
+    # checks that the latest is used if it is equal in timestamp
+    assert surveys_result[2].availability == surveys_expected[2].availability
+    # checks that it doesn't match to a dup record with older timestamp
+    assert not surveys_result[1].availability == surveys_expected[1].availability
+
 
 def test_total_availability_matches_finds_matches():
     student = models.SurveyRecord(student_id='asurite1', availability={
@@ -1048,6 +1052,7 @@ def test_parse_survey_record_with_white_space():
 def test_read_survey():
     print('hi')
 
+
 def test_parse_asurite():
 
     asurites = ['asurite 123124 -123123',
@@ -1057,19 +1062,24 @@ def test_parse_asurite():
         assert load.parse_asurite(asurite) == 'asurite'
         a = load.parse_asurite(asurite)
 
+
 def test_load_group_data():
     '''
     Tests the loading of grouping data
     '''
-    config_data: models.Configuration = config.read_json("./tests/test_files/dev_data/config-dev.json")
-    survey_data = load.read_survey(config_data['field_mappings'], "./tests/test_files/dev_data/dataset-dev.csv")
-    groups = load.read_groups("./tests/test_files/dev_data/output.csv", survey_data)
+    config_data: models.Configuration = config.read_json(
+        "./tests/test_files/dev_data/config-dev.json")
+    survey_data = load.read_survey(
+        config_data['field_mappings'], "./tests/test_files/dev_data/dataset-dev.csv")
+    groups = load.read_groups(
+        "./tests/test_files/dev_data/output.csv", survey_data)
 
     assert len(groups) == 4
     assert len(groups[0].members) == 5
     assert len(groups[1].members) == 5
     assert len(groups[2].members) == 5
     assert len(groups[3].members) == 5
+
 
 def test_load_missing_students_1():
     '''
@@ -1096,14 +1106,14 @@ def test_load_missing_students_1():
     survey.append(student4)
 
     fields = [
-      "0 to 3 AM",
-      "3 to 6 AM",
-      "6 to 9 AM",
-      "9 to 12 PM",
-      "12 to 3 PM",
-      "3 to 6 PM",
-      "6 to 9 PM",
-      "9 to 12 AM"
+        "0 to 3 AM",
+        "3 to 6 AM",
+        "6 to 9 AM",
+        "9 to 12 PM",
+        "12 to 3 PM",
+        "3 to 6 PM",
+        "6 to 9 PM",
+        "9 to 12 AM"
     ]
 
     result = load.add_missing_students(survey, ids, fields)
@@ -1132,6 +1142,7 @@ def test_load_missing_students_1():
     assert result[4].provided_survey_data == False
     assert result[5].provided_survey_data == False
 
+
 def test_load_missing_students_2():
     '''
     Tests the add missing student function with 0 missing students.
@@ -1155,14 +1166,14 @@ def test_load_missing_students_2():
     survey.append(student4)
 
     fields = [
-      "0 to 3 AM",
-      "3 to 6 AM",
-      "6 to 9 AM",
-      "9 to 12 PM",
-      "12 to 3 PM",
-      "3 to 6 PM",
-      "6 to 9 PM",
-      "9 to 12 AM"
+        "0 to 3 AM",
+        "3 to 6 AM",
+        "6 to 9 AM",
+        "9 to 12 PM",
+        "12 to 3 PM",
+        "3 to 6 PM",
+        "6 to 9 PM",
+        "9 to 12 AM"
     ]
 
     result = load.add_missing_students(survey, ids, fields)
@@ -1172,6 +1183,7 @@ def test_load_missing_students_2():
     assert result[1].provided_survey_data == True
     assert result[2].provided_survey_data == True
     assert result[3].provided_survey_data == True
+
 
 def test_load_missing_students_3():
     '''
@@ -1188,14 +1200,14 @@ def test_load_missing_students_3():
     survey = []
 
     fields = [
-      "0 to 3 AM",
-      "3 to 6 AM",
-      "6 to 9 AM",
-      "9 to 12 PM",
-      "12 to 3 PM",
-      "3 to 6 PM",
-      "6 to 9 PM",
-      "9 to 12 AM"
+        "0 to 3 AM",
+        "3 to 6 AM",
+        "6 to 9 AM",
+        "9 to 12 PM",
+        "12 to 3 PM",
+        "3 to 6 PM",
+        "6 to 9 PM",
+        "9 to 12 AM"
     ]
 
     result = load.add_missing_students(survey, ids, fields)
@@ -1205,6 +1217,7 @@ def test_load_missing_students_3():
     assert result[1].provided_survey_data == False
     assert result[2].provided_survey_data == False
     assert result[3].provided_survey_data == False
+
 
 def test_read_roster():
     '''
@@ -1234,6 +1247,220 @@ def test_read_roster():
     students[17] = "asurite18"
     students[18] = "asurite19"
     students[19] = "asurite20"
+
+# This test verifies that Example_Report_1.xlsx is read and processed correctly via
+#  the read_report function. In the process, it also verifies the __parse_record and
+#  __parse_availability functions.
+#
+# Example_Report_1.xlsx consists of 5 students, three of which are typical
+#   records (some fields have values, others are blank) and a two where
+#   the user has blank responses (did not fill out the survey).
+#
+# NOTE: Currently, we are only concerned with properly reading in the student's:
+#       - asurite (student_id)
+#       - disliked students
+#       - preferred students
+#       - availability
+#       - assigned group (group_id)
+#   If this were to change in the future, then this test should be updated as necessary.
+
+def test_read_report():
+    '''
+    Read report 1 test
+    '''
+    # *************************************************************************
+    # Start by building the expected user records
+    # *************************************************************************
+
+    # First user record -- jsmith1
+    student_id_1 = 'jsmith1'
+    timezone_1 = 'UTC +1'
+    preferred_students_1 = ['jdoe2']
+    disliked_students_1 = ['mmuster3', 'jschmo4']
+    availability_1 = {
+        '0:00 AM - 3:00 AM': ['sunday', 'thursday', 'friday'],
+        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
+        '6:00 AM - 9:00 AM': [],
+        '9:00 AM - 12:00 PM': [],
+        '12:00 PM - 3:00 PM': [],
+        '3:00 PM - 6:00 PM': ['tuesday', 'wednesday'],
+        '6:00 PM - 9:00 PM': [],
+        '9:00 PM - 12:00 PM': []
+    }
+    user_record_1 = models.SurveyRecord(
+        student_id=student_id_1,
+        preferred_students=preferred_students_1,
+        disliked_students=disliked_students_1,
+        availability=availability_1,
+        group_id='1'
+    )
+
+    # Second user record -- jdoe2
+    student_id_2 = 'jdoe2'
+    timezone_2 = 'UTC +2'
+    preferred_students_2 = ['mmuster3', 'jschmo4']
+    disliked_students_2 = ['jsmith1', 'bwillia5']
+    availability_2 = {
+        '0:00 AM - 3:00 AM': [],
+        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
+        '6:00 AM - 9:00 AM': [],
+        '9:00 AM - 12:00 PM': [],
+        '12:00 PM - 3:00 PM': ['tuesday'],
+        '3:00 PM - 6:00 PM': ['wednesday'],
+        '6:00 PM - 9:00 PM': [],
+        '9:00 PM - 12:00 PM': []
+    }
+    user_record_2 = models.SurveyRecord(
+        student_id=student_id_2,
+        preferred_students=preferred_students_2,
+        disliked_students=disliked_students_2,
+        availability=availability_2,
+        group_id='2'
+    )
+
+    # Third user record -- mmuster3
+    student_id_3 = 'mmuster3'
+    timezone_3 = 'UTC +3'
+    preferred_students_3 = ['jsmith1', 'bwillia5']
+    disliked_students_3 = ['jdoe2']
+    availability_3 = {
+        '0:00 AM - 3:00 AM': [],
+        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
+        '6:00 AM - 9:00 AM': [],
+        '9:00 AM - 12:00 PM': [],
+        '12:00 PM - 3:00 PM': [],
+        '3:00 PM - 6:00 PM': ['wednesday', 'thursday'],
+        '6:00 PM - 9:00 PM': ['thursday'],
+        '9:00 PM - 12:00 PM': ['friday']
+    }
+    user_record_3 = models.SurveyRecord(
+        student_id=student_id_3,
+        preferred_students=preferred_students_3,
+        disliked_students=disliked_students_3,
+        availability=availability_3,
+        group_id='1'
+    )
+
+    # Fourth user record -- jschmo4 (NOTE: user did not fill out survey. i.e., has no responses and therefore gets
+    # assigned completely open availability)
+    student_id_4 = 'jschmo4'
+    timezone_4 = ''
+    preferred_students_4 = []
+    disliked_students_4 = []
+    availability_4 = {
+        '0:00 AM - 3:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '3:00 AM - 6:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '6:00 AM - 9:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '9:00 AM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '12:00 PM - 3:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '3:00 PM - 6:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '6:00 PM - 9:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '9:00 PM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    user_record_4 = models.SurveyRecord(
+        student_id=student_id_4,
+        preferred_students=preferred_students_4,
+        disliked_students=disliked_students_4,
+        availability=availability_4,
+        group_id='2'
+    )
+
+    # Fifth user record -- jbwillia5 (NOTE: user did not fill out survey. i.e., has no responses and therefore gets
+    # assigned completely open availability)
+    student_id_5 = 'bwillia5'
+    timezone_5 = ''
+    preferred_students_5 = []
+    disliked_students_5 = []
+    availability_5 = {
+        '0:00 AM - 3:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '3:00 AM - 6:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '6:00 AM - 9:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '9:00 AM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '12:00 PM - 3:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '3:00 PM - 6:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '6:00 PM - 9:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        '9:00 PM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    user_record_5 = models.SurveyRecord(
+        student_id=student_id_5,
+        preferred_students=preferred_students_5,
+        disliked_students=disliked_students_5,
+        availability=availability_5,
+        group_id='1'
+    )
+
+    expected_students: models.GroupRecord = models.GroupRecord(
+        "expected students",
+        [
+            user_record_1,
+            user_record_2,
+            user_record_3,
+            user_record_4,
+            user_record_5
+        ]
+    )
+
+    # *************************************************************************
+    # Read/process the config and survey data
+    # *************************************************************************
+
+    report_data = load.read_report(
+        './tests/test_files/reports/Example_Report_1.xlsx')
+
+    # *************************************************************************
+    # Verify that the config and survey data was read/processed properly.
+    # *************************************************************************
+    assert len(report_data[0]) == 2  # 2 group records
+    num_students: int = 0
+    for group in report_data[0]:
+        for student in group.members:
+            # Each student record is read in as expected
+            assert __student_in_group(student, expected_students)
+            num_students += 1
+    assert num_students == 5  # 5 student records
+
+
+def __survey_record_eq(record1: models.SurveyRecord, record2: models.SurveyRecord) -> bool:
+    # Helper function to determine if record1 and record2 are equivalent.
+    if not record1.student_id == record2.student_id:
+        return False
+    if not record1.student_name == record2.student_name:
+        return False
+    if not record1.student_email == record2.student_email:
+        return False
+    if not record1.student_login == record2.student_login:
+        return False
+    if not record1.timezone == record2.timezone:
+        return False
+    if not record1.preferred_students == record2.preferred_students:
+        for preferred_student in record1.preferred_students:
+            if not preferred_student in record2.preferred_students:
+                return False
+        for preferred_student in record2.preferred_students:
+            if not preferred_student in record1.preferred_students:
+                return False
+    if not record1.disliked_students == record2.disliked_students:
+        for disliked_student in record1.disliked_students:
+            if not disliked_student in record2.disliked_students:
+                return False
+        for disliked_student in record2.disliked_students:
+            if not disliked_student in record1.disliked_students:
+                return False
+    if not record1.availability == record2.availability:
+        return False
+    if not record1.group_id == record2.group_id:
+        return False
+    return True
+
+
+def __student_in_group(student: models.SurveyRecord, group: models.GroupRecord) -> bool:
+    # Helper function to determine if an equivalent survey record for 'student' exists
+    # in 'group'
+    student_in_group: bool = False
+    for group_student in group.members:
+        if __survey_record_eq(student, group_student):
+            student_in_group = True
+    return student_in_group
 
 def test_split_on_delimiter():
     '''

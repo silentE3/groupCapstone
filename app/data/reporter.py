@@ -62,6 +62,8 @@ class ReportFormatter():
                 record = []
                 record.append(user.student_id)
 
+                record.append(';'.join(user.disliked_students))
+
                 if len(user.disliked_students) == 0:
                     record.append('none provided')
                 else:
@@ -86,7 +88,6 @@ class ReportFormatter():
                 else:
                     record.append(len(user_perfs[user.student_id]) > 0)
 
-                record.append(len(user_perfs[user.student_id]) > 0)
                 if self.report_config['show_preferred_students']:
                     # for preferred list
                     record.append(";".join(user_perfs[user.student_id]))
@@ -102,6 +103,7 @@ class ReportFormatter():
 
     def __individual_report_header(self):
         header = ['Student Id']
+        header.append('Disliked Students')
         header.append('Meets Dislike Requirement')
         if self.report_config['show_disliked_students']:
             header.append('Disliked students in group')

@@ -20,7 +20,8 @@ class Grouper2:
         self.groups: list[models.GroupRecord] = []
         self.group_count = group_count
         self.target_group_size = config['target_group_size']
-        self.target_group_margin = 1
+        self.target_group_margin_upper = 1 if config['target_plus_one_allowed'] else 0
+        self.target_group_margin_lower = 1 if config['target_minus_one_allowed'] else 0
         self.grouping_passes = config['grouping_passes']
         self.config = config
         self.num_students: int = len(self.students)
@@ -51,7 +52,7 @@ class Grouper2:
         balances groups
         '''
         for group in self.groups:
-            if len(group.members) < self.target_group_size - self.target_group_margin:
+            if len(group.members) < self.target_group_size - self.target_group_margin_lower:
                 self.console_printer.print(
                     f'balancing group: {group.group_id} with size {len(group.members)}')
                 self.balance_group(group)
@@ -61,21 +62,21 @@ class Grouper2:
         balancing group to ensure there are enough members
         '''
         groups_with_enough_mems = list(filter(lambda group: len(
-            group.members) > self.target_group_size-self.target_group_margin, self.groups))
-        while len(group.members) < self.target_group_size-self.target_group_margin:
+            group.members) > self.target_group_size-self.target_group_margin_lower, self.groups))
+        while len(group.members) < self.target_group_size-self.target_group_margin_lower:
             for other_group in groups_with_enough_mems:
                 for member in other_group.members:
                     if meets_hard_requirement(member, group, self.target_group_size):
                         other_group.members.remove(member)
                         group.members.append(member)
-                        if len(other_group.members) <= self.target_group_size-self.target_group_margin:
+                        if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
                             groups_with_enough_mems.remove(other_group)
                         break
-                if len(group.members) >= self.target_group_size-self.target_group_margin:
+                if len(group.members) >= self.target_group_size-self.target_group_margin_lower:
                     break
             for other_group in groups_with_enough_mems:
                 member = other_group.members.pop()
-                if len(other_group.members) <= self.target_group_size-self.target_group_margin:
+                if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
                     groups_with_enough_mems.remove(other_group)
                 group.members.append(member)
                 break
@@ -150,7 +151,7 @@ class Grouper2:
 
         # if finding a scenario with the target group size isn't feasible, attempt to just append them
         for group in self.groups:
-            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin):
+            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin_upper):
                 group.members.append(student)
                 return
 
@@ -175,7 +176,7 @@ class Grouper2:
 
         # if all else fails, just find an open group and add them
         for group in self.groups:
-            if len(group.members) < self.target_group_size+self.target_group_margin:
+            if len(group.members) < self.target_group_size+self.target_group_margin_upper:
                 group.members.append(student)
                 return
 

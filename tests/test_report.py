@@ -1,4 +1,5 @@
 import os
+import shutil
 from click.testing import CliRunner
 import click
 from app.commands import report
@@ -74,4 +75,47 @@ def test_invalid_config_file():
                              './tests/test_files/dev_data/dataset-dev.csv',
                              '-c', './tests/test_files/dev_data/badfile.json',
                              '-r', './tests/test_files/dev_data/specific_report.xlsx'])
+    assert response.exit_code == 2
+
+
+def test_update_reporting_basic():
+    '''
+    Runs a simple "update report" test against Example_Report_1.xlsx.
+    '''
+
+    report_file_path: str = './tests/test_files/reports/Example_Report_1'
+    shutil.copyfile(report_file_path + '.xlsx',
+                    report_file_path + '_copy.xlsx')
+
+    original_file_time: float = os.path.getmtime(report_file_path + '.xlsx')
+
+    response = runner.invoke(report.update_report, [
+                             './tests/test_files/reports/Example_Report_1.xlsx',
+                             '-c', './tests/test_files/configs/config_1_full.json'])
+    assert response.exit_code == 0
+
+    # verify the report file was updated
+    assert os.path.getmtime(report_file_path + '.xlsx') > original_file_time
+
+    os.remove(report_file_path + '.xlsx')
+    os.rename(report_file_path + '_copy.xlsx', report_file_path + '.xlsx')
+
+
+def test_invalid_report_file():
+    '''
+    Runs a simple test to ensure update-report fails on a bad report file
+    '''
+    response = runner.invoke(report.update_report, [
+                             './tests/test_files/reports/Nonexistent_File.xlsx',
+                             '-c', './tests/test_files/configs/config_1_full.json'])
+    assert response.exit_code == 2
+
+
+def test_update_report_invalid_config_file():
+    '''
+    Runs a simple test to ensure update-report fails on an invalid config file
+    '''
+    response = runner.invoke(report.update_report, [
+                             './tests/test_files/reports/Example_Report_1.xlsx',
+                             '-c', './tests/test_files/configs/Nonexistent_File.json'])
     assert response.exit_code == 2
