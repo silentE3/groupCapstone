@@ -233,3 +233,48 @@ def test_get_min_max_num_groups_2():
 
     assert min == 3
     assert max == 3
+
+def test_get_min_max_num_groups_3():
+    '''
+    This method tests the updated get_min_max_num_groups with minus one being true.
+    Note: survey data is models.SurveyRecord
+    '''
+    student1 = models.SurveyRecord(
+        student_id="asurite1",
+    )
+    student2 = models.SurveyRecord(
+        student_id="asurite2",
+    )
+    student3 = models.SurveyRecord(
+        student_id="asurite3",
+    )
+    student4 = models.SurveyRecord(
+        student_id="asurite4",
+    )
+    student5 = models.SurveyRecord(
+        student_id="asurite5",
+    )
+    student6 = models.SurveyRecord(
+        student_id="asurite6",
+    )
+    student7 = models.SurveyRecord(
+        student_id="asurite7",
+    )
+
+    students = []
+    students.append(student1)
+    students.append(student2)
+    students.append(student3)
+    students.append(student4)
+    students.append(student5)
+    students.append(student6)
+    students.append(student7)
+
+    output = core.get_min_max_num_groups(students, 4, False, True)
+    print(output)
+
+    min = output[0]
+    max = output[1]
+
+    assert min == 2
+    assert max == 2
