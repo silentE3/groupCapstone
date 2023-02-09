@@ -25,13 +25,11 @@ def split_on_delimiters(availability: str, delimiters: str):
     '''
     allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
     '''
-    split_str = ''
-    for character in delimiters:
-        split_str += character + '|'
-    try:
-        split_str += delimiters[len(delimiters) - 1]
-    except IndexError:
-        print("Configuration file has no availability delimiters defined")
+    if len(delimiters) == 0:
+        raise ValueError("Configuration file has no availability delimiters defined")
+    delim_chars = [*delimiters]
+    split_str = '|'.join(delim_chars)
+
     return re.split(split_str, availability)
 
 
