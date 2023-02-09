@@ -7,7 +7,7 @@ from app.group import scoring
 from app.file import xlsx
 
 
-def write_report(solutions: list[list[models.GroupRecord]], data_config: models.Configuration, filename: str):
+def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
@@ -23,6 +23,8 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
             'group_report_' + str(index + 1), group_formatted_report)
         xlsx_writer.write_sheet(
             'overall_report_' + str(index + 1), overall_formatted_report)
+
+    xlsx_writer.write_sheet('survey_data', report_rows)
 
     xlsx_writer.save()
 

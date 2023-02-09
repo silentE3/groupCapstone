@@ -175,6 +175,17 @@ def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -
 
     return surveys
 
+def read_survey_raw(data_file_path: str) -> list[list[str]]:
+    '''
+    reads the survey into a 2d list.
+    This is helpful for loading data that can be written elsewhere without changes
+    '''
+    rows = []
+    with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
+        reader = csv.reader(data_file)
+        for row in reader:
+            rows.append(row)
+    return rows
 
 def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
     '''
