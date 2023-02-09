@@ -28,6 +28,7 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
 
     # load the survey data
     survey_data = load.read_survey(config_data['field_mappings'], surveyfile)
+    rows = load.read_survey_raw(surveyfile)
 
     groups = load.read_groups(groupfile, survey_data.records)
 
