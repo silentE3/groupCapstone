@@ -5,7 +5,7 @@ from app import models
 from app.group import validate
 from app.group import scoring
 from app.file import xlsx
-from app import config
+from app import config as cfg
 
 
 def write_report(solutions: list[list[models.GroupRecord]], data_config: models.Configuration, filename: str):
@@ -214,17 +214,24 @@ class ReportFormatter():
         return headers
 
     def format_config_report(self):
+        '''
+        Generates the Excel report data from the config
+        Acts to flatten the structure of the config file so that each property has a header
+        '''
         records: list[list] = [self.__config_report_headers()]
+
+        print(records) # Temp Debug
 
         
 
-        return
-
     def __get_config_headers(self, data: dict) -> list[str]:
+        '''
+        Recursively generates a list of all headers from the config file
+        '''
         headers = []
 
         for item in data:
-            if type(data[item]) is dict:
+            if isinstance(data[item], dict):
                 self.__get_config_headers(dict(data[item]))
             else:
                 headers.append(item)
@@ -233,7 +240,10 @@ class ReportFormatter():
         return headers
 
     def __config_report_headers(self) -> list[str]:
-        return self.__get_config_headers(dict(config.CONFIG_DATA))
+        '''
+        Creates the list of headers based off of the config file
+        '''
+        return self.__get_config_headers(dict(cfg.CONFIG_DATA))
 
     def format_overall_report(self, groups: list[models.GroupRecord]):
         '''
