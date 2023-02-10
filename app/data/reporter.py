@@ -5,6 +5,7 @@ from app import models
 from app.group import validate
 from app.group import scoring
 from app.file import xlsx
+from app import config
 
 
 def write_report(solutions: list[list[models.GroupRecord]], data_config: models.Configuration, filename: str):
@@ -12,6 +13,8 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
     writes the report to an xlsx file
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
+    ReportFormatter(data_config).format_config_report()
+
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(data_config)
         formatted_data = formatter.format_individual_report(solution)
@@ -209,6 +212,28 @@ class ReportFormatter():
             headers.append('Score')
 
         return headers
+
+    def format_config_report(self):
+        records: list[list] = [self.__config_report_headers()]
+
+        
+
+        return
+
+    def __get_config_headers(self, data: dict) -> list[str]:
+        headers = []
+
+        for item in data:
+            if type(data[item]) is dict:
+                self.__get_config_headers(dict(data[item]))
+            else:
+                headers.append(item)
+                print(item + ":" + str(type(data[item]))) #DEBUG data. REMOVE ME
+
+        return headers
+
+    def __config_report_headers(self) -> list[str]:
+        return self.__get_config_headers(dict(config.CONFIG_DATA))
 
     def format_overall_report(self, groups: list[models.GroupRecord]):
         '''
