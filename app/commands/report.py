@@ -28,13 +28,12 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
 
     # load the survey data
     survey_data = load.read_survey(config_data['field_mappings'], surveyfile)
-    rows = load.read_survey_raw(surveyfile)
 
-    groups = load.read_groups(groupfile, survey_data)
+    groups = load.read_groups(groupfile, survey_data.records)
 
     click.echo(f'Writing report to: "{reportfile}"')
     reporter.write_report(
-        [groups], rows, config_data, reportfile)
+        [groups], survey_data.raw_rows, config_data, reportfile)
 
 
 @click.command("update-report")
