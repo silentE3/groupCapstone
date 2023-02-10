@@ -200,19 +200,47 @@ def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: Tex
 
     preprocess_survey_data(surveys, field_mapping)
 
-    return surveys
-
-def read_survey_raw(data_file_path: str) -> list[list[str]]:
+def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
     '''
     reads the survey into a 2d list.
     This is helpful for loading data that can be written elsewhere without changes
     '''
     rows = []
-    with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
-        reader = csv.reader(data_file)
-        for row in reader:
-            rows.append(row)
+    reader = csv.reader(data_file)
+    for row in reader:
+        rows.append(row)
+
     return rows
+
+
+def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:
+    '''
+    reads in a csv file using a csv dictreader and maps the fields back to the survey records
+    '''
+    reader = csv.DictReader(data_file)
+    surveys: list[models.SurveyRecord] = []
+    for row in reader:
+        survey = parse_survey_record(field_mapping, row)
+
+        skip_user = False
+        for idx, existing_survey_record in enumerate(surveys):
+            if existing_survey_record.student_id == survey.student_id:
+                if survey.submission_date >= existing_survey_record.submission_date:
+                    print(
+                        f'found duplicate record for id: {existing_survey_record.student_id}. Using record with timestamp: {survey.submission_date}')
+                    surveys[idx] = survey
+                else:
+                    print(
+                        f'skipped adding record with id: {existing_survey_record.student_id} and timestamp: {survey.submission_date}')
+                skip_user = True
+
+        if not skip_user:
+            surveys.append(survey)
+
+    preprocess_survey_data(surveys, field_mapping)
+
+    return surveys
+
 
 def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
     '''
