@@ -682,6 +682,19 @@ def test_read_dataset_1_all_fields():
     assert surveys_result.records[1].preferred_students[0] in surveys_expected[1].preferred_students
 
 
+def test_read_survey_raw():
+    rows = []
+    with open('./tests/test_files/survey_results/Example_Survey_Results_1_full.csv', 'r') as file:
+        rows.extend(load.read_survey_raw(file))
+    assert len(rows) == 4
+    
+def test_read_survey_raw_badfile():
+    with open('./tests/test_files/reports/Example_Report_1.xlsx', 'r') as file:
+        with pytest.raises(ValueError):
+            load.read_survey_raw(file)
+
+
+
 def test_read_dataset_dup_user():
     '''
     tests loading a dataset that contains a duplicate user. It checks  that the latest submission is used
@@ -1049,10 +1062,6 @@ def test_parse_survey_record_with_white_space():
     assert record.disliked_students[0] == 'asurite2'
 
 
-def test_read_survey():
-    print('hi')
-
-
 def test_parse_asurite():
 
     asurites = ['asurite 123124 -123123',
@@ -1264,6 +1273,7 @@ def test_read_roster():
 #       - assigned group (group_id)
 #   If this were to change in the future, then this test should be updated as necessary.
 
+
 def test_read_report():
     '''
     Read report 1 test
@@ -1462,6 +1472,7 @@ def __student_in_group(student: models.SurveyRecord, group: models.GroupRecord) 
             student_in_group = True
     return student_in_group
 
+
 def test_split_on_delimiter():
     '''
     Tests to see if the program splits on delimiter correctly. This was found
@@ -1502,6 +1513,7 @@ def test_split_on_delimiter():
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
 
+
 def test_split_on_delimiter_2():
     '''
     Tests to see if the program splits on multiple delimiters correctly.
@@ -1518,6 +1530,7 @@ def test_split_on_delimiter_2():
     assert list[2] == "Wednesday"
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
+
 
 def test_split_on_delimiter_3():
     '''
