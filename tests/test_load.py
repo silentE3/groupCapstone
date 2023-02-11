@@ -144,7 +144,7 @@ def test_read_dataset_1():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 4)  # 4 user records
+    assert (len(surveys_result.records) == 4)  # 4 user records
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_2.csv (both
@@ -330,7 +330,7 @@ def test_read_dataset_2():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 6)  # 6 user records
+    assert (len(surveys_result.records) == 6)  # 6 user records
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_3.csv (both
@@ -356,8 +356,8 @@ def test_read_dataset_3():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 0)  # 0 (no) user records
-    assert (surveys_result == surveys_expected)
+    assert (len(surveys_result.records) == 0)  # 0 (no) user records
+    assert (surveys_result.records == surveys_expected)
 
 # This test verifies that config_2.json and Example_Survey_Results_4.csv (both
 # stored in the test_files folder) are read and processed correctly.
@@ -538,7 +538,7 @@ def test_read_dataset_4():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 2)  # 2 user records
+    assert (len(surveys_result.records) == 2)  # 2 user records
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
@@ -677,9 +677,9 @@ def test_read_dataset_1_all_fields():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 3)
-    assert surveys_result[0].availability == surveys_expected[0].availability
-    assert surveys_result[1].preferred_students[0] in surveys_expected[1].preferred_students
+    assert (len(surveys_result.records) == 3)
+    assert surveys_result.records[0].availability == surveys_expected[0].availability
+    assert surveys_result.records[1].preferred_students[0] in surveys_expected[1].preferred_students
 
 
 def test_read_dataset_dup_user():
@@ -805,13 +805,13 @@ def test_read_dataset_dup_user():
     # Verify that the config and survey data was read/processed properly.
     # *************************************************************************
 
-    assert (len(surveys_result) == 3)
+    assert (len(surveys_result.records) == 3)
     # cheks that the latest is used if it is greater
-    assert surveys_result[0].availability == surveys_expected[0].availability
+    assert surveys_result.records[0].availability == surveys_expected[0].availability
     # checks that the latest is used if it is equal in timestamp
-    assert surveys_result[2].availability == surveys_expected[2].availability
+    assert surveys_result.records[2].availability == surveys_expected[2].availability
     # checks that it doesn't match to a dup record with older timestamp
-    assert not surveys_result[1].availability == surveys_expected[1].availability
+    assert not surveys_result.records[1].availability == surveys_expected[1].availability
 
 
 def test_total_availability_matches_finds_matches():
@@ -1072,7 +1072,7 @@ def test_load_group_data():
     survey_data = load.read_survey(
         config_data['field_mappings'], "./tests/test_files/dev_data/dataset-dev.csv")
     groups = load.read_groups(
-        "./tests/test_files/dev_data/output.csv", survey_data)
+        "./tests/test_files/dev_data/output.csv", survey_data.records)
 
     assert len(groups) == 4
     assert len(groups[0].members) == 5

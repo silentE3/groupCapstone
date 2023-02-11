@@ -58,7 +58,7 @@ def generate_random_user_records(count: int) -> list[UserRecord]:
     """
 
     if count <= 1:
-        raise Exception("count must be greater than 1")
+        raise ValueError("count must be greater than 1")
 
     asurites = []
     records = []
@@ -122,7 +122,7 @@ def get_random_availability(timeslice=3) -> dict:
     that contains a certain set of days the person is available
     """
     if 24 % timeslice != 0:
-        raise Exception("cannot divide timeslice evenly")
+        raise ValueError("cannot divide timeslice evenly")
 
     availability = {}
     interval_count = 24 // timeslice

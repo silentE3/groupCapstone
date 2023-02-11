@@ -3,6 +3,7 @@ Provides the ability to load data into the program including raw survey data and
 """
 
 import csv
+from io import TextIOWrapper
 import re
 
 import datetime as dt
@@ -26,7 +27,8 @@ def split_on_delimiters(availability: str, delimiters: str):
     allows handling of as many delimiters as the user wants to define in the config file, used by parse_survey_record()
     '''
     if len(delimiters) == 0:
-        raise ValueError("Configuration file has no availability delimiters defined")
+        raise ValueError(
+            "Configuration file has no availability delimiters defined")
     delim_chars = f'[{re.escape(delimiters)}]'
 
     return re.split(delim_chars, availability)
@@ -125,7 +127,8 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
         avail_str = re.sub(r'\s', '', row[field].lower())
         survey.availability[field] = []
         if avail_str and re.search(r'\S', avail_str):
-            survey.availability[field] = split_on_delimiters(avail_str, config.CONFIG_DATA["availability_values_delimiter"])
+            survey.availability[field] = split_on_delimiters(
+                avail_str, config.CONFIG_DATA["availability_values_delimiter"])
 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
@@ -143,31 +146,58 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     return survey
 
 
-def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> list[models.SurveyRecord]:
+def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> models.SurveyData:
     '''
     loads the data from the survey.
     If there is a duplicate record, it will use the one with the submission date that is equal to or greater
     '''
+    raw_rows: list[list[str]] = []
+    records: list[models.SurveyRecord] = []
     with open(data_file_path, 'r', encoding='utf-8-sig') as data_file:
-        reader = csv.DictReader(data_file)
-        surveys: list[models.SurveyRecord] = []
-        for row in reader:
-            survey = parse_survey_record(field_mapping, row)
+        raw_rows.extend(read_survey_raw(data_file))
+        data_file.seek(0)
+        records.extend(read_survey_records(field_mapping, data_file))
 
-            skip_user = False
-            for idx, existing_survey_record in enumerate(surveys):
-                if existing_survey_record.student_id == survey.student_id:
-                    if survey.submission_date >= existing_survey_record.submission_date:
-                        print(
-                            f'found duplicate record for id: {existing_survey_record.student_id}. Using record with timestamp: {survey.submission_date}')
-                        surveys[idx] = survey
-                    else:
-                        print(
-                            f'skipped adding record with id: {existing_survey_record.student_id} and timestamp: {survey.submission_date}')
-                    skip_user = True
+    return models.SurveyData(records, raw_rows)
 
-            if not skip_user:
-                surveys.append(survey)
+
+def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
+    '''
+    reads the survey into a 2d list.
+    This is helpful for loading data that can be written elsewhere without changes
+    '''
+    rows = []
+    reader = csv.reader(data_file)
+    for row in reader:
+        rows.append(row)
+
+    return rows
+
+
+def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:
+    '''
+    reads in a csv file using a csv dictreader and maps the fields back to the survey records
+    '''
+    reader = csv.DictReader(data_file)
+    surveys: list[models.SurveyRecord] = []
+    for row in reader:
+        survey = parse_survey_record(field_mapping, row)
+
+        skip_user = False
+        for idx, existing_survey_record in enumerate(surveys):
+            if existing_survey_record.student_id == survey.student_id:
+                if survey.submission_date >= existing_survey_record.submission_date:
+                    print(
+                        f'found duplicate record for id: {existing_survey_record.student_id}. Using record with timestamp: {survey.submission_date}')
+                    surveys[idx] = survey
+                else:
+                    print(
+                        f'skipped adding record with id: {existing_survey_record.student_id} and timestamp: {survey.submission_date}')
+                skip_user = True
+
+        if not skip_user:
+            surveys.append(survey)
+
     preprocess_survey_data(surveys, field_mapping)
 
     return surveys
