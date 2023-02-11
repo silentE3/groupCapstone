@@ -222,7 +222,6 @@ class ReportFormatter():
         '''
         records: list[list] = [self.__config_report_headers()]
         records += self.flatten_config()
-        print(records)  # Temp Debug
         return records
 
     def __get_config_data(self, data: dict) -> list[object]:
@@ -308,8 +307,6 @@ class ReportFormatter():
                 headers += self.__get_config_headers(dict(data[item]))
             else:
                 headers.append(item)
-                # DEBUG data. REMOVE ME
-                print(item + ":" + str(type(data[item])))
 
         return headers
 
