@@ -1534,3 +1534,33 @@ def test_split_on_delimiter_3():
     assert list[2] == "Wednesday"
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
+
+def test_split_on_delimiter_4():
+    '''
+    Tests to see if the program splits on delimiter correctly with | and another delimiter.
+    '''
+    availability = "Monday|Tuesday;Wednesday;Thursday|Friday"
+    delimiter = "|;"
+
+    list = load.split_on_delimiters(availability, delimiter)
+
+    assert list[0] == "Monday"
+    assert list[1] == "Tuesday"
+    assert list[2] == "Wednesday"
+    assert list[3] == "Thursday"
+    assert list[4] == "Friday"
+
+def test_split_on_delimiter_5():
+    '''
+    Tests to see if the program splits on delimiter correctly with ).
+    '''
+    availability = "Monday)Tuesday)Wednesday)Thursday)Friday"
+    delimiter = ")"
+
+    list = load.split_on_delimiters(availability, delimiter)
+
+    assert list[0] == "Monday"
+    assert list[1] == "Tuesday"
+    assert list[2] == "Wednesday"
+    assert list[3] == "Thursday"
+    assert list[4] == "Friday"
