@@ -38,7 +38,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     config_data: models.Configuration = config.read_json(configfile)
 
     ########## Load the survey data ##########
-    records: list[models.SurveyRecord] = load.read_survey(
+    survey_data = load.read_survey(
         config_data['field_mappings'], surveyfile)
 
     ########## Load the class roster data, if applicable ##########
@@ -46,14 +46,14 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
         click.echo(
             f'checking roster for missing students in {allstudentsfile}')
         roster = load.read_roster(allstudentsfile)
-        records = load.add_missing_students(
-            records, roster, config_data['field_mappings']['availability_field_names'])
+        survey_data.records = load.add_missing_students(
+            survey_data.records, roster, config_data['field_mappings']['availability_field_names'])
 
     ########## Grouping ##########
 
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
-                                     config_data["target_minus_one_allowed"], records):
+                                     config_data["target_minus_one_allowed"], survey_data.records):
         return  # error found -- don't continue
 
     # Run grouping algorithms
@@ -61,7 +61,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     # Determine min and max possible number of groups
     min_max_num_groups: list[int] = core.get_min_max_num_groups(
-        records,
+        survey_data.records,
         config_data["target_group_size"],
         config_data["target_plus_one_allowed"],
         config_data["target_minus_one_allowed"])
@@ -70,7 +70,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
     best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
-        records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+        survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     # Output results
     click.echo(f'writing groups to {output_filename_1}')
@@ -81,7 +81,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
     best_solution_grouper_2: list[models.GroupRecord] = __run_grouping_alg_2(
-        records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+        survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     # Output results
     click.echo(f'writing groups to {output_filename_2}')
@@ -94,7 +94,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
             best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(
-            solutions, config_data, report_filename)
+            solutions, survey_data.raw_rows, config_data, report_filename)
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,

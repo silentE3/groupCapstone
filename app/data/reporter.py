@@ -8,7 +8,7 @@ from app.file import xlsx
 from app import config as cfg
 
 
-def write_report(solutions: list[list[models.GroupRecord]], data_config: models.Configuration, filename: str):
+def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
@@ -28,6 +28,8 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
 
     config_sheet = ReportFormatter(data_config).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
+
+    xlsx_writer.write_sheet('survey_data', report_rows)
 
     xlsx_writer.save()
 

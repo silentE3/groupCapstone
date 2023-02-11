@@ -1069,19 +1069,19 @@ def test_all_users_are_grouped():
 
     # get the number of groups and create a list of groups
     num_groups = core.get_min_max_num_groups(
-        surveys_result, config_data["target_group_size"], config_data["target_plus_one_allowed"], config_data["target_minus_one_allowed"])[0]
-    grouper = grouper_1.Grouper1(surveys_result, config_data, num_groups)
+        surveys_result.records, config_data["target_group_size"], config_data["target_plus_one_allowed"], config_data["target_minus_one_allowed"])[0]
+    grouper = grouper_1.Grouper1(surveys_result.records, config_data, num_groups)
     groupings = grouper.create_groups()
 
     # verify that all users have been grouped
-    ungrouped = validate.verify_all_users_grouped(surveys_result, groupings)
+    ungrouped = validate.verify_all_users_grouped(surveys_result.records, groupings)
 
     assert len(ungrouped) == 0
 
     # remove a users from one of the groups and test again
     groupings[0].members.pop()
 
-    ungrouped = validate.verify_all_users_grouped(surveys_result, groupings)
+    ungrouped = validate.verify_all_users_grouped(surveys_result.records, groupings)
 
     assert len(ungrouped) == 1
 

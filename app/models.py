@@ -81,6 +81,15 @@ class SurveyRecord:
 
 
 @dataclass
+class SurveyData:
+    """
+    Data class for survey data loaded when reading in the raw survey file. 
+    This holds both the raw csv rows from the file and the list of survey records 
+    """
+    records: list[SurveyRecord]
+    raw_rows: list[list[str]]
+
+@dataclass
 class GroupRecord:
     '''
     Class that holds group infomation for a single group
