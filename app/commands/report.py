@@ -29,12 +29,11 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
     # load the survey data
     survey_data = load.read_survey(config_data['field_mappings'], surveyfile)
 
-    # redefine the reader and read in the grouping data
-    groups = load.read_groups(groupfile, survey_data)
+    groups = load.read_groups(groupfile, survey_data.records)
 
     click.echo(f'Writing report to: "{reportfile}"')
     reporter.write_report(
-        [groups], config_data, reportfile)
+        [groups], survey_data.raw_rows, config_data, reportfile)
 
 
 @click.command("update-report")
@@ -50,5 +49,4 @@ def update_report(reportfile: str, configfile: str):
 
     groups = load.read_report(reportfile)
 
-
-    reporter.write_report(groups, config_data, reportfile)
+    reporter.write_report(groups, [], config_data, reportfile)
