@@ -13,7 +13,6 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
     writes the report to an xlsx file
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
-    ReportFormatter(data_config).format_config_report()
 
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(data_config)
@@ -26,6 +25,9 @@ def write_report(solutions: list[list[models.GroupRecord]], data_config: models.
             'group_report_' + str(index + 1), group_formatted_report)
         xlsx_writer.write_sheet(
             'overall_report_' + str(index + 1), overall_formatted_report)
+
+    config_sheet = ReportFormatter(data_config).format_config_report()
+    xlsx_writer.write_sheet('config', config_sheet)
 
     xlsx_writer.save()
 
@@ -213,16 +215,87 @@ class ReportFormatter():
 
         return headers
 
-    def format_config_report(self):
+    def format_config_report(self) -> list[list]:
         '''
         Generates the Excel report data from the config
         Acts to flatten the structure of the config file so that each property has a header
         '''
         records: list[list] = [self.__config_report_headers()]
+        records += self.flatten_config()
+        print(records)  # Temp Debug
+        return records
 
-        print(records) # Temp Debug
+    def __get_config_data(self, data: dict) -> list[object]:
+        '''
+        Recursively generates a list of all data from the config file
+        turning it into a flat 1d list of data
+        '''
+        values = []
 
-        
+        for item in data:
+            if isinstance(data[item], dict):
+                values += self.__get_config_data(dict(data[item]))
+            else:
+                values.append(data[item])
+
+        return values
+
+    def __get_list_entries(self, data: list[object]) -> dict[int, list]:
+        '''
+        Creates a dictionary of the list data types in the flat data list
+        with their index in the data list as the key
+        '''
+
+        lists: dict[int, list] = {}
+
+        for index, item in enumerate(data):
+            if isinstance(item, list):
+                lists[index] = list(item)
+
+        return lists
+
+    def __get_max_list_length(self, data: list[object]) -> int:
+        '''
+        Finds all list data types in the flat data list and returns the max size
+        '''
+        max_len: int = 0
+
+        for item in data:
+            if isinstance(item, list) and len(list(item)) > max_len:
+                max_len = len(list(item))
+
+        return max_len
+
+    def __create_blank_2d_list(self, dim1: int, dim2: int) -> list[list]:
+        '''
+        Creates a 2d list filled with empty strings
+        '''
+        sheet: list[list] = []
+        for _ in range(dim1):
+            line: list = [""] * dim2
+            sheet.append(line)
+
+        return sheet
+
+    def flatten_config(self) -> list[list]:
+        '''
+        Turns the hierarchical config data structure into a two-dimensional array of values
+        '''
+        data: list[object] = self.__get_config_data(dict(cfg.CONFIG_DATA))
+        lists: dict[int, list] = self.__get_list_entries(data)
+        max_len: int = self.__get_max_list_length(data)
+        flattened_data: list[list] = self.__create_blank_2d_list(
+            max_len, len(data))
+
+        for index, item in enumerate(data):
+            if not isinstance(item, list):
+                flattened_data[0][index] = item
+
+        for key, value in lists.items():
+            for index, val in enumerate(value):
+                flattened_data[index][key] = val
+
+        return flattened_data
 
     def __get_config_headers(self, data: dict) -> list[str]:
         '''
@@ -232,10 +305,11 @@ class ReportFormatter():
 
         for item in data:
             if isinstance(data[item], dict):
-                self.__get_config_headers(dict(data[item]))
+                headers += self.__get_config_headers(dict(data[item]))
             else:
                 headers.append(item)
-                print(item + ":" + str(type(data[item]))) #DEBUG data. REMOVE ME
+                # DEBUG data. REMOVE ME
+                print(item + ":" + str(type(data[item])))
 
         return headers
 
