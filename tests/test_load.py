@@ -1474,23 +1474,33 @@ def test_split_on_delimiter():
     list = load.split_on_delimiters(availability, delimiter)
 
     print(list)
-    days = []
-    day = ""
-    for i in range(len(list)):
-        if (list[i] != "|"):
-            day += list[i]
-            if (i == len(list)-1):
-                days.append(day)
-        else:
-            days.append(day)
-            day = ""
-    
-    print(days)
-    assert days[0] == "Monday"
-    assert days[1] == "Tuesday"
-    assert days[2] == "Wednesday"
-    assert days[3] == "Thursday"
-    assert days[4] == "Friday"
+
+    # Commented out code block that was added last sprint to show why the test was failing and allow it to pass
+    # temporarily by doctoring the information.  Permanent change to be made while making test in sprint 7.
+
+    # days = []
+    # day = ""
+    # for i in range(len(list)):
+    #     if (list[i] != "|"):
+    #         day += list[i]
+    #         if (i == len(list)-1):
+    #             days.append(day)
+    #     else:
+    #         days.append(day)
+    #         day = ""
+    #
+    # print(days)
+    # assert days[0] == "Monday"
+    # assert days[1] == "Tuesday"
+    # assert days[2] == "Wednesday"
+    # assert days[3] == "Thursday"
+    # assert days[4] == "Friday"
+
+    assert list[0] == "Monday"
+    assert list[1] == "Tuesday"
+    assert list[2] == "Wednesday"
+    assert list[3] == "Thursday"
+    assert list[4] == "Friday"
 
 def test_split_on_delimiter_2():
     '''

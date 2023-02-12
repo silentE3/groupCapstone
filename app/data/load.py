@@ -29,10 +29,9 @@ def split_on_delimiters(availability: str, delimiters: str):
     if len(delimiters) == 0:
         raise ValueError(
             "Configuration file has no availability delimiters defined")
-    delim_chars = [*delimiters]
-    split_str = '|'.join(delim_chars)
+    delim_chars = f'[{re.escape(delimiters)}]'
 
-    return re.split(split_str, availability)
+    return re.split(delim_chars, availability)
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
