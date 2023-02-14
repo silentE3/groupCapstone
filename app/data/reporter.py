@@ -223,7 +223,7 @@ class ReportFormatter():
         Acts to flatten the structure of the config file so that each property has a header
         '''
         records: list[list] = [self.__config_report_headers()]
-        records += self.flatten_config()
+        records += self.__get_flatten_config_data()
         return records
 
     def __get_config_data(self, data: dict) -> list[object]:
@@ -278,7 +278,7 @@ class ReportFormatter():
 
         return sheet
 
-    def flatten_config(self) -> list[list]:
+    def __get_flatten_config_data(self) -> list[list]:
         '''
         Turns the hierarchical config data structure into a two-dimensional array of values
         '''
