@@ -133,11 +133,14 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
+        )
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
+        )
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
+        )
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
@@ -311,6 +314,24 @@ def read_report(filename: str) -> list[list[models.GroupRecord]]:
     book.close()
 
     return [list(groups.values())]
+
+
+def read_report_survey_data(report_filename: str):
+    '''
+    Loads the survey data from the "survey_data" sheet (tab) of a previously generated xlsx report.
+    '''
+
+    # Create a temporary csv file containing the raw survey data stored in the "survey_data" sheet
+
+    report_workbook = load_workbook(report_filename)
+
+    survey_data_sheet = report_workbook["survey_data"]
+
+    temp_csv_filename: str = f'{report_filename.removesuffix(".xlsx")}_temp.csv'
+    with open(temp_csv_filename, 'w', newline='\n', encoding='UTF-8') as file:
+        writer = csv.writer(file)
+        for row in survey_data_sheet.rows:
+            writer.writerow([cell.value for cell in row])
 
 
 def __parse_record(row) -> models.SurveyRecord:

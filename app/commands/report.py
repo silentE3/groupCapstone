@@ -45,6 +45,9 @@ def update_report(reportfile: str, configfile: str):
 
     REPORTFILE is the path to the xlsx based report file to read in
     '''
+
+    load.read_report_survey_data(reportfile)
+
     config_data: models.Configuration = config.read_json(configfile)
 
     groups = load.read_report(reportfile)
