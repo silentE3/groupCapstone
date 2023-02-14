@@ -145,6 +145,7 @@ def test_read_dataset_1():
     # *************************************************************************
 
     assert (len(surveys_result.records) == 4)  # 4 user records
+    assert len(surveys_result.raw_rows) == 5
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_2.csv (both
