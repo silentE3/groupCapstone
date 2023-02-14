@@ -331,6 +331,7 @@ def test_read_dataset_2():
     # *************************************************************************
 
     assert (len(surveys_result.records) == 6)  # 6 user records
+    assert (len(surveys_result.raw_rows) == 7)  # 7 rows in the CSV file
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_3.csv (both
@@ -358,6 +359,7 @@ def test_read_dataset_3():
 
     assert (len(surveys_result.records) == 0)  # 0 (no) user records
     assert (surveys_result.records == surveys_expected)
+    assert len(surveys_result.raw_rows) == 1
 
 # This test verifies that config_2.json and Example_Survey_Results_4.csv (both
 # stored in the test_files folder) are read and processed correctly.
@@ -539,6 +541,7 @@ def test_read_dataset_4():
     # *************************************************************************
 
     assert (len(surveys_result.records) == 2)  # 2 user records
+    assert len(surveys_result.raw_rows) == 3 # 3 rows in the csv file
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
@@ -678,17 +681,27 @@ def test_read_dataset_1_all_fields():
     # *************************************************************************
 
     assert (len(surveys_result.records) == 3)
+    assert (len(surveys_result.raw_rows) == 4)
     assert surveys_result.records[0].availability == surveys_expected[0].availability
     assert surveys_result.records[1].preferred_students[0] in surveys_expected[1].preferred_students
 
 
 def test_read_survey_raw():
+    """
+    tests that loading the raw records of a survey file reads the right number of rows 
+    and the first row is the header
+    """
     rows = []
     with open('./tests/test_files/survey_results/Example_Survey_Results_1_full.csv', 'r') as file:
         rows.extend(load.read_survey_raw(file))
     assert len(rows) == 4
+    assert rows[0][0] == 'Timestamp'
     
-def test_read_survey_raw_badfile():
+
+def test_read_survey_raw_wrongfile_type():
+    """
+    tests that loading a survey file that isn't the right type of file will raise an exception
+    """
     with open('./tests/test_files/reports/Example_Report_1.xlsx', 'r') as file:
         with pytest.raises(ValueError):
             load.read_survey_raw(file)
