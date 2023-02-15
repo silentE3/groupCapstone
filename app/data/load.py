@@ -312,6 +312,11 @@ def read_report(filename: str) -> list[list[models.GroupRecord]]:
 
     return [list(groups.values())]
 
+def read_config_from_report(filename : str):
+    '''
+    This method reads the config data from the report
+    '''
+
 
 def __parse_record(row) -> models.SurveyRecord:
     student_id = row[0].value
