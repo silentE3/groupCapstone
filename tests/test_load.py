@@ -1466,7 +1466,8 @@ def test_split_on_delimiter():
     '''
     Tests to see if the program splits on delimiter correctly. This was found
     as a limitation of the current implementation and that this test will be
-    revisited when split_on_delimiters is changed.
+    revisited when split_on_delimiters is changed. The limitation has now been
+    address and will no longer pose a problem if the delimiter is | or (.
     '''
     availability = "Monday|Tuesday|Wednesday|Thursday|Friday"
     delimiter = "|"
@@ -1511,8 +1512,6 @@ def test_split_on_delimiter_2():
 
     list = load.split_on_delimiters(availability, delimiter)
 
-    print(list)
-
     assert list[0] == "Monday"
     assert list[1] == "Tuesday"
     assert list[2] == "Wednesday"
@@ -1528,7 +1527,6 @@ def test_split_on_delimiter_3():
 
     list = load.split_on_delimiters(availability, delimiter)
 
-    print(list)
     assert list[0] == "Monday"
     assert list[1] == "Tuesday"
     assert list[2] == "Wednesday"
