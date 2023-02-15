@@ -50,3 +50,5 @@ def update_report(reportfile: str, configfile: str):
     groups = load.read_report(reportfile)
 
     reporter.write_report(groups, [], config_data, reportfile)
+
+    # This part will be edited so that the program will read the config data from the report file.
