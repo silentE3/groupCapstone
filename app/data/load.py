@@ -5,7 +5,7 @@ Provides the ability to load data into the program including raw survey data and
 import csv
 from io import TextIOWrapper
 import re
-
+import os
 import datetime as dt
 from typing import Union
 from openpyxl import load_workbook, workbook
@@ -316,7 +316,7 @@ def read_report(filename: str) -> list[list[models.GroupRecord]]:
     return [list(groups.values())]
 
 
-def read_report_survey_data(report_filename: str):
+def read_report_survey_data(report_filename: str, field_mappings: models.SurveyFieldMapping) -> models.SurveyData:
     '''
     Loads the survey data from the "survey_data" sheet (tab) of a previously generated xlsx report.
     '''
@@ -332,6 +332,16 @@ def read_report_survey_data(report_filename: str):
         writer = csv.writer(file)
         for row in survey_data_sheet.rows:
             writer.writerow([cell.value for cell in row])
+
+    # load the survey data from the temp csv file (as is done in the "normal" group command)
+    survey_data: models.SurveyData = read_survey(
+        field_mappings, temp_csv_filename)
+
+    # delete the temp csv file
+    os.remove(temp_csv_filename)
+
+    # return the survey data
+    return survey_data
 
 
 def __parse_record(row) -> models.SurveyRecord:
