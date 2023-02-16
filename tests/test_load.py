@@ -1264,6 +1264,7 @@ def test_read_roster():
 #       - assigned group (group_id)
 #   If this were to change in the future, then this test should be updated as necessary.
 
+
 def test_read_report():
     '''
     Read report 1 test
@@ -1462,38 +1463,15 @@ def __student_in_group(student: models.SurveyRecord, group: models.GroupRecord) 
             student_in_group = True
     return student_in_group
 
-def test_split_on_delimiter():
+
+def test_split_on_delimiter_1():
     '''
-    Tests to see if the program splits on delimiter correctly. This was found
-    as a limitation of the current implementation and that this test will be
-    revisited when split_on_delimiters is changed. The limitation has now been
-    address and will no longer pose a problem if the delimiter is | or (.
+    Tests to see if the function splits on a single delimiter ("|") correctly.
     '''
     availability = "Monday|Tuesday|Wednesday|Thursday|Friday"
     delimiter = "|"
 
     list = load.split_on_delimiters(availability, delimiter)
-
-    # Commented out code block that was added last sprint to show why the test was failing and allow it to pass
-    # temporarily by doctoring the information.  Permanent change to be made while making test in sprint 7.
-
-    # days = []
-    # day = ""
-    # for i in range(len(list)):
-    #     if (list[i] != "|"):
-    #         day += list[i]
-    #         if (i == len(list)-1):
-    #             days.append(day)
-    #     else:
-    #         days.append(day)
-    #         day = ""
-    #
-    # print(days)
-    # assert days[0] == "Monday"
-    # assert days[1] == "Tuesday"
-    # assert days[2] == "Wednesday"
-    # assert days[3] == "Thursday"
-    # assert days[4] == "Friday"
 
     assert list[0] == "Monday"
     assert list[1] == "Tuesday"
@@ -1501,9 +1479,10 @@ def test_split_on_delimiter():
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
 
+
 def test_split_on_delimiter_2():
     '''
-    Tests to see if the program splits on multiple delimiters correctly.
+    Tests to see if the function splits on multiple delimiters correctly.
     '''
     availability = "Monday;Tuesday;Wednesday:Thursday:Friday"
     delimiter = ";:"
@@ -1516,9 +1495,11 @@ def test_split_on_delimiter_2():
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
 
+
 def test_split_on_delimiter_3():
     '''
-    Tests to see if the program splits on delimiter correctly with a different delimiter other than |.
+    Another test to see if the program splits on a single delimiter correctly, but with
+     a different delimiter than was used in test_split_on_delimiter_1.
     '''
     availability = "Monday;Tuesday;Wednesday;Thursday;Friday"
     delimiter = ";"
@@ -1531,9 +1512,11 @@ def test_split_on_delimiter_3():
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
 
+
 def test_split_on_delimiter_4():
     '''
-    Tests to see if the program splits on delimiter correctly with | and another delimiter.
+    Another tests to see if the function splits on multiple delimiters correctly, but with 
+     a different delimiter set than was used in test_split_on_delimiter_2.
     '''
     availability = "Monday|Tuesday;Wednesday;Thursday|Friday"
     delimiter = "|;"
@@ -1546,9 +1529,12 @@ def test_split_on_delimiter_4():
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
 
+
 def test_split_on_delimiter_5():
     '''
-    Tests to see if the program splits on delimiter correctly with ).
+    Another test to see if the program splits on a single delimiter correctly, but with
+     different delimiters than those used in test_split_on_delimiter_1 and 
+     test_split_on_delimiter_3.
     '''
     availability = "Monday)Tuesday)Wednesday)Thursday)Friday"
     delimiter = ")"
