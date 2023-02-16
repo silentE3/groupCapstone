@@ -1474,8 +1474,6 @@ def test_split_on_delimiter():
 
     list = load.split_on_delimiters(availability, delimiter)
 
-    print(list)
-
     # Commented out code block that was added last sprint to show why the test was failing and allow it to pass
     # temporarily by doctoring the information.  Permanent change to be made while making test in sprint 7.
 
