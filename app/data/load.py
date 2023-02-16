@@ -4,8 +4,8 @@ Provides the ability to load data into the program including raw survey data and
 
 import csv
 from io import TextIOWrapper
+from io import StringIO
 import re
-import os
 import datetime as dt
 from typing import Union
 from openpyxl import load_workbook, workbook
@@ -151,8 +151,9 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
 
 def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> models.SurveyData:
     '''
-    loads the data from the survey.
-    If there is a duplicate record, it will use the one with the submission date that is equal to or greater
+    Loads the data from the survey.
+    If there is a duplicate survey record, it will use (keep) the one with the submission
+     date that is equal to or greater
     '''
     raw_rows: list[list[str]] = []
     records: list[models.SurveyRecord] = []
@@ -160,6 +161,21 @@ def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -
         raw_rows.extend(read_survey_raw(data_file))
         data_file.seek(0)
         records.extend(read_survey_records(field_mapping, data_file))
+
+    return models.SurveyData(records, raw_rows)
+
+
+def read_survey_from_io(field_mapping: models.SurveyFieldMapping, text_buffer: TextIOWrapper) -> models.SurveyData:
+    '''
+    Loads the survey data from an io buffer version of the data.
+    If there is a duplicate survey record, it will use (keep) the one with the submission
+     date that is equal to or greater
+    '''
+    raw_rows: list[list[str]] = []
+    records: list[models.SurveyRecord] = []
+    raw_rows.extend(read_survey_raw(text_buffer))
+    text_buffer.seek(0)
+    records.extend(read_survey_records(field_mapping, text_buffer))
 
     return models.SurveyData(records, raw_rows)
 
@@ -321,27 +337,20 @@ def read_report_survey_data(report_filename: str, field_mappings: models.SurveyF
     Loads the survey data from the "survey_data" sheet (tab) of a previously generated xlsx report.
     '''
 
-    # Create a temporary csv file containing the raw survey data stored in the "survey_data" sheet
+    # Write the data in the "survey_data" tab/sheet to an io buffer.
 
     report_workbook = load_workbook(report_filename)
 
     survey_data_sheet = report_workbook["survey_data"]
 
-    temp_csv_filename: str = f'{report_filename.removesuffix(".xlsx")}_temp.csv'
-    with open(temp_csv_filename, 'w', newline='\n', encoding='UTF-8') as file:
-        writer = csv.writer(file)
-        for row in survey_data_sheet.rows:
-            writer.writerow([cell.value for cell in row])
+    text_buffer = StringIO()
+    writer = csv.writer(text_buffer)
+    for row in survey_data_sheet.rows:
+        writer.writerow([cell.value for cell in row])
 
-    # load the survey data from the temp csv file (as is done in the "normal" group command)
-    survey_data: models.SurveyData = read_survey(
-        field_mappings, temp_csv_filename)
-
-    # delete the temp csv file
-    os.remove(temp_csv_filename)
-
-    # return the survey data
-    return survey_data
+    # load and return the survey data from the io buffer
+    text_buffer.seek(0)
+    return read_survey_from_io(field_mappings, text_buffer)
 
 
 def __parse_record(row) -> models.SurveyRecord:
