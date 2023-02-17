@@ -91,7 +91,7 @@ def test_update_reporting_basic():
 
     response = runner.invoke(report.update_report, [
                              './tests/test_files/reports/Example_Report_1.xlsx',
-                             '-c', './tests/test_files/configs/config_1_full.json'])
+                             '-c', './tests/test_files/reports/Example_1_config.json'])
     assert response.exit_code == 0
 
     # verify the report file was updated
