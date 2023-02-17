@@ -9,7 +9,7 @@ from io import StringIO
 import re
 import datetime as dt
 from typing import Union
-from openpyxl import load_workbook, workbook
+from openpyxl import load_workbook
 from app import models
 from app.group import validate
 from app import config
@@ -335,8 +335,6 @@ def read_report_groups(report_filename: str, survey_data: list[models.SurveyReco
         if "individual" not in str.lower(sheet_name):
             continue
 
-        individual_data_sheet = report_workbook[sheet_name]
-
         text_buffer = StringIO()
         writer = csv.writer(text_buffer)
 
@@ -345,7 +343,7 @@ def read_report_groups(report_filename: str, survey_data: list[models.SurveyReco
         student_id_str: str = "student id"
         group_id_col: int = -1
         student_id_col: int = -1
-        for row_idx, row in enumerate(individual_data_sheet.rows):
+        for row_idx, row in enumerate(report_workbook[sheet_name].rows):
             if row_idx == 0:
                 # first row, write headers and determine group id and student id column numbers
                 writer.writerow([group_id_str, student_id_str])
