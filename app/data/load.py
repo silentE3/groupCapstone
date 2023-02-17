@@ -2,6 +2,7 @@
 Provides the ability to load data into the program including raw survey data and grouped data
 """
 
+import copy
 import csv
 from io import TextIOWrapper
 from io import StringIO
@@ -182,7 +183,7 @@ def read_survey_from_io(field_mapping: models.SurveyFieldMapping, text_buffer: T
 
 def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
     '''
-    reads the survey into a 2d list.
+    reads the csv into a 2d list.
     This is helpful for loading data that can be written elsewhere without changes
     '''
     rows = []
@@ -222,30 +223,41 @@ def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: Tex
     return surveys
 
 
-def read_groups(group_file: str, survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
+def read_groups(group_filename: str, survey_data: list[models.SurveyRecord]) -> list[models.GroupRecord]:
     '''
     Reads in grouping data into a list of GroupRecord objects
     '''
+    with open(group_filename, 'r', encoding='utf-8-sig') as data_file:
+        return read_groups_from_io(survey_data, data_file)
+
+
+def read_groups_from_io(survey_data: list[models.SurveyRecord], text_buffer: TextIOWrapper) -> list[models.GroupRecord]:
+    '''
+    Loads/reads the grouping data into a list of Group Record objects from an io buffer
+     version of the data.
+    '''
+    text_buffer.seek(0)
     groups: dict[str, models.GroupRecord] = {}
     is_header: bool = False
-    with open(group_file, 'r', encoding='utf-8-sig') as data_file:
-        reader = csv.DictReader(data_file)
+    reader = csv.DictReader(text_buffer)
 
-        for row in reader:
+    for row in reader:
 
-            if is_header:
-                is_header = False
-                continue
+        if is_header:
+            is_header = False
+            continue
 
-            group_id = row["group id"]
+        group_id = row["group id"]
 
-            if not group_id in groups:
-                groups[group_id] = models.GroupRecord(group_id, [])
+        if not group_id in groups:
+            groups[group_id] = models.GroupRecord(group_id, [])
 
-            user = __get_user_by_id(row["student id"], survey_data)
+        user = __get_user_by_id(row["student id"], survey_data)
 
-            if not user is None:
-                groups[group_id].members.append(user)
+        if not user is None:
+            copied_user = copy.deepcopy(user)
+            copied_user.group_id = group_id
+            groups[group_id].members.append(copied_user)
 
     return list(groups.values())
 
@@ -308,28 +320,50 @@ def read_roster(filename: str) -> list[str]:
     return roster
 
 
-def read_report(filename: str) -> list[list[models.GroupRecord]]:
+def read_report_groups(report_filename: str, survey_data: list[models.SurveyRecord]) -> list[list[models.GroupRecord]]:
     '''
-    reads a previously generated report. This is an xlsx file and currently only the `individual_report_1` tab is read.
+    Reads the specified groups from the individual tabs of an existing xlsx report file.
     '''
-    records: list[models.SurveyRecord] = []
-    book: workbook.Workbook = load_workbook(filename)
-    for idx, row in enumerate(book['individual_report_1'].rows):
-        if idx != 0:
-            records.append(__parse_record(row))
 
-    groups: dict[str, models.GroupRecord] = {}
+    group_sets: list[list[models.GroupRecord]] = []
 
-    for record in records:
-        if groups.get(record.group_id) is None:
-            groups[record.group_id] = models.GroupRecord(
-                record.group_id, [record])
-        else:
-            groups[record.group_id].members.append(record)
+    report_workbook = load_workbook(report_filename)
 
-    book.close()
+    for sheet_name in report_workbook.sheetnames:
 
-    return [list(groups.values())]
+        # Write the grouping data for each "individual" sheet/tab to an io buffer.
+        if "individual" not in str.lower(sheet_name):
+            continue
+
+        individual_data_sheet = report_workbook[sheet_name]
+
+        text_buffer = StringIO()
+        writer = csv.writer(text_buffer)
+
+        # Variables for header information
+        group_id_str: str = "group id"
+        student_id_str: str = "student id"
+        group_id_col: int = -1
+        student_id_col: int = -1
+        for row_idx, row in enumerate(individual_data_sheet.rows):
+            if row_idx == 0:
+                # first row, write headers and determine group id and student id column numbers
+                writer.writerow([group_id_str, student_id_str])
+                for cell_idx, cell in enumerate(row):
+                    if str.lower(cell.value) == str.lower(group_id_str):
+                        group_id_col = cell_idx
+                    elif str.lower(cell.value) == str.lower(student_id_str):
+                        student_id_col = cell_idx
+            elif group_id_col != -1 and student_id_col != -1:
+                # write group information for each student
+                writer.writerow(
+                    [row[group_id_col].value, row[student_id_col].value])
+
+        # load the group data from the io buffer
+        text_buffer.seek(0)
+        group_sets.append(read_groups_from_io(survey_data, text_buffer))
+
+    return group_sets
 
 
 def read_report_survey_data(report_filename: str, field_mappings: models.SurveyFieldMapping) -> models.SurveyData:
@@ -351,47 +385,3 @@ def read_report_survey_data(report_filename: str, field_mappings: models.SurveyF
     # load and return the survey data from the io buffer
     text_buffer.seek(0)
     return read_survey_from_io(field_mappings, text_buffer)
-
-
-def __parse_record(row) -> models.SurveyRecord:
-    student_id = row[0].value
-    disliked_students: str = row[1].value
-    availability: str = row[4].value
-    preferred_students: str = row[7].value
-    group_id: str = row[12].value
-    record: models.SurveyRecord = models.SurveyRecord(
-        student_id=student_id, group_id=group_id)
-    if disliked_students is not None:
-        record.disliked_students = disliked_students.split(';')
-
-    if preferred_students is not None:
-        record.preferred_students = preferred_students.split(';')
-
-    if availability is not None:
-        record.availability = __parse_availability(availability)
-
-    return record
-
-
-def __parse_availability(availability_str: str) -> dict[str, list[str]]:
-    '''
-    parses the availability into a dictionary assuming the format is `day @ time`
-    '''
-    availability: dict[str, list[str]] = {}
-    avail_arr: list[str] = availability_str.split(";")
-    availability = {
-        "0:00 AM - 3:00 AM": [],
-        "3:00 AM - 6:00 AM": [],
-        "6:00 AM - 9:00 AM": [],
-        "9:00 AM - 12:00 PM": [],
-        "12:00 PM - 3:00 PM": [],
-        "3:00 PM - 6:00 PM": [],
-        "6:00 PM - 9:00 PM": [],
-        "9:00 PM - 12:00 PM": []
-    }
-    for key, val in availability.items():
-        for avail in avail_arr:
-            if key in avail:
-                val.append(avail.split()[0])
-
-    return availability
