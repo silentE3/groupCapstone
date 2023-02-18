@@ -5,8 +5,6 @@ import click
 from app.commands import report
 from os.path import exists
 
-from data.load import read_report_survey_data
-
 runner = CliRunner()
 
 # These tests verify the functionality in report.py.
@@ -122,6 +120,3 @@ def test_update_report_invalid_config_file():
                              '-c', './tests/test_files/configs/Nonexistent_File.json'])
     assert response.exit_code == 2
 
-def test_load_survey_data_from_report():
-
-    read_report_survey_data
