@@ -1546,3 +1546,14 @@ def test_split_on_delimiter_5():
     assert list[2] == "Wednesday"
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
+
+
+def test_load_survey_data_from_report():
+
+    config_data = config.read_json(
+        './tests/test_files/reports/Example_1_config.json')
+    expected_data = load.read_survey(config_data['field_mappings'], './tests/test_files/reports/Example_1_dataset.csv')
+    survey_data = load.read_report_survey_data(
+        './tests/test_files/reports/Example_Report_1.xlsx', config_data['field_mappings'])
+
+    assert survey_data == expected_data
