@@ -99,4 +99,3 @@ def read_report_config(report_filename: str) -> Configuration:
 
 
 CONFIG_DATA = None
-
