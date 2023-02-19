@@ -47,4 +47,5 @@ def update_report(reportfile: str):
     config_data: models.Configuration = config.read_report_config(reportfile)
     groups = load.read_report(reportfile)
 
-    reporter.write_report(groups, [], config_data, reportfile)
+    reporter.write_report(groups, survey_data.raw_rows,
+                          config_data, reportfile)
