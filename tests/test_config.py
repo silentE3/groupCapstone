@@ -69,12 +69,17 @@ def test_read_report_config_2():
 
     list = result.get("field_mappings")
     preferred_list = list.get("preferred_students_field_names")
-    
+    dislike_list = list.get("disliked_students_field_names")
+
     assert preferred_list[0] == "Preferred team member 1"
     assert preferred_list[1] == "Preferred team member 2"
     assert preferred_list[2] == "Preferred team member 3"
     assert preferred_list[3] == "Preferred team member 4"
     assert preferred_list[4] == "Preferred team member 5"
+
+    assert dislike_list[0] == "Non-preferred student 1"
+    assert dislike_list[1] == "Non-preferred student 2"
+    assert dislike_list[2] == "Non-preferred student 3"
 
 def test_read_report_config_3():
     '''
