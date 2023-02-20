@@ -79,7 +79,7 @@ def test_invalid_config_file():
     assert response.exit_code == 2
 
 
-def test_update_reporting_basic():
+def test_update_report_basic():
     '''
     Runs a simple "update report" test against Example_Report_1.xlsx.
     '''
@@ -101,23 +101,12 @@ def test_update_reporting_basic():
     os.rename(report_file_path + '_copy.xlsx', report_file_path + '.xlsx')
 
 
-def test_invalid_report_file():
+def test_update_report_invalid_report_file():
     '''
     Runs a simple test to ensure update-report fails on a bad report file
     '''
     response = runner.invoke(report.update_report, [
-                             './tests/test_files/reports/Nonexistent_File.xlsx',
-                             '-c', './tests/test_files/configs/config_1_full.json'])
-    assert response.exit_code == 2
-
-
-def test_update_report_invalid_config_file():
-    '''
-    Runs a simple test to ensure update-report fails on an invalid config file
-    '''
-    response = runner.invoke(report.update_report, [
-                             './tests/test_files/reports/Example_Report_1.xlsx',
-                             '-c', './tests/test_files/configs/Nonexistent_File.json'])
+                             './tests/test_files/reports/Nonexistent_File.xlsx'])
     assert response.exit_code == 2
 
 

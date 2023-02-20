@@ -1250,178 +1250,55 @@ def test_read_roster():
     students[18] = "asurite19"
     students[19] = "asurite20"
 
-# This test verifies that Example_Report_1.xlsx is read and processed correctly via
-#  the read_report function. In the process, it also verifies the __parse_record and
-#  __parse_availability functions.
-#
-# Example_Report_1.xlsx consists of 5 students, three of which are typical
-#   records (some fields have values, others are blank) and a two where
-#   the user has blank responses (did not fill out the survey).
-#
-# NOTE: Currently, we are only concerned with properly reading in the student's:
-#       - asurite (student_id)
-#       - disliked students
-#       - preferred students
-#       - availability
-#       - assigned group (group_id)
-#   If this were to change in the future, then this test should be updated as necessary.
 
-
-'''
-##### NOTE: This test needs to be revisited as part of task #214, which handles the unit testing
-##### associated with the 'update-report' changes made via task #201.
 def test_read_report():
-    # Read report 1 test
-    # *************************************************************************
-    # Start by building the expected user records
-    # *************************************************************************
+    '''
+    Test the functionality pertaining to reading/loading groupings from an existing report file.
 
-    # First user record -- jsmith1
-    student_id_1 = 'jsmith1'
-    timezone_1 = 'UTC +1'
-    preferred_students_1 = ['jdoe2']
-    disliked_students_1 = ['mmuster3', 'jschmo4']
-    availability_1 = {
-        '0:00 AM - 3:00 AM': ['sunday', 'thursday', 'friday'],
-        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
-        '6:00 AM - 9:00 AM': [],
-        '9:00 AM - 12:00 PM': [],
-        '12:00 PM - 3:00 PM': [],
-        '3:00 PM - 6:00 PM': ['tuesday', 'wednesday'],
-        '6:00 PM - 9:00 PM': [],
-        '9:00 PM - 12:00 PM': []
-    }
-    user_record_1 = models.SurveyRecord(
-        student_id=student_id_1,
-        preferred_students=preferred_students_1,
-        disliked_students=disliked_students_1,
-        availability=availability_1,
-        group_id='1'
-    )
-
-    # Second user record -- jdoe2
-    student_id_2 = 'jdoe2'
-    timezone_2 = 'UTC +2'
-    preferred_students_2 = ['mmuster3', 'jschmo4']
-    disliked_students_2 = ['jsmith1', 'bwillia5']
-    availability_2 = {
-        '0:00 AM - 3:00 AM': [],
-        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
-        '6:00 AM - 9:00 AM': [],
-        '9:00 AM - 12:00 PM': [],
-        '12:00 PM - 3:00 PM': ['tuesday'],
-        '3:00 PM - 6:00 PM': ['wednesday'],
-        '6:00 PM - 9:00 PM': [],
-        '9:00 PM - 12:00 PM': []
-    }
-    user_record_2 = models.SurveyRecord(
-        student_id=student_id_2,
-        preferred_students=preferred_students_2,
-        disliked_students=disliked_students_2,
-        availability=availability_2,
-        group_id='2'
-    )
-
-    # Third user record -- mmuster3
-    student_id_3 = 'mmuster3'
-    timezone_3 = 'UTC +3'
-    preferred_students_3 = ['jsmith1', 'bwillia5']
-    disliked_students_3 = ['jdoe2']
-    availability_3 = {
-        '0:00 AM - 3:00 AM': [],
-        '3:00 AM - 6:00 AM': ['monday', 'tuesday'],
-        '6:00 AM - 9:00 AM': [],
-        '9:00 AM - 12:00 PM': [],
-        '12:00 PM - 3:00 PM': [],
-        '3:00 PM - 6:00 PM': ['wednesday', 'thursday'],
-        '6:00 PM - 9:00 PM': ['thursday'],
-        '9:00 PM - 12:00 PM': ['friday']
-    }
-    user_record_3 = models.SurveyRecord(
-        student_id=student_id_3,
-        preferred_students=preferred_students_3,
-        disliked_students=disliked_students_3,
-        availability=availability_3,
-        group_id='1'
-    )
-
-    # Fourth user record -- jschmo4 (NOTE: user did not fill out survey. i.e., has no responses and therefore gets
-    # assigned completely open availability)
-    student_id_4 = 'jschmo4'
-    timezone_4 = ''
-    preferred_students_4 = []
-    disliked_students_4 = []
-    availability_4 = {
-        '0:00 AM - 3:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '3:00 AM - 6:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '6:00 AM - 9:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '9:00 AM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '12:00 PM - 3:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '3:00 PM - 6:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '6:00 PM - 9:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '9:00 PM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-    }
-    user_record_4 = models.SurveyRecord(
-        student_id=student_id_4,
-        preferred_students=preferred_students_4,
-        disliked_students=disliked_students_4,
-        availability=availability_4,
-        group_id='2'
-    )
-
-    # Fifth user record -- jbwillia5 (NOTE: user did not fill out survey. i.e., has no responses and therefore gets
-    # assigned completely open availability)
-    student_id_5 = 'bwillia5'
-    timezone_5 = ''
-    preferred_students_5 = []
-    disliked_students_5 = []
-    availability_5 = {
-        '0:00 AM - 3:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '3:00 AM - 6:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '6:00 AM - 9:00 AM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '9:00 AM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '12:00 PM - 3:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '3:00 PM - 6:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '6:00 PM - 9:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
-        '9:00 PM - 12:00 PM': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
-    }
-    user_record_5 = models.SurveyRecord(
-        student_id=student_id_5,
-        preferred_students=preferred_students_5,
-        disliked_students=disliked_students_5,
-        availability=availability_5,
-        group_id='1'
-    )
-
-    expected_students: models.GroupRecord = models.GroupRecord(
-        "expected students",
-        [
-            user_record_1,
-            user_record_2,
-            user_record_3,
-            user_record_4,
-            user_record_5
-        ]
-    )
+    This test verifies that the groupings in Example_Report_1.xlsx are read and processed correctly
+      via the read_report_groups function
+    '''
 
     # *************************************************************************
-    # Read/process the config and survey data
+    # Start by building the expected groupings
     # *************************************************************************
 
-    report_data = load.read_report(
+    # Algorithm 1 groups (only identifying the student by asurite here)
+    groups_1 = {"1": ['jsmith1', 'mmuster3', 'bwillia5'],  # group 1, group_id = '1'
+                "2": ['jdoe2', 'jschmo4']}  # group 2, group_id = '2'
+    # Algorithm 2 groups (only identifying the student by asurite here)
+    groups_2 = {"group_1": ['jsmith1', 'jdoe2'],  # group 1, group_id = 'group_1'
+                "group_2": ['mmuster3', 'bwillia5', 'jschmo4']}  # group 1, group_id = 'group_2'
+
+    expected_group_sets = [groups_1, groups_2]
+
+    # *************************************************************************
+    # Load the config and survey data and then read/load the groupings in from the report.
+    # *************************************************************************
+    config_data: models.Configuration = config.read_report_config(
         './tests/test_files/reports/Example_Report_1.xlsx')
+    survey_data: models.SurveyData = load.read_report_survey_data(
+        './tests/test_files/reports/Example_Report_1.xlsx', config_data['field_mappings'])
+
+    group_sets: list[list[models.GroupRecord]] = load.read_report_groups(
+        './tests/test_files/reports/Example_Report_1.xlsx', survey_data.records)
 
     # *************************************************************************
-    # Verify that the config and survey data was read/processed properly.
+    # Verify that the groupings were read/loaded properly.
     # *************************************************************************
-    assert len(report_data[0]) == 2  # 2 group records
-    num_students: int = 0
-    for group in report_data[0]:
-        for student in group.members:
-            # Each student record is read in as expected
-            assert __student_in_group(student, expected_students)
-            num_students += 1
-    assert num_students == 5  # 5 student records
+    for groups_idx, groups in enumerate(group_sets):
+        expected_groups = expected_group_sets[groups_idx]
+        # size of group as expected
+        assert len(groups) == len(expected_groups)
+        for group in groups:
+            if group.group_id in expected_groups:
+                expected_group = expected_groups[group.group_id]
+                for stud_idx, student in enumerate(group.members):
+                    expected_student = expected_group[stud_idx]
+                    # Each member of the group is as expected
+                    assert student.student_id == expected_student
+            else:
+                assert False  # group_id was not found/read in properly
 
 
 def __survey_record_eq(record1: models.SurveyRecord, record2: models.SurveyRecord) -> bool:
@@ -1465,7 +1342,6 @@ def __student_in_group(student: models.SurveyRecord, group: models.GroupRecord) 
         if __survey_record_eq(student, group_student):
             student_in_group = True
     return student_in_group
-'''
 
 
 def test_split_on_delimiter_1():
@@ -1519,7 +1395,7 @@ def test_split_on_delimiter_3():
 
 def test_split_on_delimiter_4():
     '''
-    Another tests to see if the function splits on multiple delimiters correctly, but with 
+    Another tests to see if the function splits on multiple delimiters correctly, but with
      a different delimiter set than was used in test_split_on_delimiter_2.
     '''
     availability = "Monday|Tuesday;Wednesday;Thursday|Friday"
@@ -1537,7 +1413,7 @@ def test_split_on_delimiter_4():
 def test_split_on_delimiter_5():
     '''
     Another test to see if the program splits on a single delimiter correctly, but with
-     different delimiters than those used in test_split_on_delimiter_1 and 
+     different delimiters than those used in test_split_on_delimiter_1 and
      test_split_on_delimiter_3.
     '''
     availability = "Monday)Tuesday)Wednesday)Thursday)Friday"
@@ -1579,29 +1455,29 @@ def test_load_raw_survey_data():
     # load and return the survey data from the io buffer
     text_buffer.seek(0)
     raw_data = load.read_survey_raw(text_buffer)
-    expected_data = [['Timestamp', 'Username', 'Please select your ASURITE ID', 'Please enter your Github username (NOT your email address)', 
-                      'Email address for us to invite you to the Taiga scrumboard', 
-                      'In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]', 
-                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]', 
+    expected_data = [['Timestamp', 'Username', 'Please select your ASURITE ID', 'Please enter your Github username (NOT your email address)',
+                      'Email address for us to invite you to the Taiga scrumboard',
+                     'In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]',
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]',
                       'How well would you say you know GitHub? (1 not at all, 5 worked with it a lot - know how to merge, resolve conflicts, etc.) You are not expected to know GitHub well yet, so please be honest. It will not be used for grading what you put here but I want to try to have one student knowing GitHub in each team to make things easier.',
-                      'Do you know Scrum already? (1 just heard about it, 5 know it well (process, roles). You are not expected to know Scrum yet, so please be honest. It will not be used for grading what you put here. ', 
-                      'Preferred team member 1', 'Preferred team member 2', 'Preferred team member 3', 'Preferred team member 4', 
-                      'Preferred team member 5', 'Non-preferred student 1', 'Non-preferred student 2', 'Non-preferred student 3'], 
-                      ['2022/10/17 6:31:58 PM EST', 'jsmith1@asu.edu', 'jsmith1', 'jsmith_1', 'johnsmith@gmail.com', 'UTC +1', 
-                       'Sunday;Thursday;Friday', 'Monday;Tuesday', '', '', '', 'Tuesday;Wednesday', '', '', '5', '2', 'jdoe2 - Jane Doe', '', 
-                       '', '', '', 'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', ''], ['2022/10/17 6:33:27 PM EST', 'jdoe2@asu.edu', 
-                        'jdoe2', 'jdoe_2', 'janedoe@gmail.com', 'UTC +2', '', 'Monday;Tuesday', '', '', 'Tuesday', 'Wednesday', '', '', '4', '3', 
-                        'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', '', '', '', 'jsmith1 - John Smith', 'bwillia5 - Billy Williams', ''], 
-                        ['2022/10/17 6:34:15 PM EST', 'mmuster3@asu.edu', 'mmuster3', 'mmuster_3', 'maxmustermann@gmail.com', 'UTC +3', '', 
-                         'Monday;Tuesday', '', '', '', 'Wednesday;Thursday', 'Thursday', 'Friday', '3', '4', 'jsmith1 - John Smith', 
-                         'bwillia5 - Billy Williams', '', '', '', 'jdoe2 - Jane Doe', '', ''], ['', '', 'jschmo4', '', '', '', '', '', '', '', 
-                        '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ['', '', 'bwillia5', '', '', '', '', '', '', '', '', '', '', '', 
-                        '', '', '', '', '', '', '', '', '', '']]
+                      'Do you know Scrum already? (1 just heard about it, 5 know it well (process, roles). You are not expected to know Scrum yet, so please be honest. It will not be used for grading what you put here. ',
+                      'Preferred team member 1', 'Preferred team member 2', 'Preferred team member 3', 'Preferred team member 4',
+                      'Preferred team member 5', 'Non-preferred student 1', 'Non-preferred student 2', 'Non-preferred student 3'],
+                     ['2022/10/17 6:31:58 PM EST', 'jsmith1@asu.edu', 'jsmith1', 'jsmith_1', 'johnsmith@gmail.com', 'UTC +1',
+                     'Sunday;Thursday;Friday', 'Monday;Tuesday', '', '', '', 'Tuesday;Wednesday', '', '', '5', '2', 'jdoe2 - Jane Doe', '',
+                      '', '', '', 'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', ''], ['2022/10/17 6:33:27 PM EST', 'jdoe2@asu.edu',
+                                                                                            'jdoe2', 'jdoe_2', 'janedoe@gmail.com', 'UTC +2', '', 'Monday;Tuesday', '', '', 'Tuesday', 'Wednesday', '', '', '4', '3',
+                                                                                            'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', '', '', '', 'jsmith1 - John Smith', 'bwillia5 - Billy Williams', ''],
+                     ['2022/10/17 6:34:15 PM EST', 'mmuster3@asu.edu', 'mmuster3', 'mmuster_3', 'maxmustermann@gmail.com', 'UTC +3', '',
+                     'Monday;Tuesday', '', '', '', 'Wednesday;Thursday', 'Thursday', 'Friday', '3', '4', 'jsmith1 - John Smith',
+                         'bwillia5 - Billy Williams', '', '', '', 'jdoe2 - Jane Doe', '', ''], ['', '', 'jschmo4', '', '', '', '', '', '', '',
+                                                                                                '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ['', '', 'bwillia5', '', '', '', '', '', '', '', '', '', '', '',
+                                                                                                                                                          '', '', '', '', '', '', '', '', '', '']]
     assert raw_data == expected_data
