@@ -2,7 +2,9 @@
 Testing loader
 '''
 import copy
+import csv
 import datetime
+from io import StringIO
 import pytest
 from app import models
 from app import config
@@ -1548,3 +1550,58 @@ def test_split_on_delimiter_5():
     assert list[2] == "Wednesday"
     assert list[3] == "Thursday"
     assert list[4] == "Friday"
+
+
+def test_load_survey_data_from_report():
+
+    config_data = config.read_json(
+        './tests/test_files/reports/Example_1_config.json')
+    expected_data = load.read_survey(
+        config_data['field_mappings'], './tests/test_files/reports/Example_1_dataset.csv')
+    survey_data = load.read_report_survey_data(
+        './tests/test_files/reports/Example_Report_1.xlsx', config_data['field_mappings'])
+
+    assert survey_data == expected_data
+
+
+def test_load_raw_survey_data():
+
+    report_workbook = load.load_workbook(
+        './tests/test_files/reports/Example_Report_1.xlsx')
+
+    survey_data_sheet = report_workbook["survey_data"]
+
+    text_buffer = StringIO()
+    writer = csv.writer(text_buffer)
+    for row in survey_data_sheet.rows:
+        writer.writerow([cell.value for cell in row])
+
+    # load and return the survey data from the io buffer
+    text_buffer.seek(0)
+    raw_data = load.read_survey_raw(text_buffer)
+    expected_data = [['Timestamp', 'Username', 'Please select your ASURITE ID', 'Please enter your Github username (NOT your email address)', 
+                      'Email address for us to invite you to the Taiga scrumboard', 
+                      'In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]', 
+                      'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]', 
+                      'How well would you say you know GitHub? (1 not at all, 5 worked with it a lot - know how to merge, resolve conflicts, etc.) You are not expected to know GitHub well yet, so please be honest. It will not be used for grading what you put here but I want to try to have one student knowing GitHub in each team to make things easier.',
+                      'Do you know Scrum already? (1 just heard about it, 5 know it well (process, roles). You are not expected to know Scrum yet, so please be honest. It will not be used for grading what you put here. ', 
+                      'Preferred team member 1', 'Preferred team member 2', 'Preferred team member 3', 'Preferred team member 4', 
+                      'Preferred team member 5', 'Non-preferred student 1', 'Non-preferred student 2', 'Non-preferred student 3'], 
+                      ['2022/10/17 6:31:58 PM EST', 'jsmith1@asu.edu', 'jsmith1', 'jsmith_1', 'johnsmith@gmail.com', 'UTC +1', 
+                       'Sunday;Thursday;Friday', 'Monday;Tuesday', '', '', '', 'Tuesday;Wednesday', '', '', '5', '2', 'jdoe2 - Jane Doe', '', 
+                       '', '', '', 'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', ''], ['2022/10/17 6:33:27 PM EST', 'jdoe2@asu.edu', 
+                        'jdoe2', 'jdoe_2', 'janedoe@gmail.com', 'UTC +2', '', 'Monday;Tuesday', '', '', 'Tuesday', 'Wednesday', '', '', '4', '3', 
+                        'mmuster3 - Max Mustermann', 'jschmo4 - Joe Schmo', '', '', '', 'jsmith1 - John Smith', 'bwillia5 - Billy Williams', ''], 
+                        ['2022/10/17 6:34:15 PM EST', 'mmuster3@asu.edu', 'mmuster3', 'mmuster_3', 'maxmustermann@gmail.com', 'UTC +3', '', 
+                         'Monday;Tuesday', '', '', '', 'Wednesday;Thursday', 'Thursday', 'Friday', '3', '4', 'jsmith1 - John Smith', 
+                         'bwillia5 - Billy Williams', '', '', '', 'jdoe2 - Jane Doe', '', ''], ['', '', 'jschmo4', '', '', '', '', '', '', '', 
+                        '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ['', '', 'bwillia5', '', '', '', '', '', '', '', '', '', '', '', 
+                        '', '', '', '', '', '', '', '', '', '']]
+    assert raw_data == expected_data
