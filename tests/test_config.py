@@ -48,8 +48,8 @@ def test_config_target_group_size_negative():
 
 def test_read_report_config():
     '''
-    Tests if the config file properly reads the config tab in the report and gets the columns
-    holding only 1 row value.
+    Tests if the config file properly reads the config tab in the report and gets the variables
+    holding only 1 value.
     '''
     result:Configuration = config.read_report_config("Example_Report_1.xlsx")
 
@@ -58,11 +58,12 @@ def test_read_report_config():
     assert result.get("target_plus_one_allowed") == True
     assert result.get("target_minus_one_allowed") == False
     assert result.get("availability_values_delimiter") == ";,"
+    assert result.get("grouping_passes") == 10
 
 def test_read_report_config_2():
     '''
-    Tests if the config file properly reads the config tab in the report and gets the columns
-    holding more than 1 row value.
+    Tests if the config file properly reads the config tab in the report and gets the content in the
+    field mapping fields.
     '''
     result:Configuration = config.read_report_config("Example_Report_1.xlsx")
 
@@ -74,3 +75,17 @@ def test_read_report_config_2():
     assert preferred_list[2] == "Preferred team member 3"
     assert preferred_list[3] == "Preferred team member 4"
     assert preferred_list[4] == "Preferred team member 5"
+
+def test_read_report_config_3():
+    '''
+    Tests if the config file properly reads the config tab in the report and gets the content found in
+    the report fields.
+    '''
+    result:Configuration = config.read_report_config("Example_Report_1.xlsx")
+
+    list = result.get("report_fields")
+
+    assert list.get("show_preferred_students") == True
+    assert list.get("show_disliked_students") == True
+    assert list.get("show_availability_overlap") == True
+    assert list.get("show_scores") == True
