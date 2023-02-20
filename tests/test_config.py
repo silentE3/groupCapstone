@@ -48,7 +48,8 @@ def test_config_target_group_size_negative():
 
 def test_read_report_config():
     '''
-    Tests if the config file properly reads the config tab in the report.
+    Tests if the config file properly reads the config tab in the report and gets the columns
+    holding only 1 row value.
     '''
     result:Configuration = config.read_report_config("Example_Report_1.xlsx")
 
@@ -56,3 +57,20 @@ def test_read_report_config():
     assert result.get("target_group_size") == 2
     assert result.get("target_plus_one_allowed") == True
     assert result.get("target_minus_one_allowed") == False
+    assert result.get("availability_values_delimiter") == ";,"
+
+def test_read_report_config_2():
+    '''
+    Tests if the config file properly reads the config tab in the report and gets the columns
+    holding more than 1 row value.
+    '''
+    result:Configuration = config.read_report_config("Example_Report_1.xlsx")
+
+    list = result.get("field_mappings")
+    preferred_list = list.get("preferred_students_field_names")
+    
+    assert preferred_list[0] == "Preferred team member 1"
+    assert preferred_list[1] == "Preferred team member 2"
+    assert preferred_list[2] == "Preferred team member 3"
+    assert preferred_list[3] == "Preferred team member 4"
+    assert preferred_list[4] == "Preferred team member 5"
