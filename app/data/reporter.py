@@ -5,6 +5,7 @@ from app import models
 from app.group import validate
 from app.group import scoring
 from app.file import xlsx
+from app import config as cfg
 
 
 def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
@@ -12,6 +13,7 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
     writes the report to an xlsx file
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
+
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(data_config)
         formatted_data = formatter.format_individual_report(solution)
@@ -23,6 +25,9 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
             'group_report_' + str(index + 1), group_formatted_report)
         xlsx_writer.write_sheet(
             'overall_report_' + str(index + 1), overall_formatted_report)
+
+    config_sheet = ReportFormatter(data_config).format_config_report()
+    xlsx_writer.write_sheet('config', config_sheet)
 
     xlsx_writer.write_sheet('survey_data', report_rows)
 
@@ -211,6 +216,107 @@ class ReportFormatter():
             headers.append('Score')
 
         return headers
+
+    def format_config_report(self) -> list[list]:
+        '''
+        Generates the Excel report data from the config
+        Acts to flatten the structure of the config file so that each property has a header
+        '''
+        records: list[list] = [self.__config_report_headers()]
+        records += self.__get_flatten_config_data()
+        return records
+
+    def __get_config_data(self, data: dict) -> list[object]:
+        '''
+        Recursively generates a list of all data from the config file
+        turning it into a flat 1d list of data
+        '''
+        values = []
+
+        for item in data:
+            if isinstance(data[item], dict):
+                values += self.__get_config_data(dict(data[item]))
+            else:
+                values.append(data[item])
+
+        return values
+
+    def __get_list_entries(self, data: list[object]) -> dict[int, list]:
+        '''
+        Creates a dictionary of the list data types in the flat data list
+        with their index in the data list as the key
+        '''
+
+        lists: dict[int, list] = {}
+
+        for index, item in enumerate(data):
+            if isinstance(item, list):
+                lists[index] = list(item)
+
+        return lists
+
+    def __get_max_list_length(self, data: list[object]) -> int:
+        '''
+        Finds all list data types in the flat data list and returns the max size
+        '''
+        max_len: int = 0
+
+        for item in data:
+            if isinstance(item, list) and len(list(item)) > max_len:
+                max_len = len(list(item))
+
+        return max_len
+
+    def __create_blank_2d_list(self, dim1: int, dim2: int) -> list[list]:
+        '''
+        Creates a 2d list filled with empty strings
+        '''
+        sheet: list[list] = []
+        for _ in range(dim1):
+            line: list = [""] * dim2
+            sheet.append(line)
+
+        return sheet
+
+    def __get_flatten_config_data(self) -> list[list]:
+        '''
+        Turns the hierarchical config data structure into a two-dimensional array of values
+        '''
+        data: list[object] = self.__get_config_data(dict(cfg.CONFIG_DATA))
+        lists: dict[int, list] = self.__get_list_entries(data)
+        max_len: int = self.__get_max_list_length(data)
+        flattened_data: list[list] = self.__create_blank_2d_list(
+            max_len, len(data))
+
+        for index, item in enumerate(data):
+            if not isinstance(item, list):
+                flattened_data[0][index] = item
+
+        for key, value in lists.items():
+            for index, val in enumerate(value):
+                flattened_data[index][key] = val
+
+        return flattened_data
+
+    def __get_config_headers(self, data: dict) -> list[str]:
+        '''
+        Recursively generates a list of all headers from the config file
+        '''
+        headers = []
+
+        for item in data:
+            if isinstance(data[item], dict):
+                headers += self.__get_config_headers(dict(data[item]))
+            else:
+                headers.append(item)
+
+        return headers
+
+    def __config_report_headers(self) -> list[str]:
+        '''
+        Creates the list of headers based off of the config file
+        '''
+        return self.__get_config_headers(dict(cfg.CONFIG_DATA))
 
     def format_overall_report(self, groups: list[models.GroupRecord]):
         '''
