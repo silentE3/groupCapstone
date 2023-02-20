@@ -91,8 +91,7 @@ def test_update_reporting_basic():
     original_file_time: float = os.path.getmtime(report_file_path + '.xlsx')
 
     response = runner.invoke(report.update_report, [
-                             './tests/test_files/reports/Example_Report_1.xlsx',
-                             '-c', './tests/test_files/configs/config_1_full.json'])
+                             './tests/test_files/reports/Example_Report_1.xlsx'])
     assert response.exit_code == 0
 
     # verify the report file was updated
@@ -136,6 +135,6 @@ def test_dev_reporting_contains_sheets():
 
     book: workbook.Workbook = load_workbook("./grouping_results_report.xlsx")
     assert 'config' in list(book.sheetnames)
-    # add more asserts for more sheet names here    
+    # add more asserts for more sheet names here
 
     os.remove("./grouping_results_report.xlsx")

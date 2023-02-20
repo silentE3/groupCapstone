@@ -4,8 +4,8 @@ Provides the ability to load data into the program including raw survey data and
 
 import csv
 from io import TextIOWrapper
+from io import StringIO
 import re
-
 import datetime as dt
 from typing import Union
 from openpyxl import load_workbook, workbook
@@ -29,10 +29,9 @@ def split_on_delimiters(availability: str, delimiters: str):
     if len(delimiters) == 0:
         raise ValueError(
             "Configuration file has no availability delimiters defined")
-    delim_chars = [*delimiters]
-    split_str = '|'.join(delim_chars)
+    delim_chars = f'[{re.escape(delimiters)}]'
 
-    return re.split(split_str, availability)
+    return re.split(delim_chars, availability)
 
 
 def total_availability_matches(student: models.SurveyRecord, students: list[models.SurveyRecord]) -> int:
@@ -134,11 +133,14 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
+        )
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
+        )
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
+        )
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
@@ -149,8 +151,9 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
 
 def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -> models.SurveyData:
     '''
-    loads the data from the survey.
-    If there is a duplicate record, it will use the one with the submission date that is equal to or greater
+    Loads the data from the survey.
+    If there is a duplicate survey record, it will use (keep) the one with the submission
+     date that is equal to or greater
     '''
     raw_rows: list[list[str]] = []
     records: list[models.SurveyRecord] = []
@@ -158,6 +161,21 @@ def read_survey(field_mapping: models.SurveyFieldMapping, data_file_path: str) -
         raw_rows.extend(read_survey_raw(data_file))
         data_file.seek(0)
         records.extend(read_survey_records(field_mapping, data_file))
+
+    return models.SurveyData(records, raw_rows)
+
+
+def read_survey_from_io(field_mapping: models.SurveyFieldMapping, text_buffer: TextIOWrapper) -> models.SurveyData:
+    '''
+    Loads the survey data from an io buffer version of the data.
+    If there is a duplicate survey record, it will use (keep) the one with the submission
+     date that is equal to or greater
+    '''
+    raw_rows: list[list[str]] = []
+    records: list[models.SurveyRecord] = []
+    raw_rows.extend(read_survey_raw(text_buffer))
+    text_buffer.seek(0)
+    records.extend(read_survey_records(field_mapping, text_buffer))
 
     return models.SurveyData(records, raw_rows)
 
@@ -312,6 +330,27 @@ def read_report(filename: str) -> list[list[models.GroupRecord]]:
     book.close()
 
     return [list(groups.values())]
+
+
+def read_report_survey_data(report_filename: str, field_mappings: models.SurveyFieldMapping) -> models.SurveyData:
+    '''
+    Loads the survey data from the "survey_data" sheet (tab) of a previously generated xlsx report.
+    '''
+
+    # Write the data in the "survey_data" tab/sheet to an io buffer.
+
+    report_workbook = load_workbook(report_filename)
+
+    survey_data_sheet = report_workbook["survey_data"]
+
+    text_buffer = StringIO()
+    writer = csv.writer(text_buffer)
+    for row in survey_data_sheet.rows:
+        writer.writerow([cell.value for cell in row])
+
+    # load and return the survey data from the io buffer
+    text_buffer.seek(0)
+    return read_survey_from_io(field_mappings, text_buffer)
 
 
 def __parse_record(row) -> models.SurveyRecord:
