@@ -38,18 +38,14 @@ def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
 
 @click.command("update-report")
 @click.argument('reportfile', type=click.Path(exists=True), default="group_report.xlsx")
-# NOTE: this line needs to be updated (deleted) via task #200 to no longer include the config file as an option
-@click.option('-c', '--configfile', type=click.Path(exists=True), show_default=True, default="config.json", help="Enter the path to the config file.")
-def update_report(reportfile: str, configfile: str):
+def update_report(reportfile: str):
     '''
     update-report - reads in a previously generated report and updates it based on changes made to it
 
     REPORTFILE is the path to the xlsx based report file to read in
     '''
 
-    # NOTE: this line needs to be updated via task #200 to instead read the config data from the
-    # config tab of the report (being implemented in task #200)
-    config_data: models.Configuration = config.read_json(configfile)
+    config_data: models.Configuration = config.read_report_config(reportfile)
 
     # load the survey data
     survey_data = load.read_report_survey_data(reportfile,
