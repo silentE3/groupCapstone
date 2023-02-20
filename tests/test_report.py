@@ -4,6 +4,7 @@ from click.testing import CliRunner
 import click
 from app.commands import report
 from os.path import exists
+from openpyxl import load_workbook, workbook
 
 runner = CliRunner()
 
@@ -90,8 +91,7 @@ def test_update_reporting_basic():
     original_file_time: float = os.path.getmtime(report_file_path + '.xlsx')
 
     response = runner.invoke(report.update_report, [
-                             './tests/test_files/reports/Example_Report_1.xlsx',
-                             '-c', './tests/test_files/reports/Example_1_config.json'])
+                             './tests/test_files/reports/Example_Report_1.xlsx'])
     assert response.exit_code == 0
 
     # verify the report file was updated
@@ -119,3 +119,23 @@ def test_update_report_invalid_config_file():
                              './tests/test_files/reports/Example_Report_1.xlsx',
                              '-c', './tests/test_files/configs/Nonexistent_File.json'])
     assert response.exit_code == 2
+
+
+def test_dev_reporting_contains_sheets():
+    '''
+    Checks the generated excel file for the expected sheets
+    For now, just config
+    '''
+    response = runner.invoke(report.report, [
+                             './tests/test_files/dev_data/output.csv',
+                             './tests/test_files/dev_data/dataset-dev.csv',
+                             '-c', './tests/test_files/dev_data/config-dev.json'])
+    assert response.exit_code == 0
+
+    assert exists("./grouping_results_report.xlsx")
+
+    book: workbook.Workbook = load_workbook("./grouping_results_report.xlsx")
+    assert 'config' in list(book.sheetnames)
+    # add more asserts for more sheet names here
+
+    os.remove("./grouping_results_report.xlsx")
