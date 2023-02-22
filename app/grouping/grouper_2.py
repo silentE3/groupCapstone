@@ -3,6 +3,7 @@ module for an additional grouping algorithm implementation
 """
 import copy
 from random import randint
+from typing import Optional
 from app import models
 from app.data import load
 from app.group import validate, scoring
@@ -61,19 +62,31 @@ class Grouper2:
         '''
         balancing group to ensure there are enough members
         '''
+        # First filter out groups that have enough members to share
         groups_with_enough_mems = list(filter(lambda group: len(
             group.members) > self.target_group_size-self.target_group_margin_lower, self.groups))
         while len(group.members) < self.target_group_size-self.target_group_margin_lower:
             for other_group in groups_with_enough_mems:
+                # loop through all members in the other groups and see if they can be added to the current group
                 for member in other_group.members:
+
+                    # if the member meets the given hard reqs, add them to the targeted undersized group
                     if meets_hard_requirement(member, group, self.target_group_size):
                         other_group.members.remove(member)
                         group.members.append(member)
+
+                        # immediately evaluate if the group that had the member removed is still large enough to remove more members.
+                        # If not, take them out of the list to pull students from
                         if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
                             groups_with_enough_mems.remove(other_group)
                         break
+                # check if the reqs are met and break if they are
                 if len(group.members) >= self.target_group_size-self.target_group_margin_lower:
                     break
+
+            # if we make it to this, we are ignoring hard requirements
+            # and just making sure there are enough members
+            # by pulling a member from another group that has enough members to spare
             for other_group in groups_with_enough_mems:
                 member = other_group.members.pop()
                 if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
@@ -85,20 +98,26 @@ class Grouper2:
         '''
         creates grouping optimizations by swapping users
         if 5 operations result in the same score, it will end with the assumption that it has done the best it will do
+
+        The optimization happens by running scenarios for swapping members. 
+        How could it run more quickly?
+        - rather than checking every scenario, cache certain scenarios
+        - what ones don't make sense to run?
+
         '''
         prev_score = 0
         dup_score_count = 0
+        # loop through the specified # of grouping passes
         for group_pass in range(self.grouping_passes):
+            # track previous scores
             if prev_score == self.grade_groups():
                 dup_score_count += 1
             else:
-                dup_score_count = 1
+                dup_score_count = 0
 
-            if dup_score_count >= 15:
+            if dup_score_count >= 5:
                 break
-
             prev_score = self.grade_groups()
-            # self.console_printer.print(self.grade_groups())
             self.console_printer.print(f'optimization pass #{group_pass+1}')
             for group in self.groups:
                 for mem in group.members:
@@ -197,12 +216,13 @@ class Grouper2:
 
         return scenarios
 
-    def run_swap_scenarios(self, group: models.GroupRecord, student: models.SurveyRecord):
+    def run_swap_scenarios(self, group: models.GroupRecord, student: models.SurveyRecord) -> Optional[models.SwapScenario]:
         '''
         gives a list of scenarios if the student were to be swapped for another group.
         '''
 
         scenarios: list[models.SwapScenario] = []
+        # loop through the groups and create a copy of each to run scenarios
         for other_group in self.groups:
             if group.group_id == other_group.group_id:
                 continue
@@ -212,11 +232,7 @@ class Grouper2:
         scenarios.sort(reverse=True)
 
         if len(scenarios) > 1:
-            best_scenario = scenarios[0]
-            for scenario in scenarios:
-                if scenario.score1 + scenario.score2 >= best_scenario.score1 + best_scenario.score2:
-                    best_scenario = scenario
-            return best_scenario
+            return scenarios[0]
 
         return None
 
@@ -235,10 +251,11 @@ class Grouper2:
             group_copy.members.append(member)
             score_1 = self.rank_group(group_copy)
             score_2 = self.rank_group(oth_group_copy)
+            total_score = score_1 + score_2
 
-            if score_1 + score_2 >= self.rank_group(group) + self.rank_group(other_group):
+            if total_score >= self.rank_group(group) + self.rank_group(other_group):
                 scenario = models.SwapScenario(
-                    group_copy, oth_group_copy, score_1, score_2)
+                    group_copy, oth_group_copy, total_score)
                 scenarios.append(scenario)
 
         return scenarios

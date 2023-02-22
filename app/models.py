@@ -136,8 +136,7 @@ class SwapScenario:
     '''
     group_1: GroupRecord
     group_2: GroupRecord
-    score1: float
-    score2: float
+    score: float
 
     def __lt__(self, other):
-        return (self.score1 < other.score1 and self.score2 < other.score2)
+        return (self.score < other.score)
