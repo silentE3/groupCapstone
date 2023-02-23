@@ -12,12 +12,12 @@ def test_new_sheet_creates_sheet():
     tests that a sheet is created and it matches the name that was passed in
     '''
     writer = xlsx.XLSXWriter()
-    assert writer.sheets == {}
+    assert writer.__sheets == {}
 
     writer.new_sheet('sheet_uno')
 
-    assert writer.sheets.get('sheet_uno')
-    assert writer.sheets['sheet_uno'].get_name() == 'sheet_uno'
+    assert writer.__sheets.get('sheet_uno')
+    assert writer.__sheets['sheet_uno'].get_name() == 'sheet_uno'
 
 
 def test_new_sheet_duplicate_name_fails():
@@ -35,7 +35,7 @@ def test_write_sheet_creates_sheet_if_not_exists():
     
     writer.write_sheet('sheet1', [['test']])
 
-    assert writer.sheets.get('sheet1')
+    assert writer.__sheets.get('sheet1')
     
 def test_save():
     writer = xlsx.XLSXWriter('test_groups.xlsx')
