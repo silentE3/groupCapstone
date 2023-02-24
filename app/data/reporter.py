@@ -8,7 +8,7 @@ from app.file import xlsx
 from app import config as cfg
 
 
-def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
+def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.SurveyData, data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
@@ -19,17 +19,19 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
         formatted_data = formatter.format_individual_report(solution)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
+        availability_map = formatter.generate_availability_map(solution, survey_data)
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
         xlsx_writer.write_sheet(
             'group_report_' + str(index + 1), group_formatted_report)
         xlsx_writer.write_sheet(
             'overall_report_' + str(index + 1), overall_formatted_report)
+        
 
     config_sheet = ReportFormatter(data_config).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
-    xlsx_writer.write_sheet('survey_data', report_rows)
+    xlsx_writer.write_sheet('survey_data', survey_data.raw_rows)
 
     xlsx_writer.save()
 
@@ -375,3 +377,39 @@ class ReportFormatter():
             headers.append('Standard Deviation of Groups')
 
         return headers
+
+    def generate_availability_map(self, data: list[models.GroupRecord], survey_data: models.SurveyData) -> models.AvailabilityMap:
+        availability_map = models.AvailabilityMap(self.__generate_availability_slot_map(survey_data), [])
+        base_slot_list: list[bool]
+        # first create the map of groups with members
+        for group in data:
+            group_availability = models.GroupAvailabilityMap(group.group_id, {})  
+            for user in group.members:
+                group_availability.users[user.student_id] = []
+                #TODO: add availability mapping
+                
+            availability_map.group_availability.append(models.GroupAvailabilityMap(group.group_id, {}))    
+
+        return availability_map
+    
+    # NOTE: this method may not need to check each user if we can assume a fixed set of days for each time slot
+    def __generate_availability_slot_map(self, survey_data: models.SurveyData) -> dict[str, list[str]]:
+        '''
+        Creates a dictionary of all current slots across all users
+        '''
+        slot_map: dict[str, list[str]] = {}
+
+        
+        for survey in survey_data.records:
+            for slot in survey.availability:
+                if slot not in slot_map.keys():
+                    slot_map[slot] = []
+                slot_map[slot] = list(set(slot_map[slot]) | set(survey.availability[slot]))
+        
+        return slot_map
+
+
+
+        
+        return matrix
+  
