@@ -16,12 +16,12 @@ from app.grouping import grouper_2
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
 @click.option('-o', '--outputfile', show_default=False, default=None, help="Enter the path to the output file. [default: <SURVEYFILE>_groups]")
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
-@click.option('--report/--no-report', show_default=True, default=True, help="Use this option to output a report on the results of the goruping.")
+# @click.option('--report/--no-report', show_default=True, default=True, help="Use this option to output a report on the results of the goruping.")
 @click.option('-r', '--reportfile', show_default=False, default=None,
               help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
 #pylint: disable=too-many-arguments, too-many-locals
-def group(surveyfile: str, outputfile: str, configfile: str, report: bool, reportfile: str, allstudentsfile: str):
+def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, allstudentsfile: str):
     '''Group Users - forms groups for the users from the survey.
 
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
@@ -29,7 +29,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     ########## Determine Output Filenames ##########
     filenames: list[str] = __determine_output_filenames(
-        surveyfile, outputfile, report, reportfile)
+        surveyfile, outputfile, reportfile)
     output_filename_1: str = filenames[0]
     output_filename_2: str = filenames[1]
     report_filename: str = filenames[2]
@@ -72,10 +72,10 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
-    # Output results
-    click.echo(f'writing groups to {output_filename_1}')
-    output.GroupingDataWriter(config_data).write_csv(
-        best_solution_grouper_1.best_solution_found, output_filename_1)
+    # # Output results
+    # click.echo(f'writing groups to {output_filename_1}')
+    # output.GroupingDataWriter(config_data).write_csv(
+    #     best_solution_grouper_1.best_solution_found, output_filename_1)
 
     ########## Run "second" grouping algorithm ##########
 
@@ -83,18 +83,18 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     best_solution_grouper_2: list[models.GroupRecord] = __run_grouping_alg_2(
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
-    # Output results
-    click.echo(f'writing groups to {output_filename_2}')
-    output.GroupingDataWriter(config_data).write_csv(
-        best_solution_grouper_2, output_filename_2)
+    # # Output results
+    # click.echo(f'writing groups to {output_filename_2}')
+    # output.GroupingDataWriter(config_data).write_csv(
+    #     best_solution_grouper_2, output_filename_2)
 
     ########## Output solutions report if configured ##########
-    if report:
-        solutions: list[list[models.GroupRecord]] = [
-            best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
-        click.echo(f'Writing report to: {report_filename}')
-        reporter.write_report(
-            solutions, survey_data.raw_rows, config_data, report_filename)
+    # if report:
+    solutions: list[list[models.GroupRecord]] = [
+        best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
+    click.echo(f'Writing report to: {report_filename}')
+    reporter.write_report(
+        solutions, survey_data.raw_rows, config_data, report_filename)
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,
@@ -129,25 +129,17 @@ def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models
     return best_solution_found
 
 
-def __determine_output_filenames(surveyfile: str, outputfile: str, report: bool, reportfile: str) -> list[str]:
+def __determine_output_filenames(surveyfile: str, reportfile: str) -> list[str]:
     filenames: list[str] = []
 
     # Set the default output filename values per the input filename (SURVEYFILE) value (if
-    #  output file values were not specified)
-    if outputfile is None:
-        outputfile = f'{surveyfile.removesuffix(".csv")}_groups'
-    if report and reportfile is None:
+    if reportfile is None:
         # the default report filename is based upon the output filename
-        reportfile = f'{outputfile.removesuffix(".csv")}_report'
-
-    # ensure the output filenames end .csv
-    output_filename_1: str = f'{outputfile.removesuffix(".csv")}_1.csv'
-    output_filename_2: str = f'{outputfile.removesuffix(".csv")}_2.csv'
+        reportfile = f'{surveyfile.removesuffix(".csv")}_report'
 
     # ensure the report filename ends .xlsx
     report_filename: str = ""
-    if report:
-        report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
+    report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
 
     # Append integer value to avoid output file overwriting
     for filename in [output_filename_1, output_filename_2, report_filename]:
