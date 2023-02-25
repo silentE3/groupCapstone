@@ -9,13 +9,13 @@ import xlsxwriter
 @dataclass
 class Cell:
     '''
-    Cell describes an xlsx cell. It also allows one to specify a format
+    Cell describes an xlsx cell. It also allows a format to be applied.
     '''
     value: Optional[str | int | bool | float] = ''
     
     '''
     specifies the cells individual format. 
-    This can be any format that has been added to the workbook
+    This can be any format that has been added to the workbook.
     '''
     cell_format: Optional[xlsxwriter.workbook.Format] = None
 
@@ -34,7 +34,9 @@ class XLSXWriter():
         '''
         adds a new format to the workbook. 
         This allows users to specify certain formats and 
-        they will be added to the formatters dict for string based lookup
+        they will be added to the formatters dict for string based lookup.
+        
+        Only formats that have been added to the workbook can be applied to cells
         '''
         xlsx_format = self.__workbook.add_format(props)
         self.__formatters[name] = xlsx_format
@@ -68,7 +70,7 @@ class XLSXWriter():
 
 def convert_to_cells(table: list[list[Any]]) -> list[list[Cell]]:
     '''
-    converts 2d lists to Cells
+    converts 2d lists to a table with cells
     '''
     table_cells: list[list[Cell]] = []
     for row in table:

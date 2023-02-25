@@ -15,7 +15,7 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
     writes the report to an xlsx file
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
-    green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "green"})
+    green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(data_config, formatters= {'green_bg': green_bg})
