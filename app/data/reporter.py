@@ -22,10 +22,8 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
 
-        # TODO: use this map for the availability in the report
-        # this is just here to avoid the linter
-        print(availability_map)
-
+        # TODO: Placeholder for availability reporting
+        xlsx_writer.write_sheet('availability_report_' + str(index + 1), [list(availability_map.availability_slots.keys())])
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
         xlsx_writer.write_sheet(
