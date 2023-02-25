@@ -28,11 +28,11 @@ def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, al
     '''
 
     ########## Determine Output Filenames ##########
-    filenames: list[str] = __determine_output_filenames(
-        surveyfile, outputfile, reportfile)
-    output_filename_1: str = filenames[0]
-    output_filename_2: str = filenames[1]
-    report_filename: str = filenames[2]
+    report_filename: str = __determine_output_filenames(
+        surveyfile, reportfile)
+    # output_filename_1: str = filenames[0]
+    # output_filename_2: str = filenames[1]
+    # report_filename: str = filenames[0]
 
     ########## Load the config data ##########
     config_data: models.Configuration = config.read_json(configfile)
@@ -130,11 +130,10 @@ def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models
 
 
 def __determine_output_filenames(surveyfile: str, reportfile: str) -> list[str]:
-    filenames: list[str] = []
 
     # Set the default output filename values per the input filename (SURVEYFILE) value (if
     if reportfile is None:
-        # the default report filename is based upon the output filename
+        # the default report filename is based upon the surveyfile filename
         reportfile = f'{surveyfile.removesuffix(".csv")}_report'
 
     # ensure the report filename ends .xlsx
@@ -142,21 +141,18 @@ def __determine_output_filenames(surveyfile: str, reportfile: str) -> list[str]:
     report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
 
     # Append integer value to avoid output file overwriting
-    for filename in [output_filename_1, output_filename_2, report_filename]:
-        suffix: str = '.xlsx' if filename == report_filename else '.csv'
-        if Path('./' + filename).is_file():
-            print(filename + " already exists...", end='')
-            append_value: int = 1
-            new_filename: str = filename.removesuffix(
-                suffix) + '_' + str(append_value) + suffix
-            while (Path('./' + new_filename).is_file()):
-                append_value += 1
-                new_filename = filename.removesuffix(
-                    suffix) + '_' + str(append_value) + suffix
-            print('available filename: ' + new_filename)
-            filenames.append(new_filename)
-        else:
-            filenames.append(filename)
+    if Path('./' + report_filename).is_file():
+        print(report_filename + " already exists...", end='')
+        append_value: int = 1
+        new_filename: str = report_filename.removesuffix(
+            'xlsx') + '_' + str(append_value) + 'xlsx'
+        while (Path('./' + new_filename).is_file()):
+            append_value += 1
+            new_filename = report_filename.removesuffix(
+                'xlsx') + '_' + str(append_value) + 'xlsx'
+        print('available filename: ' + new_filename)
+        report_filename = new_filename
+
     print()
 
-    return filenames
+    return report_filename
