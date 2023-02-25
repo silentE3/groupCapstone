@@ -30,9 +30,6 @@ def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, al
     ########## Determine Output Filenames ##########
     report_filename: str = __determine_output_filenames(
         surveyfile, reportfile)
-    # output_filename_1: str = filenames[0]
-    # output_filename_2: str = filenames[1]
-    # report_filename: str = filenames[0]
 
     ########## Load the config data ##########
     config_data: models.Configuration = config.read_json(configfile)
@@ -50,7 +47,6 @@ def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, al
             survey_data.records, roster, config_data['field_mappings']['availability_field_names'])
 
     ########## Grouping ##########
-
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
                                      config_data["target_minus_one_allowed"], survey_data.records):
@@ -72,10 +68,6 @@ def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, al
     best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
-    # # Output results
-    # click.echo(f'writing groups to {output_filename_1}')
-    # output.GroupingDataWriter(config_data).write_csv(
-    #     best_solution_grouper_1.best_solution_found, output_filename_1)
 
     ########## Run "second" grouping algorithm ##########
 
@@ -83,12 +75,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, al
     best_solution_grouper_2: list[models.GroupRecord] = __run_grouping_alg_2(
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
-    # # Output results
-    # click.echo(f'writing groups to {output_filename_2}')
-    # output.GroupingDataWriter(config_data).write_csv(
-    #     best_solution_grouper_2, output_filename_2)
-
-    ########## Output solutions report if configured ##########
+    ########## Output solutions report ##########
     # if report:
     solutions: list[list[models.GroupRecord]] = [
         best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
