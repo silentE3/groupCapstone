@@ -27,7 +27,7 @@ class XLSXWriter():
 
     def __init__(self, filename: str = 'groups.xlsx') -> None:
         self.__workbook = xlsxwriter.Workbook(filename)
-        self.__sheets: dict[str, xlsxwriter.workbook.Worksheet] = {}
+        self.sheets: dict[str, xlsxwriter.workbook.Worksheet] = {}
         self.__formatters: dict[str, xlsxwriter.workbook.Format] = {}
 
     def new_format(self, name, props) -> xlsxwriter.workbook.Format:
@@ -47,18 +47,18 @@ class XLSXWriter():
         '''
         adds a new sheet to the workbook and stores a reference to it in the dictionary
         '''
-        self.__sheets[sheet_name] = self.__workbook.add_worksheet(sheet_name)
+        self.sheets[sheet_name] = self.__workbook.add_worksheet(sheet_name)
 
     def write_sheet(self, sheet: str, table: list[list[Cell]]):
         '''
         writes data to a worksheet. This includes the header and the data. If the sheet doesn't exist, it will create it.
         '''
-        if not self.__sheets.get(sheet):
+        if not self.sheets.get(sheet):
             self.new_sheet(sheet)
 
         for i, row in enumerate(table):
             for j, field in enumerate(row):
-                self.__sheets[sheet].write(
+                self.sheets[sheet].write(
                     i, j, field.value, field.cell_format)
 
     def save(self):
