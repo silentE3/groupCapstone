@@ -94,7 +94,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
             best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(
-            solutions, survey_data.raw_rows, config_data, report_filename)
+            solutions, survey_data, config_data, report_filename)
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,

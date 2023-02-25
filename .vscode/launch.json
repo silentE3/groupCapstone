@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
     
 
         {
@@ -15,14 +16,23 @@
             "console": "integratedTerminal",
             "justMyCode": true
         },
+        // {
+        //     "name": "Python: Current File Report",
+        //     "type": "python",
+        //     "request": "launch",
+        //     "program": "${file}",
+        //     "args": ["report", "output.csv", "dataset-dev.csv", "-c", "config-dev.json", "-r", "reporting.xlsx"],
+        //     "console": "integratedTerminal",
+        //     "justMyCode": true
+        // },
         {
-            "name": "Python: Current File Report",
+            "name": "Python: Grouper",
             "type": "python",
             "request": "launch",
-            "program": "${file}",
-            "args": ["report", "output.csv", "dataset-dev.csv", "-c", "config-dev.json", "-r", "reporting.xlsx"],
+            "program": "grouper.py",
+            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "--report", "-a",  "roster.csv"],
             "console": "integratedTerminal",
             "justMyCode": true
-        }        
+        }
     ]
 }
