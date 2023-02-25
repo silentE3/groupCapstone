@@ -21,7 +21,7 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
         overall_formatted_report = formatter.format_overall_report(solution)
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
-        # pylint: disable-fixme
+        # pylint: disable=fixme
         # TODO: Placeholder for availability reporting. Can remove the preceding pylint: disable when done
         xlsx_writer.write_sheet('availability_report_' + str(index + 1), [list(availability_map.availability_slots.keys())])
         xlsx_writer.write_sheet('individual_report_' +
