@@ -28,9 +28,11 @@ def test_group_1():
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
 
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_2_groups_1.csv", expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx',
+                  './tests/test_files/survey_results/Example_Survey_Results_2.csv', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_2_groups_2.csv", expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx',
+                  './tests/test_files/survey_results/Example_Survey_Results_2.csv', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
@@ -40,7 +42,7 @@ def test_group_1():
     os.remove(
         './tests/test_files/survey_results/Example_Survey_Results_2_groups_2.csv')
     os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_2_groups_report.xlsx')
+        './tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx')
 
 
 def test_group_2():
