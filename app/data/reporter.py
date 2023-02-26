@@ -112,7 +112,7 @@ class ReportFormatter():
 
     def __individual_report_header(self):
         header = ['Student Id']
-        header.append('Provided Survey Data')
+        header.append('Filled out Survey')
         header.append('Disliked Students')
         header.append('Meets Dislike Requirement')
         if self.report_config['show_disliked_students']:
