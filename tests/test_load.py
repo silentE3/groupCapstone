@@ -544,7 +544,7 @@ def test_read_dataset_4():
     # *************************************************************************
 
     assert (len(surveys_result.records) == 2)  # 2 user records
-    assert len(surveys_result.raw_rows) == 3 # 3 rows in the csv file
+    assert len(surveys_result.raw_rows) == 3  # 3 rows in the csv file
     # assert (surveys_result == surveys_expected)
 
 # This test verifies that config_1.json and Example_Survey_Results_1.csv (both
@@ -699,7 +699,7 @@ def test_read_survey_raw():
         rows.extend(load.read_survey_raw(file))
     assert len(rows) == 4
     assert rows[0][0] == 'Timestamp'
-    
+
 
 def test_read_survey_raw_wrongfile_type():
     """
@@ -708,7 +708,6 @@ def test_read_survey_raw_wrongfile_type():
     with open('./tests/test_files/reports/Example_Report_1.xlsx', 'r') as file:
         with pytest.raises(ValueError):
             load.read_survey_raw(file)
-
 
 
 def test_read_dataset_dup_user():
@@ -1249,7 +1248,7 @@ def test_read_roster():
     Tests to see if program reads the roster file correctly
     '''
     students = []
-    students = load.read_roster("roster.csv")
+    students = load.read_roster("./tests/test_files/example_roster.csv")
 
     assert len(students) == 20
     students[0] = "asurite1"
