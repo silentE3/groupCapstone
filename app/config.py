@@ -1,14 +1,15 @@
 '''config holds the logic to read in a configuration object'''
 import json
+import sys
 from io import TextIOWrapper, StringIO
 from openpyxl import load_workbook
-from app.models import Configuration
+from app.models import Configuration, NoSurveyGroupMethodConsts
 
 
 def read_json(config_path: str) -> Configuration:
     """Reads in a json configuration file"""
     with open(config_path, mode="r", encoding="UTF-8") as json_file:
-        data: Configuration = json.load(json_file)
+        data: Configuration = read_json_from_io(json_file)
 
 # The following global module variables and assignments are a move towards
 # creating a single instance of the configuration that does not need to be
@@ -26,6 +27,7 @@ def read_json_from_io(text_buffer: TextIOWrapper) -> Configuration:
     '''
     text_buffer.seek(0)
     data: Configuration = json.load(text_buffer)
+    __check_config_validity(data)
 
     # pylint: disable=global-statement
     global CONFIG_DATA
@@ -96,6 +98,16 @@ def read_report_config(report_filename: str) -> Configuration:
     CONFIG_DATA = data
 
     return data
+
+
+def __check_config_validity(config_data: Configuration):
+    valid_no_survey_group_methods = [NoSurveyGroupMethodConsts.STANDARD_GROUPING,
+                                     NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY, NoSurveyGroupMethodConsts.GROUP_TOGETHER]
+    if "no_survey_group_method" not in config_data:
+        config_data["no_survey_group_method"] = NoSurveyGroupMethodConsts.STANDARD_GROUPING
+    if config_data['no_survey_group_method'] not in valid_no_survey_group_methods:
+        print('Invalid configuration selection for "no_survey_group_method".')
+        sys.exit(1)
 
 
 CONFIG_DATA = None

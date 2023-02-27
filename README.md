@@ -93,8 +93,18 @@ JSON format. The following is the structure and explication of the configuration
 {
     /*string, name of the class the grouping is for*/
     "class_name": "SER401",
-    /*number, target size of each group (or +1) */
-    "target_group_size": 5,
+    /*number, target size of each group */
+    "target_group_size": 5,    
+    /*boolean, allow groups to have one more member than the target group size*/
+    "target_plus_one_allowed": true,
+    /*boolean, allow groups to have one less member than the target group size*/    
+    "target_minus_one_allowed": true,
+    /* number (0, 1, or 2), Select a method for grouping students who did NOT fill out the survey:
+        0 = Standard grouping -- no special treatment of these students.
+        1 = Distribute evenly -- these students are distributed as evenly as possible among all groups,
+            with larger groups (if applicable) receiving these students "first".
+        2 = Group together -- these students are grouped together to the extent possible */
+    "no_survey_group_method": 0,    
     /*number, the number of passes that will happen to generate the group*/
     "grouping_passes": 2,
     /*used to denote what the availability is separated on, if multiple characters, simply type them all with no spaces or separators, every character typed will be considered a delimiter.  As written below, it will separate on either a colon or a semicolon*/
