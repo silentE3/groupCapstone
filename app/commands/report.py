@@ -15,7 +15,7 @@ from app.data import load, reporter
 @click.option('-r', '--reportfile', show_default=True, default="grouping_results_report.xlsx",
               help="Enter the path to the group report output file.")
 def report(groupfile: str, surveyfile: str, reportfile: str, configfile: str):
-    '''Generate report- Creates a report on the results of the groups that were generated. 
+    '''Generate report - Creates a report on the results of the groups that were generated. 
     It uses the raw survey file to verify the data.
 
     GROUPFILE is the path to the grouped dataset. [default=output.csv]

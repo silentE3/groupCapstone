@@ -102,6 +102,7 @@ class ReportFormatter():
                 # calc if user provided any availability
                 record.append(str(user.provided_availability))
                 record.append(str(user.has_matching_availability))
+                record.append(str(user.provided_survey_data))
 
                 record.append(group.group_id)
                 records.append(record)
@@ -127,7 +128,7 @@ class ReportFormatter():
 
         header.append('Supplied Availability in Survey')
         header.append('Availability overlaps with others')
-
+        header.append('Filled out Survey')
         header.append('Group Id')
 
         return header
