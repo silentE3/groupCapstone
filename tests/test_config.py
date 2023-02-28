@@ -46,12 +46,14 @@ def test_config_target_group_size_negative():
         "./tests/test_files/configs/config_negative_group_size.json")
     assert configuration["target_group_size"] == expected_target_group_size
 
+
 def test_read_report_config():
     '''
     Tests if the config file properly reads the config tab in the report and gets the variables
     holding only 1 value.
     '''
-    result:Configuration = config.read_report_config("Example_Report_1.xlsx")
+    result: Configuration = config.read_report_config(
+        "./tests/test_files/reports/Example_Report_1.xlsx")
 
     assert result.get("class_name") == "SER401"
     assert result.get("target_group_size") == 2
@@ -60,12 +62,14 @@ def test_read_report_config():
     assert result.get("availability_values_delimiter") == ";,"
     assert result.get("grouping_passes") == 10
 
+
 def test_read_report_config_2():
     '''
     Tests if the config file properly reads the config tab in the report and gets the content in the
     field mapping fields.
     '''
-    result:Configuration = config.read_report_config("Example_Report_1.xlsx")
+    result: Configuration = config.read_report_config(
+        "./tests/test_files/reports/Example_Report_1.xlsx")
 
     list = result.get("field_mappings")
     preferred_list = list.get("preferred_students_field_names")
@@ -81,12 +85,14 @@ def test_read_report_config_2():
     assert dislike_list[1] == "Non-preferred student 2"
     assert dislike_list[2] == "Non-preferred student 3"
 
+
 def test_read_report_config_3():
     '''
     Tests if the config file properly reads the config tab in the report and gets the content found in
     the report fields.
     '''
-    result:Configuration = config.read_report_config("Example_Report_1.xlsx")
+    result: Configuration = config.read_report_config(
+        "./tests/test_files/reports/Example_Report_1.xlsx")
 
     list = result.get("report_fields")
 
