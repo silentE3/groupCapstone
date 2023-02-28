@@ -14,14 +14,13 @@ from app.grouping import grouper_2
 
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
-@click.option('-o', '--outputfile', show_default=False, default=None, help="Enter the path to the output file. [default: <SURVEYFILE>_groups]")
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
 # @click.option('--report/--no-report', show_default=True, default=True, help="Use this option to output a report on the results of the goruping.")
 @click.option('-r', '--reportfile', show_default=False, default=None,
               help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
 #pylint: disable=too-many-arguments, too-many-locals
-def group(surveyfile: str, outputfile: str, configfile: str, reportfile: str, allstudentsfile: str):
+def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: str):
     '''Group Users - forms groups for the users from the survey.
 
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
