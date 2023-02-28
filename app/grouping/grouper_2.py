@@ -29,12 +29,28 @@ class Grouper2:
         for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
         self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
+        self.cache = {}
+    
+    def group_students_who_did_not_fill_out_survey(self):
+        '''
+        go through students and 
+        '''
+        for student in self.students:
+            if student.provided_survey_data:
+                continue
+            for group in self.groups:
+                if len(group.members) < self.target_group_margin_upper:
+                    group.members.append(student)
+                    break
+            self.students.remove(student)
 
     def group_students(self) -> list[models.GroupRecord]:
         """
         initiates the grouping process
         """
-
+        
+        self.group_students_who_did_not_fill_out_survey()
+        
         while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
@@ -93,6 +109,7 @@ class Grouper2:
                     groups_with_enough_mems.remove(other_group)
                 group.members.append(member)
                 break
+    
 
     def optimize_groups(self):
         '''
@@ -100,9 +117,6 @@ class Grouper2:
         if 5 operations result in the same score, it will end with the assumption that it has done the best it will do
 
         The optimization happens by running scenarios for swapping members. 
-        How could it run more quickly?
-        - rather than checking every scenario, cache certain scenarios
-        - what ones don't make sense to run?
 
         '''
         prev_score = 0
@@ -219,8 +233,10 @@ class Grouper2:
     def run_swap_scenarios(self, group: models.GroupRecord, student: models.SurveyRecord) -> Optional[models.SwapScenario]:
         '''
         gives a list of scenarios if the student were to be swapped for another group.
+        
         '''
-
+        self.cache = {student.student_id + str(group.members): group}
+        
         scenarios: list[models.SwapScenario] = []
         # loop through the groups and create a copy of each to run scenarios
         for other_group in self.groups:

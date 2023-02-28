@@ -69,13 +69,13 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
     ########## Run "first" grouping algorithm ##########
 
     # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
-    best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
-        survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+    # best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
+    #     survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     # Output results
-    click.echo(f'writing groups to {output_filename_1}')
-    output.GroupingDataWriter(config_data).write_csv(
-        best_solution_grouper_1.best_solution_found, output_filename_1)
+    # click.echo(f'writing groups to {output_filename_1}')
+    # output.GroupingDataWriter(config_data).write_csv(
+    #     best_solution_grouper_1.best_solution_found, output_filename_1)
 
     ########## Run "second" grouping algorithm ##########
 
@@ -90,8 +90,7 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     ########## Output solutions report if configured ##########
     if report:
-        solutions: list[list[models.GroupRecord]] = [
-            best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
+        solutions: list[list[models.GroupRecord]] = [best_solution_grouper_2]
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(
             solutions, survey_data.raw_rows, config_data, report_filename)
