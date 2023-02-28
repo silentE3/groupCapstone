@@ -2,7 +2,7 @@
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
 import datetime as dt
-from typing import TypedDict, Optional
+from typing import TypedDict, Optional, ClassVar
 
 
 @dataclass
@@ -48,6 +48,7 @@ class Configuration(TypedDict):
     target_group_size: int
     target_plus_one_allowed: bool
     target_minus_one_allowed: bool
+    no_survey_group_method: int
     grouping_passes: int
     availability_values_delimiter: str
     field_mappings: SurveyFieldMapping
@@ -88,6 +89,7 @@ class SurveyData:
     """
     records: list[SurveyRecord]
     raw_rows: list[list[str]]
+
 
 @dataclass
 class GroupRecord:
@@ -141,3 +143,14 @@ class SwapScenario:
 
     def __lt__(self, other):
         return (self.score1 < other.score1 and self.score2 < other.score2)
+
+
+@dataclass
+class NoSurveyGroupMethodConsts:
+    ''' 
+    Data class for storing constants representing the valid methods that can be used
+     to group students who didn't submit a survey.
+    '''
+    STANDARD_GROUPING: ClassVar[int] = 0
+    DISTRIBUTE_EVENLY: ClassVar[int] = 1
+    GROUP_TOGETHER: ClassVar[int] = 2
