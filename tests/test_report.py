@@ -132,7 +132,7 @@ def test_colored_columns():
     '''
     Checks if the availability overlap column has a background color of Green.
     '''
-    wb = load_workbook("./grouping_results_report.xlsx", data_only=True)
+    wb = load_workbook("grouping_results_report.xlsx")
     ws1 = wb["individual_report_1"]
     
     cell1 = ws1[2][6].value
