@@ -5,7 +5,7 @@ Also includes reading in the configuration file.
 
 from pathlib import Path
 import click
-from app import config, core, models, output
+from app import config, core, models
 from app.data import load, reporter
 from app.group import scoring
 from app.grouping.grouper_1 import Grouper1
@@ -15,11 +15,9 @@ from app.grouping import grouper_2
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
-# @click.option('--report/--no-report', show_default=True, default=True, help="Use this option to output a report on the results of the goruping.")
 @click.option('-r', '--reportfile', show_default=False, default=None,
               help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
-#pylint: disable=too-many-arguments, too-many-locals
 def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: str):
     '''Group Users - forms groups for the users from the survey.
 
@@ -27,7 +25,7 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     '''
 
     ########## Determine Output Filenames ##########
-    report_filename: str = __determine_output_filenames(
+    report_filename: str = __report_filename(
         surveyfile, reportfile)
 
     ########## Load the config data ##########
@@ -115,7 +113,7 @@ def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models
     return best_solution_found
 
 
-def __determine_output_filenames(surveyfile: str, reportfile: str) -> list[str]:
+def __report_filename(surveyfile: str, reportfile: str) -> str:
 
     # Set the default output filename values per the input filename (SURVEYFILE) value (if
     if reportfile is None:

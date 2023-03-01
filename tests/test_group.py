@@ -28,13 +28,11 @@ def test_group_1():
     expected_students = ['jsmith1', 'jdoe2',
                          'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
 
-    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx',
-                  './tests/test_files/survey_results/Example_Survey_Results_2.csv', expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
 
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
-
 
     os.remove(
         './tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx')
@@ -54,19 +52,13 @@ def test_group_2():
     expected_max_num_groups = 8//(5-1)
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv", expected_min_num_groups,
-                  expected_max_num_groups, expected_students)
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv", expected_min_num_groups,
+    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_report.xlsx", expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
     os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
-    os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
-    os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_report.xlsx')
+        './tests/test_files/survey_results/Example_Survey_Results_5_report.xlsx')
 
 
 def test_group_3():
@@ -78,25 +70,18 @@ def test_group_3():
     expected_min_num_groups = math.ceil(8/(7+1))
     expected_max_num_groups = 8//(7-1)
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_4.json'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_4.json', '--reportfile', './tests/test_files/survey_results/test_3_report.xlsx'])
     assert response.exit_code == 0
 
     expected_num_groups = 1
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
                          'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6']
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv", expected_min_num_groups,
-                  expected_max_num_groups, expected_students)
-    verify_groups("./tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv", expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/test_3_report.xlsx', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
-    os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_1.csv')
-    os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_2.csv')
-    os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_5_groups_report.xlsx')
+    os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
 
 
 def test_group_size_not_possible():
@@ -119,7 +104,7 @@ def test_group_size_not_possible():
 def test_group_invalid_group_size():
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json', '--no-report'])
+                             './tests/test_files/survey_results/Example_Survey_Results_5.csv', '--configfile', './tests/test_files/configs/config_5.json', '--reportfile', './tests/test_files/survey_results/report_bad_group_size.xlsx'])
     assert response.exit_code == 0
 
     # Verify that no groups were created
@@ -170,14 +155,12 @@ def test_group_verify_and_report_file_name_1():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--outputfile', 'test_verify_and_report_file_name_1.csv', '--configfile', './tests/test_files/configs/config_1.json', '--reportfile', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json', '--reportfile', 'test_verify_and_report_file_name_1_report.xlsx'])
     assert response.exit_code == 0
 
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1_1.csv')
-    os.remove('test_verify_and_report_file_name_1_2.csv')
 
 
 def test_alt_command_args_1():
@@ -186,11 +169,9 @@ def test_alt_command_args_1():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-o', 'test_verify_and_report_file_name_1.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx', '--report'])
+                             './tests/test_files/survey_results/Example_Survey_Results_2.csv', '-c', './tests/test_files/configs/config_1.json', '-r', 'test_verify_and_report_file_name_1_report.xlsx'])
     assert response.exit_code == 0
 
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
-    os.remove('test_verify_and_report_file_name_1_1.csv')
-    os.remove('test_verify_and_report_file_name_1_2.csv')
