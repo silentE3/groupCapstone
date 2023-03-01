@@ -16,7 +16,7 @@ from app.grouping import grouper_2
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
 @click.option('-r', '--reportfile', show_default=False, default=None,
-              help="report filename, relies on --report flag being enabled [default: <outputfile>_report.csv]")
+              help="report filename, relies on --report flag being enabled [default: <surveyfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
 def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: str):
     '''Group Users - forms groups for the users from the survey.
