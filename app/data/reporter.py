@@ -85,10 +85,7 @@ class ReportFormatter():
                     record.append(xlsx.Cell(
                         ';'.join(validate.user_dislikes_group(user, group))))
 
-                if get_user_availability(user) == "":
-                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('red_bg')))
-                else:
-                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
+                record.append(xlsx.Cell(group.group_id))
 
                 record.append(
                     xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
@@ -111,7 +108,10 @@ class ReportFormatter():
                 record.append(xlsx.Cell(user.provided_availability))
                 record.append(xlsx.Cell(user.has_matching_availability))
 
-                record.append(xlsx.Cell(group.group_id))
+                if get_user_availability(user) != "":
+                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(';'.join(get_user_availability(user))))
                 records.append(record)
 
         return records
@@ -123,7 +123,7 @@ class ReportFormatter():
         if self.report_config['show_disliked_students']:
             header.append(xlsx.Cell('Disliked students in group'))
 
-        header.append(xlsx.Cell('Availability'))
+        header.append(xlsx.Cell('Group Id'))
         header.append(xlsx.Cell('Meets Availability Requirement'))
         if self.report_config['show_availability_overlap']:
             header.append(xlsx.Cell('Availability Overlap'))
@@ -136,7 +136,7 @@ class ReportFormatter():
         header.append(xlsx.Cell('Supplied Availability in Survey'))
         header.append(xlsx.Cell('Availability overlaps with others'))
 
-        header.append(xlsx.Cell('Group Id'))
+        header.append(xlsx.Cell('Availability'))
 
         return header
 
