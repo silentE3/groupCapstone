@@ -16,9 +16,10 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
+    red_bg = xlsx_writer.new_format("red_bg", {"bg_color": "#FF0000"})
     
     for index, solution in enumerate(solutions):
-        formatter = ReportFormatter(data_config, formatters= {'green_bg': green_bg})
+        formatter = ReportFormatter(data_config, formatters= {'green_bg': green_bg, 'red_bg': red_bg})
         formatted_data = formatter.format_individual_report(solution)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
@@ -30,7 +31,7 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
             'overall_report_' + str(index + 1), overall_formatted_report)
 
     config_sheet = ReportFormatter(data_config, formatters={
-                                   'green_bg': green_bg}).format_config_report()
+                                   'green_bg': green_bg, 'red_bg': red_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
     xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(report_rows))
@@ -84,7 +85,10 @@ class ReportFormatter():
                     record.append(xlsx.Cell(
                         ';'.join(validate.user_dislikes_group(user, group))))
 
-                record.append(xlsx.Cell(';'.join(get_user_availability(user))))
+                if get_user_availability(user) == "":
+                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('red_bg')))
 
                 record.append(
                     xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
