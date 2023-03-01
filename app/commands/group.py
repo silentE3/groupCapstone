@@ -26,7 +26,6 @@ def group(surveyfile: str, outputfile: str, configfile: str, report: bool, repor
 
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
     '''
-
     ########## Determine Output Filenames ##########
     filenames: list[str] = __determine_output_filenames(
         surveyfile, outputfile, report, reportfile)

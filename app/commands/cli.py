@@ -5,7 +5,6 @@ cli contains the main group for commands
 
 import click
 from app.commands import generate, group, report
-from importlib import import_module
 
 
 @click.group(invoke_without_command=True)
@@ -18,21 +17,41 @@ def cli(ctx):
     if ctx.invoked_subcommand is None:
         ctx.invoke(guide)
 
+
 @cli.command()
 def guide():
     '''
     guide command
     '''
-    command_names = ['group', 'generate', 'report', 'update_report']
+    commands = {
+        'group': group.group,
+        'generate': generate.generate
+    }
+
+    command_names = list(commands.keys())
     click.echo('Available commands:')
     for name in command_names:
         click.echo(f'* {name}')
     selected_command = click.prompt('Select a command to run', type=click.Choice(command_names))
-    # Import the selected command module
-    module = import_module(f'app.commands.{selected_command}')
-    # Invoke the selected command
-    ctx = click.get_current_context()
-    ctx.invoke(getattr(module, selected_command))
+
+    if selected_command == 'group':
+        surveyfile = click.prompt('Enter the path to the survey file', default='dataset.csv')
+        configfile = click.prompt('Enter the path to the config file', default='config.json', show_default=True)
+        roster = click.confirm('Do you want to include a class roster with students who did not fill out the survey?')
+        if roster:
+            allstudentsfile = click.prompt('Enter the path to the file containing all student IDs', default=None,
+                                           show_default=False)
+        else:
+            allstudentsfile = None
+        commands[selected_command](surveyfile, configfile, allstudentsfile)
+    else:
+        commands[selected_command]()
+
+
+cli.add_command(group.group)
+cli.add_command(generate.gen)
+cli.add_command(report.report)
+cli.add_command(report.update_report)
 
 if __name__ == '__main__':
     cli()
