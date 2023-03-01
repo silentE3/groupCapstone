@@ -86,9 +86,9 @@ class ReportFormatter():
                         ';'.join(validate.user_dislikes_group(user, group))))
 
                 if get_user_availability(user) == "":
-                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
-                else:
                     record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('red_bg')))
+                else:
+                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
 
                 record.append(
                     xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
