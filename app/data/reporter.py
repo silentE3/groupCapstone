@@ -69,6 +69,8 @@ class ReportFormatter():
                 record = []
                 record.append(user.student_id)
 
+                record.append(user.provided_survey_data)
+
                 record.append(';'.join(user.disliked_students))
 
                 if len(user.disliked_students) == 0:
@@ -110,6 +112,7 @@ class ReportFormatter():
 
     def __individual_report_header(self):
         header = ['Student Id']
+        header.append('Filled out Survey')
         header.append('Disliked Students')
         header.append('Meets Dislike Requirement')
         if self.report_config['show_disliked_students']:
