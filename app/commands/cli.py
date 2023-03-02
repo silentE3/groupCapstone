@@ -34,18 +34,25 @@ def guide():
         click.echo(f'* {name}')
     selected_command = click.prompt('Select a command to run', type=click.Choice(command_names))
 
-    if selected_command == 'group':
-        surveyfile = click.prompt('Enter the path to the survey file', default='dataset.csv')
-        configfile = click.prompt('Enter the path to the config file', default='config.json', show_default=True)
-        roster = click.confirm('Do you want to include a class roster with students who did not fill out the survey?')
-        if roster:
-            allstudentsfile = click.prompt('Enter the path to the file containing all student IDs', default=None,
-                                           show_default=False)
-        else:
-            allstudentsfile = None
-        commands[selected_command](surveyfile, configfile, allstudentsfile)
-    else:
-        commands[selected_command]()
+    match selected_command:
+        case 'group':
+            surveyfile = click.prompt('Enter the path to the survey file', default='dataset.csv')
+            configfile = click.prompt('Enter the path to the config file', default='config.json', show_default=True)
+            roster = click.confirm('Do you want to include a class roster with students who did not fill out the survey?')
+            if roster:
+                allstudentsfile = click.prompt('Enter the path to the file containing all student IDs', default=None,
+                                               show_default=False)
+            else:
+                allstudentsfile = None
+            commands[selected_command](surveyfile, configfile, allstudentsfile)
+        case 'gen':
+            '''get arguments and run generate'''
+
+        case 'update-report':
+            '''get arguments and run update_report'''
+
+        case _:
+            commands[selected_command]()
 
 
 cli.add_command(group.group)
