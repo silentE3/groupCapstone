@@ -108,11 +108,22 @@ class ReportFormatter():
                 record.append(xlsx.Cell(user.provided_availability))
                 record.append(xlsx.Cell(user.has_matching_availability))
 
-                if get_user_availability(user) != "":
-                    record.append(xlsx.Cell(';'.join(get_user_availability(user)), self.formatters.get('green_bg')))
+                availability = get_user_availability(user)
+
+                if availability.count('sunday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
                 else:
-                    record.append(xlsx.Cell(';'.join(get_user_availability(user))))
-                records.append(record)
+                    record.append(xlsx.Cell())
+
+                if availability.count('sunday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell())
+
+                if availability.count('sunday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell())
 
         return records
 
