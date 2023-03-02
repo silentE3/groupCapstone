@@ -16,9 +16,10 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
-    
+
     for index, solution in enumerate(solutions):
-        formatter = ReportFormatter(data_config, formatters= {'green_bg': green_bg})
+        formatter = ReportFormatter(
+            data_config, formatters={'green_bg': green_bg})
         formatted_data = formatter.format_individual_report(solution)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
@@ -73,6 +74,8 @@ class ReportFormatter():
                 record: list[xlsx.Cell] = []
                 record.append(xlsx.Cell(user.student_id))
 
+                record.append(xlsx.Cell(user.provided_survey_data))
+
                 record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
                 if len(user.disliked_students) == 0:
@@ -97,11 +100,13 @@ class ReportFormatter():
                 if len(user.preferred_students) == 0:
                     record.append(xlsx.Cell("none provided"))
                 else:
-                    record.append(xlsx.Cell(len(user_perfs[user.student_id]) > 0))
+                    record.append(
+                        xlsx.Cell(len(user_perfs[user.student_id]) > 0))
 
                 if self.report_config['show_preferred_students']:
                     # for preferred list
-                    record.append(xlsx.Cell(";".join(user_perfs[user.student_id])))
+                    record.append(
+                        xlsx.Cell(";".join(user_perfs[user.student_id])))
 
                 # calc if user provided any availability
                 record.append(xlsx.Cell(user.provided_availability))
@@ -114,6 +119,7 @@ class ReportFormatter():
 
     def __individual_report_header(self):
         header = [xlsx.Cell('Student Id')]
+        header.append(xlsx.Cell('Filled out Survey'))
         header.append(xlsx.Cell('Disliked Students'))
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
@@ -371,7 +377,8 @@ class ReportFormatter():
         headers = []
         headers.append(xlsx.Cell("Number of Groups"))
         headers.append(xlsx.Cell('Disliked Pairings'))
-        headers.append(xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
+        headers.append(
+            xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:

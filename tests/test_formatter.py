@@ -134,8 +134,9 @@ def test_format_individual_report_check_header_all_enabled():
 
     report = report_formatter.format_individual_report(groups)
 
-    assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Availability'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
-                         xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell('Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
+    assert report[0] == [xlsx.Cell('Student Id'),  xlsx.Cell('Filled out Survey'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Availability'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
+                         xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell(
+                             'Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
                          xlsx.Cell('Group Id')]
 
 
