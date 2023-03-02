@@ -405,7 +405,6 @@ class ReportFormatter():
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
             header.append(xlsx.Cell('Disliked students in group'))
-            header.append(xlsx.Cell('Disliked students in group'))
 
         header.append(xlsx.Cell('Meets Availability Requirement'))
         if self.report_config['show_availability_overlap']:
