@@ -73,6 +73,7 @@ class ReportFormatter():
 
                 record: list[xlsx.Cell] = []
                 record.append(xlsx.Cell(user.student_id))
+                record.append(xlsx.Cell(group.group_id))
 
                 record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
@@ -85,7 +86,6 @@ class ReportFormatter():
                     record.append(xlsx.Cell(
                         ';'.join(validate.user_dislikes_group(user, group))))
 
-                record.append(xlsx.Cell(group.group_id))
 
                 record.append(
                     xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
