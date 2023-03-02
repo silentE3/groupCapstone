@@ -1,6 +1,7 @@
 """
 module for an additional grouping algorithm implementation
 """
+from typing import List, Any
 import copy
 from random import randint
 from typing import Optional
@@ -30,27 +31,12 @@ class Grouper2:
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
         self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
         self.cache = {}
-    
-    def group_students_who_did_not_fill_out_survey(self):
-        '''
-        go through students and 
-        '''
-        for student in self.students:
-            if student.provided_survey_data:
-                continue
-            for group in self.groups:
-                if len(group.members) < self.target_group_margin_upper:
-                    group.members.append(student)
-                    break
-            self.students.remove(student)
 
     def group_students(self) -> list[models.GroupRecord]:
         """
         initiates the grouping process
         """
-        
-        self.group_students_who_did_not_fill_out_survey()
-        
+
         while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
@@ -109,7 +95,6 @@ class Grouper2:
                     groups_with_enough_mems.remove(other_group)
                 group.members.append(member)
                 break
-    
 
     def optimize_groups(self):
         '''
@@ -233,10 +218,10 @@ class Grouper2:
     def run_swap_scenarios(self, group: models.GroupRecord, student: models.SurveyRecord) -> Optional[models.SwapScenario]:
         '''
         gives a list of scenarios if the student were to be swapped for another group.
-        
+
         '''
         self.cache = {student.student_id + str(group.members): group}
-        
+
         scenarios: list[models.SwapScenario] = []
         # loop through the groups and create a copy of each to run scenarios
         for other_group in self.groups:
@@ -297,14 +282,8 @@ class Grouper2:
         '''
         uses the scoring algorithm to rank the group
         '''
-        scoring_vars = models.GroupSetData(group.group_id,
-                                           self.config["target_group_size"],
-                                           len((self.config["field_mappings"])[
-                                               "preferred_students_field_names"]),
-                                           self.num_students,
-                                           len((self.config["field_mappings"])[
-                                               "availability_field_names"]))
-        return scoring.score_individual_group(group, scoring_vars)
+        scoring_vars = score_group(group.members)
+        return scoring_vars
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
@@ -353,3 +332,57 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
+
+
+def score_group(members: List[models.SurveyRecord]) -> float:
+    '''
+    scores a group based on availability, disliked students in the group, and preferred students in the group
+    '''
+    # Start with a base score of 100
+    group_score = 100
+
+    # Compute the maximum possible score based on the number of members in the group
+    n_members = len(members)
+    max_possible_score = 100 + 20*(n_members-1) + 10*(n_members-1)**2
+
+    # Compute the weight of availability factor
+    availability_weight = max(0.0, 1.0 - (n_members - 1)*0.05)
+
+    # For each member in the group
+    for member in members:
+        # # Skip members with no available time slots
+        # if not member.provided_availability:
+        #     continue
+
+        # Check each other member in the group
+        for other_member in members:
+            # Skip the same member and members with no available time slots
+            if other_member is member:
+                continue
+
+            # Check if there is at least one matching availability slot for both members
+            matching_slots = set(member.availability).intersection(
+                other_member.availability)
+
+            if matching_slots:
+                # Add to the group score based on the availability factor and the number of matching slots
+                group_score += availability_weight * 20 * len(matching_slots)
+
+            # Check if the member dislikes any other members in the group
+            if member.disliked_students and other_member.student_id in member.disliked_students:
+                # Subtract from the group score based on the number of disliked members
+                group_score -= 10 * len(member.disliked_students)
+
+            # Check if the member likes any other members in the group
+            if member.preferred_students and other_member.student_id in member.preferred_students:
+                # Add to the group score based on the number of liked members
+                group_score += 10 * len(member.preferred_students)
+
+    # If any member dislikes another member or there are no matching availability slots, set the group score to 0
+    if group_score == 100:
+        group_score = 0
+
+    # Normalize the group score by dividing by the maximum possible score
+    normalized_score = group_score / max_possible_score
+
+    return normalized_score
