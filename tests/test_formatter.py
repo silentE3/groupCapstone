@@ -149,7 +149,7 @@ def test_format_individual_report_check_header_all_enabled():
                          xlsx.Cell('Friday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Friday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Friday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Friday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Friday @ 12:00 PM - 3:00 PM'),
                          xlsx.Cell('Friday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Friday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Friday @ 9:00 PM - 12:00 AM'),
                          xlsx.Cell('Saturday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Saturday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Saturday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Saturday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Saturday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Saturday @ 9:00 PM - 12:00 AM'),]
+                         xlsx.Cell('Saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Saturday @ 9:00 PM - 12:00 AM')]
 
 
 def test_format_config_flatten_headers():
