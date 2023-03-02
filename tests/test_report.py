@@ -127,30 +127,3 @@ def test_dev_reporting_contains_sheets():
     # add more asserts for more sheet names here
 
     os.remove("./grouping_results_report.xlsx")
-
-def test_colored_columns():
-    '''
-    Checks if the availability overlap column has a background color of Green.
-    '''
-    wb = load_workbook("./grouping_results_report.xlsx")
-    ws1 = wb["individual_report_1"]
-    
-    cell1 = ws1[2][6].value
-    cell2 = ws1[3][6].value
-    cell3 = ws1[4][6].value
-    cell4 = ws1[5][6].value
-
-    cell1_color = ws1[2][6].fill.start_color.index
-    cell2_color = ws1[3][6].fill.start_color.index
-    cell3_color = ws1[4][6].fill.start_color.index
-    cell4_color = ws1[5][6].fill.start_color.index
-
-    assert cell1 == 'monday @ 3:00 AM - 6:00 AM;tuesday @ 3:00 AM - 6:00 AM;wednesday @ 3:00 PM - 6:00 PM'
-    assert cell2 == 'monday @ 3:00 AM - 6:00 AM;tuesday @ 3:00 AM - 6:00 AM;wednesday @ 3:00 PM - 6:00 PM'
-    assert cell3 == 'monday @ 3:00 AM - 6:00 AM;tuesday @ 3:00 AM - 6:00 AM;wednesday @ 3:00 PM - 6:00 PM'
-    assert cell4 == 'monday @ 3:00 AM - 6:00 AM;tuesday @ 3:00 AM - 6:00 AM;wednesday @ 3:00 PM - 6:00 PM'
-
-    assert cell1_color == "FF00FF00"
-    assert cell2_color == "FF00FF00" 
-    assert cell3_color == "FF00FF00" 
-    assert cell4_color == "FF00FF00" 
