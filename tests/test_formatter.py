@@ -134,9 +134,22 @@ def test_format_individual_report_check_header_all_enabled():
 
     report = report_formatter.format_individual_report(groups)
 
-    assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Group Id'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
+    assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Group Id'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
                          xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell('Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
-                         xlsx.Cell('Availability')]
+                         xlsx.Cell('Sunday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Sunday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Sunday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Sunday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Sunday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Sunday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Sunday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Sunday @ 9:00 PM - 12:00 AM'), 
+                         xlsx.Cell('Monday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Monday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Monday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Monday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Monday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Monday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Monday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Monday @ 9:00 PM - 12:00 AM'), 
+                         xlsx.Cell('Tuesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Tuesday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Tuesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Tuesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Tuesday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Tuesday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Tuesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Tuesday @ 9:00 PM - 12:00 AM'),
+                         xlsx.Cell('Wednesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Wednesday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Wednesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Wednesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Wednesday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Wednesday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Wednesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Wednesday @ 9:00 PM - 12:00 AM'),
+                         xlsx.Cell('Thursday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Thursday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Thursday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Thursday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Thursday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Thursday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Thursday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Thursday @ 9:00 PM - 12:00 AM'),
+                         xlsx.Cell('Friday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Friday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Friday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Friday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Friday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Friday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Friday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Friday @ 9:00 PM - 12:00 AM'),
+                         xlsx.Cell('Saturday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Saturday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Saturday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Saturday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Saturday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('Saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Saturday @ 9:00 PM - 12:00 AM'),]
 
 
 def test_format_config_flatten_headers():
