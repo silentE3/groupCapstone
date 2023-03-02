@@ -111,19 +111,285 @@ class ReportFormatter():
                 availability = get_user_availability(user)
 
                 if availability.count('sunday @ 0:00 AM - 3:00 AM') != 0:
-                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
                 else:
-                    record.append(xlsx.Cell())
+                    record.append(xlsx.Cell(' '))
 
                 if availability.count('sunday @ 3:00 AM - 6:00 AM') != 0:
-                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
                 else:
-                    record.append(xlsx.Cell())
+                    record.append(xlsx.Cell(' '))
 
                 if availability.count('sunday @ 6:00 AM - 9:00 AM') != 0:
-                    record.append(xlsx.Cell(self.formatters.get('green_bg')))
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
                 else:
-                    record.append(xlsx.Cell())
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('sunday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('sunday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('sunday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('sunday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('sunday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('monday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('tuesday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))    
+
+                if availability.count('wednesday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('wednesday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))  
+
+                if availability.count('thursday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('thursday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))  
+                
+                if availability.count('friday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('friday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))  
+
+                if availability.count('saturday @ 0:00 AM - 3:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 3:00 AM - 6:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 6:00 AM - 9:00 AM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 9:00 AM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 12:00 PM - 3:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 3:00 PM - 6:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 6:00 PM - 9:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+
+                if availability.count('saturday @ 9:00 PM - 12:00 PM') != 0:
+                    record.append(xlsx.Cell(' ', self.formatters.get('green_bg')))
+                else:
+                    record.append(xlsx.Cell(' '))
+                records.append(record)
 
         return records
 
