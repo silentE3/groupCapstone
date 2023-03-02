@@ -76,7 +76,8 @@ class ReportFormatter():
 
                 record.append(xlsx.Cell(user.provided_survey_data))
 
-                record.append(xlsx.Cell(';'.join(user.disliked_students)))
+                if self.report_config['show_disliked_students']:
+                    record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
                 if len(user.disliked_students) == 0:
                     record.append(xlsx.Cell('none provided'))
@@ -95,7 +96,8 @@ class ReportFormatter():
                     record.append(
                         xlsx.Cell(';'.join(validate.group_availability_strings(group)), self.formatters.get('green_bg')))
 
-                record.append(xlsx.Cell(";".join(user.preferred_students)))
+                if self.report_config['show_preferred_students']:
+                    record.append(xlsx.Cell(";".join(user.preferred_students)))
 
                 if len(user.preferred_students) == 0:
                     record.append(xlsx.Cell("none provided"))
@@ -120,7 +122,8 @@ class ReportFormatter():
     def __individual_report_header(self):
         header = [xlsx.Cell('Student Id')]
         header.append(xlsx.Cell('Filled out Survey'))
-        header.append(xlsx.Cell('Disliked Students'))
+        if self.report_config['show_disliked_students']:
+            header.append(xlsx.Cell('Disliked Students'))
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
             header.append(xlsx.Cell('Disliked students in group'))
@@ -130,13 +133,15 @@ class ReportFormatter():
         if self.report_config['show_availability_overlap']:
             header.append(xlsx.Cell('Availability Overlap'))
 
-        header.append(xlsx.Cell('Preferred Students'))
+        if self.report_config['show_preferred_students']:
+            header.append(xlsx.Cell('Preferred Students'))
         header.append(xlsx.Cell('Meets Preferred Goal'))
         if self.report_config['show_preferred_students']:
             header.append(xlsx.Cell('Preferred students in group'))
 
         header.append(xlsx.Cell('Supplied Availability in Survey'))
-        header.append(xlsx.Cell('Availability overlaps with others'))
+        header.append(
+            xlsx.Cell('Availability overlaps with others in the class'))
 
         header.append(xlsx.Cell('Group Id'))
 
