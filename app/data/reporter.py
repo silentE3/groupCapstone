@@ -22,11 +22,10 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
         formatted_data = formatter.format_individual_report(solution)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
+        # pylint: disable=unused-variable
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
-        # pylint: disable=fixme
-        # TODO: Placeholder for availability reporting. Can remove the preceding pylint: disable when done
-        xlsx_writer.write_sheet('availability_report_' + str(index + 1), [list(availability_map.availability_slots.keys())])
+
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
         xlsx_writer.write_sheet(
@@ -38,7 +37,7 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
-    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(report_rows))
+    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
     xlsx_writer.save()
 
