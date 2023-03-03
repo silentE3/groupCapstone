@@ -115,7 +115,7 @@ class ReportFormatter():
 
                 availability = get_user_availability(user)
 
-                # color-coded availability
+                # color-coded availability for every day of the week
                 for day in validate.WEEK_DAYS:
                     for availability_field in self.data_config['field_mappings']['availability_field_names']:
                         if day + ' @ ' + validate.extract_time(availability_field) in availability:
@@ -123,7 +123,7 @@ class ReportFormatter():
                                 xlsx.Cell(' ', self.formatters.get('green_bg')))
                         else:
                             record.append(xlsx.Cell(' '))
-                            
+
                 records.append(record)
 
         return records
