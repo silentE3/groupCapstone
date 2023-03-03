@@ -136,20 +136,33 @@ def test_format_individual_report_check_header_all_enabled():
 
     assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Group Id'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
                          xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell('Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
-                         xlsx.Cell('Sunday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Sunday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Sunday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Sunday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Sunday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Sunday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Sunday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Sunday @ 9:00 PM - 12:00 AM'), 
-                         xlsx.Cell('Monday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Monday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Monday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Monday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Monday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Monday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Monday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Monday @ 9:00 PM - 12:00 AM'), 
-                         xlsx.Cell('Tuesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Tuesday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Tuesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Tuesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Tuesday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Tuesday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Tuesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Tuesday @ 9:00 PM - 12:00 AM'),
-                         xlsx.Cell('Wednesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Wednesday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Wednesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Wednesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Wednesday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Wednesday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Wednesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Wednesday @ 9:00 PM - 12:00 AM'),
-                         xlsx.Cell('Thursday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Thursday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Thursday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Thursday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Thursday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Thursday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Thursday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Thursday @ 9:00 PM - 12:00 AM'),
-                         xlsx.Cell('Friday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Friday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Friday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Friday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Friday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Friday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Friday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Friday @ 9:00 PM - 12:00 AM'),
-                         xlsx.Cell('Saturday @ 0:00 AM - 3:00 AM'), xlsx.Cell('Saturday @ 3:00 AM - 6:00 AM'), xlsx.Cell('Saturday @ 6:00 AM - 9:00 AM'), xlsx.Cell('Saturday @ 9:00 AM - 12:00 PM'), xlsx.Cell('Saturday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('Saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell('Saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('Saturday @ 9:00 PM - 12:00 AM')]
+                         xlsx.Cell('monday @ 0:00 AM - 3:00 AM'), xlsx.Cell('monday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'monday @ 6:00 AM - 9:00 AM'), xlsx.Cell('monday @ 9:00 AM - 12:00 PM'), xlsx.Cell('monday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('monday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'monday @ 6:00 PM - 9:00 PM'), xlsx.Cell('monday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('tuesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('tuesday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'tuesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('tuesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('tuesday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('tuesday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'tuesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('tuesday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('wednesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('wednesday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'wednesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('wednesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('wednesday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('wednesday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'wednesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('wednesday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('thursday @ 0:00 AM - 3:00 AM'), xlsx.Cell('thursday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'thursday @ 6:00 AM - 9:00 AM'), xlsx.Cell('thursday @ 9:00 AM - 12:00 PM'), xlsx.Cell('thursday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('thursday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'thursday @ 6:00 PM - 9:00 PM'), xlsx.Cell('thursday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('friday @ 0:00 AM - 3:00 AM'), xlsx.Cell('friday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'friday @ 6:00 AM - 9:00 AM'), xlsx.Cell('friday @ 9:00 AM - 12:00 PM'), xlsx.Cell('friday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('friday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'friday @ 6:00 PM - 9:00 PM'), xlsx.Cell('friday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('saturday @ 0:00 AM - 3:00 AM'), xlsx.Cell('saturday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'saturday @ 6:00 AM - 9:00 AM'), xlsx.Cell('saturday @ 9:00 AM - 12:00 PM'), xlsx.Cell('saturday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
+                             'saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('saturday @ 9:00 PM - 12:00 PM'),
+                         xlsx.Cell('sunday @ 0:00 AM - 3:00 AM'), xlsx.Cell('sunday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
+                             'sunday @ 6:00 AM - 9:00 AM'), xlsx.Cell('sunday @ 9:00 AM - 12:00 PM'), xlsx.Cell('sunday @ 12:00 PM - 3:00 PM'),
+                         xlsx.Cell('sunday @ 3:00 PM - 6:00 PM'), xlsx.Cell('sunday @ 6:00 PM - 9:00 PM'), xlsx.Cell('sunday @ 9:00 PM - 12:00 PM')]
 
 
 def test_format_config_flatten_headers():
