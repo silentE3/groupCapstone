@@ -33,7 +33,7 @@ def test_new_sheet_duplicate_name_fails():
 def test_write_sheet_creates_sheet_if_not_exists():
     writer = xlsx.XLSXWriter()
     
-    writer.write_sheet('sheet1', [['test']])
+    writer.write_sheet('sheet1', [[xlsx.Cell('test')]])
 
     assert writer.sheets.get('sheet1')
     

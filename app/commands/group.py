@@ -15,6 +15,7 @@ from app.grouping import grouper_2
 @click.command("group")
 @click.argument('surveyfile', type=click.Path(exists=True), default='dataset.csv')
 @click.option('-c', '--configfile', show_default=True, default="config.json", help="Enter the path to the config file.", type=click.Path(exists=True))
+@click.option('--report/--no-report', show_default=True, default=True, help="Use this option to output a report on the results of the goruping.")
 @click.option('-r', '--reportfile', show_default=False, default=None,
               help="report filename, relies on --report flag being enabled [default: <surveyfile>_report.csv]")
 @click.option('-a', '--allstudentsfile', help="list of all student ids in class. Ignored if not included")
@@ -44,6 +45,7 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
             survey_data.records, roster, config_data['field_mappings']['availability_field_names'])
 
     ########## Grouping ##########
+
     # Perform pre-grouping error checking
     if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
                                      config_data["target_minus_one_allowed"], survey_data.records):
@@ -72,13 +74,20 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     best_solution_grouper_2: list[models.GroupRecord] = __run_grouping_alg_2(
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
-    ########## Output solutions report ##########
-    # if report:
+    # ~~~~~~~~ Delete if no issues found ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #
+    # solutions: list[list[models.GroupRecord]] = [
+    #     best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
+    # click.echo(f'Writing report to: {report_filename}')
+    # reporter.write_report(
+    #     solutions, survey_data.raw_rows, config_data, report_filename)
+
+    ########## Output solutions report if configured ##########
     solutions: list[list[models.GroupRecord]] = [
         best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
     click.echo(f'Writing report to: {report_filename}')
     reporter.write_report(
-        solutions, survey_data.raw_rows, config_data, report_filename)
+        solutions, survey_data, config_data, report_filename)
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,

@@ -27,5 +27,7 @@ def update_report(reportfile: str):
         reportfile, survey_data.records)
 
     click.echo(f'Writing updated report to: "{reportfile}"')
-    reporter.write_report(groups, survey_data.raw_rows,
+    reporter.write_report(groups, survey_data,
                           config_data, reportfile)
+ # Delete if no problems
+ # ~~~~~~~~~~~~~~~~~~~~~~survey_data.raw_rows~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
