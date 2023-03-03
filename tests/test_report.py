@@ -150,6 +150,14 @@ def test_colored_columns():
     cell6_color = ws1[7][7].fill.start_color.index
     cell7_color = ws1[8][7].fill.start_color.index
     cell8_color = ws1[9][7].fill.start_color.index
+    cell9_color = ws1[10][7].fill.start_color.index
+    cell10_color = ws1[11][7].fill.start_color.index
+    cell11_color = ws1[12][7].fill.start_color.index
+    cell12_color = ws1[13][7].fill.start_color.index
+    cell13_color = ws1[14][7].fill.start_color.index
+    cell14_color = ws1[15][7].fill.start_color.index
+    cell15_color = ws1[16][7].fill.start_color.index
+    cell16_color = ws1[17][7].fill.start_color.index
 
     assert cell1_color == "FF00FF00"
     assert cell2_color == "FF00FF00" 
@@ -159,6 +167,14 @@ def test_colored_columns():
     assert cell6_color == "FF00FF00" 
     assert cell7_color == "FF00FF00" 
     assert cell8_color == "FF00FF00"  
+    assert cell9_color == "FF00FF00"
+    assert cell10_color == "FF00FF00" 
+    assert cell11_color == "FF00FF00" 
+    assert cell12_color == "FF00FF00"
+    assert cell13_color == "FF00FF00"
+    assert cell14_color == "FF00FF00" 
+    assert cell15_color == "FF00FF00" 
+    assert cell16_color == "FF00FF00"
 
     os.remove("./grouping_results_report.xlsx")
     
