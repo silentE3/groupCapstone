@@ -9,7 +9,6 @@ from app.file import xlsx
 from app import config as cfg
 
 
-
 def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
@@ -51,6 +50,7 @@ def get_user_availability(user: models.SurveyRecord):
 
     return available_slots
 
+
 class ReportFormatter():
     '''
     formatter for writing reports. Uses the provided configuration
@@ -79,22 +79,21 @@ class ReportFormatter():
 
                 record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
+                meets_dislike_req: str = str(
+                    len(validate.user_dislikes_group(user, group)) == 0)
                 if len(user.disliked_students) == 0:
-                    record.append(xlsx.Cell('none provided'))
-                else:
-                    record.append(
-                        xlsx.Cell(str(len(validate.user_dislikes_group(user, group)) == 0)))
+                    meets_dislike_req = 'none provided'
+                record.append(xlsx.Cell(meets_dislike_req))
                 if self.report_config['show_disliked_students']:
                     record.append(xlsx.Cell(
                         ';'.join(validate.user_dislikes_group(user, group))))
 
-
                 record.append(
                     xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
-                
+
                 if self.report_config['show_availability_overlap']:
                     record.append(
-                        xlsx.Cell(';'.join(validate.group_availability_strings(group)), self.formatters.get('green_bg')))
+                        xlsx.Cell(';'.join(validate.group_availability_strings(group))))
 
                 record.append(xlsx.Cell(";".join(user.preferred_students)))
 
@@ -115,7 +114,7 @@ class ReportFormatter():
 
                 availability = get_user_availability(user)
 
-                # color-coded availability for every day of the week
+                # color-coded availability
                 for day in validate.WEEK_DAYS:
                     for availability_field in self.data_config['field_mappings']['availability_field_names']:
                         if day + ' @ ' + validate.extract_time(availability_field) in availability:
@@ -131,6 +130,7 @@ class ReportFormatter():
     def __individual_report_header(self):
         header = [xlsx.Cell('Student Id')]
         header.append(xlsx.Cell('Group Id'))
+        header.append(xlsx.Cell('Filled out Survey'))
         header.append(xlsx.Cell('Disliked Students'))
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
@@ -148,7 +148,7 @@ class ReportFormatter():
         header.append(xlsx.Cell('Supplied Availability in Survey'))
         header.append(xlsx.Cell('Availability overlaps with others'))
 
-        # color-coded availability headers for every day of the week
+        # color-coded availability headers
         for day in validate.WEEK_DAYS:
             for availability_field in self.data_config['field_mappings']['availability_field_names']:
                 header.append(
@@ -396,7 +396,8 @@ class ReportFormatter():
         headers = []
         headers.append(xlsx.Cell("Number of Groups"))
         headers.append(xlsx.Cell('Disliked Pairings'))
-        headers.append(xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
+        headers.append(
+            xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
