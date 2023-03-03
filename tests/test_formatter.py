@@ -134,8 +134,9 @@ def test_format_individual_report_check_header_all_enabled():
 
     report = report_formatter.format_individual_report(groups)
 
-    assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Group Id'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
-                         xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell('Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
+    assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Group Id'), xlsx.Cell('Filled out Survey'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
+                         xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell(
+                             'Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
                          xlsx.Cell('monday @ 0:00 AM - 3:00 AM'), xlsx.Cell('monday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
                              'monday @ 6:00 AM - 9:00 AM'), xlsx.Cell('monday @ 9:00 AM - 12:00 PM'), xlsx.Cell('monday @ 12:00 PM - 3:00 PM'),
                          xlsx.Cell('monday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
