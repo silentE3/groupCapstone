@@ -3,6 +3,7 @@ module for a grouping algorithm implementation that creates groups via a constru
     heuristic approach with local backtracking.
 '''
 
+from copy import deepcopy
 import random as rnd
 from app import models
 from app.group import validate
@@ -140,7 +141,22 @@ class Grouper1:
         # Sort students from most disliked to least (not in place)
         # Also, for subsets of students with the same number of dislikes,
         #  randomly shuffle the subset
-        return self.__sort_students_by_dislikes()
+        sorted_students: list[models.SurveyRecord] = self.__sort_students_by_dislikes(
+        )
+
+        # Process "no survey students" per the configuration selection (no_survey_group_method)
+        if self.config_data["no_survey_group_method"] != models.NoSurveyGroupMethodConsts.STANDARD_GROUPING:
+            # Place "no survey students" at the top of the list
+            sorted_students_copy = deepcopy(sorted_students)
+            for student in sorted_students_copy:
+                if not student.provided_survey_data:
+                    # Remove the student from their current position in the list
+                    sorted_students.remove(student)
+                    # Add the student to the beginning (top) of the list
+                    sorted_students.insert(0, student)
+
+        # return the pre-processed student data
+        return sorted_students
 
     def __sort_students_by_dislikes(self) -> list[models.SurveyRecord]:
         '''
@@ -196,40 +212,52 @@ class Grouper1:
         # For each remaining student on the list (top to bottom), assign them to a group:
         count_groups_max_size: int = 0
         while len(preprocessed_data) > 0:
-
             student_assigned: bool = False
             student_survey: models.SurveyRecord = preprocessed_data[0]
+            group_added_to: models.GroupRecord = models.GroupRecord(
+                "invalid", [])
 
-            # For each group, 1 to max group num:
-            for group in self.groups:
+            # If the config selection for "no_survey_group_method" is "DISTRIBUTE_EVENLY",
+            #  then we simply move through the groups in order until all "no survey students"
+            #  have been assigned.
+            if (self.config_data["no_survey_group_method"] == models.NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY and
+                    not student_survey.provided_survey_data):
+                group_added_to = self.groups[0]
+                previous_group: models.GroupRecord = self.groups[0]
+                for group in self.groups:
+                    if previous_group.members > group.members:
+                        # We've identified the "next" group
+                        group_added_to = group
+                        break
 
-                # If the group is full, continue to the next group.
-                if self.__is_group_full(group, non_stand_mod, num_non_targ_groups, count_groups_max_size):
-                    continue
-
-                # If the student increases the number of disliked pairings in the group, continue
-                #  to the next group.
-                if (validate.group_dislikes_user(student_survey.student_id, group) or
-                        validate.user_dislikes_group(student_survey, group)):
-                    continue
-
-                # If the group currently has availability overlap AND would not have availability
-                # overlap if this student were added, continue to the next group.
-                if (len(group.members) != 0 and validate.availability_overlap_count(group) > 0 and
-                        not validate.fits_group_availability(student_survey, group)):
-                    continue
-
-                # Else, assign the student to this group and break from the for loop.
-                group.members.append(student_survey)
-
-                # "pop" the student now that they have been assigned
-                preprocessed_data.pop(0)
+                # Add the student to the identified group
+                group_added_to.members.append(student_survey)
                 student_assigned = True
 
-                # Increment count of groups at max size, if applicable
-                if self.__group_at_max_size(group, non_stand_mod):
-                    count_groups_max_size += 1
-                break
+            if not student_assigned:
+                # For each group, 1 to max group num:
+                for group in self.groups:
+                    # If the group is full, continue to the next group.
+                    if self.__is_group_full(group, non_stand_mod, num_non_targ_groups, count_groups_max_size):
+                        continue
+
+                    # If the student increases the number of disliked pairings in the group, continue
+                    #  to the next group.
+                    if (True in validate.group_dislikes_user(student_survey.student_id, group).values() or
+                            len(validate.user_dislikes_group(student_survey, group)) > 0):
+                        continue
+
+                    # If the group currently has availability overlap AND would not have availability
+                    # overlap if this student were added, continue to the next group.
+                    if (len(group.members) != 0 and validate.availability_overlap_count(group) > 0 and
+                            not validate.fits_group_availability(student_survey, group)):
+                        continue
+
+                    # Else, assign the student to this group and break from the for loop.
+                    group.members.append(student_survey)
+                    group_added_to = group
+                    student_assigned = True
+                    break
 
             # If the student has not yet been assigned to a group, then assign them to the first
             #   potential group for which the total number of disliked pairings would be increased
@@ -242,13 +270,15 @@ class Grouper1:
                 # Add the student to the identified group
                 self.groups[least_dislike_increase_idx].members.append(
                     student_survey)
+                group_added_to = self.groups[least_dislike_increase_idx]
+                student_assigned = True
 
-                # increment count of groups at max size, if applicable
-                if self.__group_at_max_size(self.groups[least_dislike_increase_idx], non_stand_mod):
-                    count_groups_max_size += 1
+            # "pop" the student now that they have been assigned
+            preprocessed_data.pop(0)
 
-                # "pop" the student now that they have been assigned
-                preprocessed_data.pop(0)
+            # Increment count of groups at max size, if applicable
+            if self.__group_at_max_size(group_added_to, non_stand_mod):
+                count_groups_max_size += 1
 
     def __backtracking_phase_1(self, grouping_pass: int):
         '''
@@ -339,6 +369,7 @@ class Grouper1:
             #   with this student would improve (lower) the overall solution score, swap the two
             #   students and break from the for loop.
             for idx_stud_most_dislike, _ in enumerate(group_max_disliked_pairs.members):
+
                 if self.__attempt_swap(idx_stud_most_dislike, group_max_disliked_pairs, False):
                     student_swapped = True
                     improvement_swap = True
@@ -474,6 +505,10 @@ class Grouper1:
         the student_group with students in the other groups in order to (depending on the value of
         equiv_swap_ok) improve or at least maintain the solution's score.
         '''
+
+        student_provided_survey_data: bool = student_group.members[
+            stud_idx_in_group].provided_survey_data
+
         for group in self.groups:
             if group == student_group:
                 continue
@@ -486,6 +521,12 @@ class Grouper1:
             # shuffle the group to avoid getting stuck swapping the same student over and over
             rnd.shuffle(group.members)
             for idx, student in enumerate(group.members):
+                # NOTE: If the config selection for "no_survey_group_method" is DISTRIBUTE_EVENLY or
+                #    GROUP_TOGETHER (i.e., not STANDARD_GROUPING), then swapping of students should
+                #    only be attempted IF their "provided_survey_data" member variable matches.
+                if student.provided_survey_data != student_provided_survey_data:
+                    continue
+
                 # swap the students
                 group.members[idx] = student_group.members[stud_idx_in_group]
                 student_group.members[stud_idx_in_group] = student
