@@ -8,6 +8,8 @@ from app.commands import report
 from os.path import exists
 from openpyxl import load_workbook, workbook
 from app.file import xlsx
+import xlsxwriter
+import random
 
 runner = CliRunner()
 
@@ -167,9 +169,46 @@ def test_availability_map():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-            config_data, formatters={'green_bg': green_bg})
+        config_data, formatters={'green_bg': green_bg})
     expected_map: models.AvailabilityMap = models.AvailabilityMap(availability_slots={'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']},
                                                                   group_availability=[models.GroupAvailabilityMap(group_id='1', users={'jsmith1': [False, False, False, True, True, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'jschmo4': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'bwillia5': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'jdoe2': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'mmuster3': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, True, False, False, False, False, False, False, False, True, False, False]})])
     availability_map = formatter.generate_availability_map(data, survey_data)
 
     assert availability_map == expected_map
+
+
+def test_colored_columns():
+    '''
+    Checks if the availability overlap column has a background color of Green.
+    '''
+    workbook1 = xlsxwriter.Workbook("Random.xlsx")
+    worksheet = workbook1.add_worksheet()
+    green_bg = workbook1.add_format({"bg_color": "#00FF00"})
+
+    worksheet.write('A1', 1, green_bg)
+    worksheet.write('B1', 1)
+    worksheet.write('C1', 1, green_bg)
+    worksheet.write('A2', 1)
+    worksheet.write('B2', 1, green_bg)
+    worksheet.write('C2', 1)
+    workbook1.close()
+
+    book: workbook.Workbook = load_workbook("Random.xlsx")
+    assert exists("Random.xlsx")
+    ws1 = book["Sheet1"]
+
+    cell1color = ws1[1][0].fill.start_color.index
+    cell2color = ws1[1][1].fill.start_color.index
+    cell3color = ws1[1][2].fill.start_color.index
+    cell4color = ws1[2][0].fill.start_color.index
+    cell5color = ws1[2][1].fill.start_color.index
+    cell6color = ws1[2][2].fill.start_color.index
+
+    assert cell1color == "FF00FF00"
+    assert cell2color != "FF00FF00"
+    assert cell3color == "FF00FF00"
+    assert cell4color != "FF00FF00"
+    assert cell5color == "FF00FF00"
+    assert cell6color != "FF00FF00"
+
+    os.remove("Random.xlsx")

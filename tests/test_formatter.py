@@ -134,7 +134,6 @@ def test_format_group_report_check_group():
     assert report[1][0] == xlsx.Cell('1')
 
 
-
 def test_format_individual_report_check_header_all_enabled():
     report_config: models.ReportConfiguration = {
         "show_preferred_students": True,
@@ -438,8 +437,6 @@ def test_format_config_flatten_data():
             "",
         ],
     ]
-    print(flattened_data)
-    print(expected_data)
     assert flattened_data == expected_data
 
 
@@ -454,10 +451,10 @@ def test_are_time_slots_days():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-            config_data, formatters={'green_bg': green_bg})
-   
+        config_data, formatters={'green_bg': green_bg})
 
-    assert formatter._ReportFormatter__are_time_slots_days(surveys_result)  # type: ignore
+    assert formatter._ReportFormatter__are_time_slots_days(
+        surveys_result)  # type: ignore
 
 
 def test_generate_availability_slot_map():
@@ -471,11 +468,13 @@ def test_generate_availability_slot_map():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-            config_data, formatters={'green_bg': green_bg})
-    slot_map = formatter._ReportFormatter__generate_availability_slot_map(surveys_result)   # type: ignore
+        config_data, formatters={'green_bg': green_bg})
+    slot_map = formatter._ReportFormatter__generate_availability_slot_map(
+        surveys_result)   # type: ignore
     expected_slot_map: dict[str, list[str]] = {'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']}    
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']}
     assert slot_map == expected_slot_map
+
 
 def test_generate_user_availability_list():
     config_data: models.Configuration = config.read_json(
@@ -488,10 +487,13 @@ def test_generate_user_availability_list():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-            config_data, formatters={'green_bg': green_bg})
-    slot_map = formatter._ReportFormatter__generate_availability_slot_map(surveys_result)   # type: ignore
+        config_data, formatters={'green_bg': green_bg})
+    slot_map = formatter._ReportFormatter__generate_availability_slot_map(
+        surveys_result)   # type: ignore
     availability_map = models.AvailabilityMap(slot_map, [])
-    returned_list = formatter._ReportFormatter__generate_user_availability_list(surveys_result.records[0], availability_map)   # type: ignore
-    expected_list: list[bool] = [False, False, False, True, True, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
+    returned_list = formatter._ReportFormatter__generate_user_availability_list(
+        surveys_result.records[0], availability_map)   # type: ignore
+    expected_list: list[bool] = [False, False, False, True, True, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False,
+                                 False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False]
 
     assert returned_list == expected_list

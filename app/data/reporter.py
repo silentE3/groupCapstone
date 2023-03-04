@@ -37,7 +37,8 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
-    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
+    xlsx_writer.write_sheet(
+        'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
     xlsx_writer.save()
 
