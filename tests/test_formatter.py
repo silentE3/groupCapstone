@@ -189,9 +189,66 @@ def test_format_individual_report_check_header_all_enabled():
 
     report = report_formatter.format_individual_report(groups)
 
-    assert report[0] == [xlsx.Cell('Student Id'),  xlsx.Cell('Filled out Survey'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Availability'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
-                         xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell(
-                             'Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
+    assert report[0] == [xlsx.Cell('Student Id'),
+                         xlsx.Cell('Filled out Survey'),
+                         xlsx.Cell('Disliked Students'),
+                         xlsx.Cell('Meets Dislike Requirement'),
+                         xlsx.Cell('Disliked students in group'),
+                         xlsx.Cell('Availability'),
+                         xlsx.Cell('Meets Availability Requirement'),
+                         xlsx.Cell('Availability Overlap'),
+                         xlsx.Cell('Preferred Students'),
+                         xlsx.Cell('Meets Preferred Goal'),
+                         xlsx.Cell('Preferred students in group'),
+                         xlsx.Cell('Supplied Availability in Survey'),
+                         xlsx.Cell(
+                             'Availability overlaps with others in the class'),
+                         xlsx.Cell('Group Id')]
+
+
+def test_format_individual_report_check_header_all_disabled():
+    report_config: models.ReportConfiguration = {
+        'show_preferred_students': False,
+        'show_disliked_students': False,
+        'show_availability_overlap': False,
+        'show_scores': False
+    }
+
+    data_config: models.Configuration = config.read_json(
+        "./tests/test_files/configs/config_1.json")
+    data_config["report_fields"] = report_config
+    report_formatter = reporter.ReportFormatter(data_config, {})
+
+    groups = [
+        models.GroupRecord('1', [
+            models.SurveyRecord('asurite1', preferred_students=[
+                'asurite2', 'asurite3'], disliked_students=['asurite4']),
+            models.SurveyRecord('asurite2', preferred_students=[
+                'asurite1'], disliked_students=['asurite1']),
+            models.SurveyRecord(
+                'asurite3', preferred_students=['asurite1']),
+            models.SurveyRecord('asurite4', preferred_students=['asurite2'])]),
+        models.GroupRecord('2', [
+            models.SurveyRecord('asurite5', preferred_students=[
+                'asurite6'], disliked_students=['asurite7']),
+            models.SurveyRecord(
+                'asurite6', disliked_students=['asurite1']),
+            models.SurveyRecord(
+                'asurite7', preferred_students=['asurite1']),
+            models.SurveyRecord('asurite8', preferred_students=['asurite2'])])
+    ]
+
+    report = report_formatter.format_individual_report(groups)
+
+    assert report[0] == [xlsx.Cell('Student Id'),
+                         xlsx.Cell('Filled out Survey'),
+                         xlsx.Cell('Meets Dislike Requirement'),
+                         xlsx.Cell('Availability'),
+                         xlsx.Cell('Meets Availability Requirement'),
+                         xlsx.Cell('Meets Preferred Goal'),
+                         xlsx.Cell('Supplied Availability in Survey'),
+                         xlsx.Cell(
+                             'Availability overlaps with others in the class'),
                          xlsx.Cell('Group Id')]
 
 
