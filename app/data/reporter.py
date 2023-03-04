@@ -84,8 +84,8 @@ class ReportFormatter():
                 record.append(xlsx.Cell(group.group_id))
 
                 record.append(xlsx.Cell(user.provided_survey_data))
-
-                record.append(xlsx.Cell(';'.join(user.disliked_students)))
+                if self.report_config['show_disliked_students']:
+                    record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
                 meets_dislike_req: str = str(
                     len(validate.user_dislikes_group(user, group)) == 0)
@@ -103,13 +103,14 @@ class ReportFormatter():
                     record.append(
                         xlsx.Cell(';'.join(validate.group_availability_strings(group))))
 
-                record.append(xlsx.Cell(";".join(user.preferred_students)))
+                if self.report_config['show_preferred_students']:
+                    record.append(xlsx.Cell(";".join(user.preferred_students)))
 
+                meets_preferred_req: str = str(
+                    len(user_perfs[user.student_id]) > 0)
                 if len(user.preferred_students) == 0:
-                    record.append(xlsx.Cell("none provided"))
-                else:
-                    record.append(
-                        xlsx.Cell(len(user_perfs[user.student_id]) > 0))
+                    meets_preferred_req = "none provided"
+                record.append(xlsx.Cell(meets_preferred_req))
 
                 if self.report_config['show_preferred_students']:
                     # for preferred list
@@ -130,11 +131,10 @@ class ReportFormatter():
                 if user.student_id in group_availability_map.users:
                     user_availability_map = group_availability_map.users[user.student_id]
                     for avail_slot_tuple in self.avail_slot_header_order:
+                        cell_formatter = None
                         if user_availability_map[slot_indexing[avail_slot_tuple]]:
-                            record.append(
-                                xlsx.Cell(' ', self.formatters.get('green_bg')))
-                        else:
-                            record.append(xlsx.Cell(' '))
+                            cell_formatter = self.formatters.get('green_bg')
+                        record.append(xlsx.Cell(' ', cell_formatter))
 
                 records.append(record)
 
@@ -153,7 +153,8 @@ class ReportFormatter():
         header = [xlsx.Cell('Student Id')]
         header.append(xlsx.Cell('Group Id'))
         header.append(xlsx.Cell('Filled out Survey'))
-        header.append(xlsx.Cell('Disliked Students'))
+        if self.report_config['show_disliked_students']:
+            header.append(xlsx.Cell('Disliked Students'))
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
             header.append(xlsx.Cell('Disliked students in group'))
@@ -162,7 +163,8 @@ class ReportFormatter():
         if self.report_config['show_availability_overlap']:
             header.append(xlsx.Cell('Availability Overlap'))
 
-        header.append(xlsx.Cell('Preferred Students'))
+        if self.report_config['show_preferred_students']:
+            header.append(xlsx.Cell('Preferred Students'))
         header.append(xlsx.Cell('Meets Preferred Goal'))
         if self.report_config['show_preferred_students']:
             header.append(xlsx.Cell('Preferred students in group'))
