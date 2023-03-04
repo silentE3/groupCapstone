@@ -5,3 +5,4 @@ disable=
   too-many-instance-attributes,
   trailing-whitespace
 max-line-length=160
+max-branches=16
