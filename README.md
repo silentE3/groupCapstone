@@ -26,7 +26,7 @@ There are four different functions that this application can perform:
 1. Generation: This function generates test survey data
 2. Grouping: This function performs grouping on survey data
 3. Reporting [Depreciated]: This function creates a report of the grouping results 
-4. Updating a report: This will take a report rom a grouping run that has already completed, and the user has made manual changes to, and it will re-evaluate all the metrics in the report and make sure all the formatting is normalized.
+4. Updating a report: This will take a report from a grouping run that has already completed, and the user has made manual changes to, and it will re-evaluate all the metrics in the report and make sure all the formatting is normalized.
 
 Each of these functions are accessible from the CLI (Command Line Interface)
 
