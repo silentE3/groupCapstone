@@ -22,7 +22,7 @@ Example command:
 ./grouper-windows-amd64.exe group
 ```
 
-There are three different functions that this application can perform:
+There are four different functions that this application can perform:
 
 1. Generation: This function generates test survey data
 2. Grouping: This function performs grouping on survey data
