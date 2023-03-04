@@ -401,11 +401,6 @@ class ReportFormatter():
         record.append(xlsx.Cell(num_groups_no_avail))
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
-        record.append(xlsx.Cell(num_groups_total))
-        record.append(xlsx.Cell(num_disliked_pairings))
-        record.append(xlsx.Cell(num_groups_no_avail))
-        record.append(xlsx.Cell(num_liked_pairings))
-        record.append(xlsx.Cell(num_additional_overlap))
 
         if self.report_config['show_scores']:
             scoring_vars = models.GroupSetData("solution_1",
@@ -437,8 +432,6 @@ class ReportFormatter():
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
-            headers.append(xlsx.Cell('Score'))
-            headers.append(xlsx.Cell('Standard Deviation of Groups'))
             headers.append(xlsx.Cell('Score'))
             headers.append(xlsx.Cell('Standard Deviation of Groups'))
 
@@ -482,7 +475,7 @@ class ReportFormatter():
 
         for slot in slot_map.availability_slots:
             # first see if the user has that slot
-            user_availability = user.availability[slot]
+            user_availability = user.availability.get(slot)
             # if they do, add bools to the availability list
             if user_availability:
                 for time in slot_map.availability_slots[slot]:
@@ -515,7 +508,7 @@ class ReportFormatter():
 
         # if we are sure the time slots are day-names, then just fill with the day names
         if self.__are_time_slots_days(survey_data):
-            for slot in cfg.CONFIG_DATA['field_mappings']['availability_field_names']:
+            for slot in self.data_config['field_mappings']['availability_field_names']:
                 slot_map[slot] = validate.WEEK_DAYS
 
             return slot_map
