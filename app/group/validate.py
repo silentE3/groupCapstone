@@ -86,6 +86,8 @@ def group_availability(group: models.GroupRecord) -> dict[str, dict[str, bool]]:
                                           for x in member.availability[key]]
             for day in WEEK_DAYS:
                 if (lowercase_avail).count(day.lower()) == 0:
+                    if not group_available.get(key):
+                        group_available[key] = {}
                     group_available[key][day] = False
     return group_available
 
