@@ -76,7 +76,7 @@ class SurveyRecord:
     provided_availability: bool = True
     provided_survey_data: bool = True
     group_id: str = ""
-
+    lock_in_group: bool = False
     def __lt__(self, other):
         return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank
 
@@ -141,7 +141,7 @@ class SwapScenario:
     score: float
 
     def __lt__(self, other):
-        return (self.score < other.score)
+        return self.score < other.score
 
 
 @dataclass

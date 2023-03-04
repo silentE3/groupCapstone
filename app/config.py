@@ -45,7 +45,7 @@ def read_report_config(report_filename: str) -> Configuration:
     # load the workbook
     report_workbook = load_workbook(report_filename)
     if config_sheet_name not in report_workbook.sheetnames:
-        raise Exception(
+        raise KeyError(
             "Unable to load the config data from the report file. 'config' tab does not exist.")
     # get the workbook's config sheet
     config_sheet = report_workbook['config']

@@ -30,27 +30,12 @@ class Grouper2:
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
         self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
         self.cache = {}
-    
-    def group_students_who_did_not_fill_out_survey(self):
-        '''
-        go through students and 
-        '''
-        for student in self.students:
-            if student.provided_survey_data:
-                continue
-            for group in self.groups:
-                if len(group.members) < self.target_group_margin_upper:
-                    group.members.append(student)
-                    break
-            self.students.remove(student)
 
     def group_students(self) -> list[models.GroupRecord]:
         """
         initiates the grouping process
         """
-        
-        self.group_students_who_did_not_fill_out_survey()
-        
+        self.prepare_students_for_grouping()
         while len(self.students) > 0:
             student = self.students.pop()
             self.add_student_to_group(student)
@@ -63,6 +48,61 @@ class Grouper2:
         # Clear any final print statement in preparation for it to be overwritten
         self.console_printer.print("")
         return self.groups
+
+    def prepare_students_for_grouping(self):
+        '''
+        ensures the survey data is ready to be grouped
+        '''
+
+        if self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.STANDARD_GROUPING:
+            # do nothing
+            self.console_printer.print(
+                'no survey group method is set to random, so no preparation is needed')
+        elif self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY:
+            self.lock_students()
+            students_locked = list(filter(lambda student: student.lock_in_group, self.students))
+            for student in students_locked:
+                if student.lock_in_group:
+                    self.add_student_to_next_empty_group(student)
+        elif self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.GROUP_TOGETHER:
+            self.lock_students()
+            students_locked = list(
+                filter(lambda student: student.lock_in_group, self.students))
+            for student in students_locked:
+                if student.lock_in_group:
+                    self.add_student_to_next_group(student)
+
+    def lock_students(self):
+        '''
+        locks the students who didn't fill out survey 
+        so they can't be moved to other groups after they are placed
+        '''
+        for student in self.students:
+            if not student.provided_survey_data:
+                student.lock_in_group = True
+
+    def add_student_to_next_group(self, student: models.SurveyRecord):
+        '''
+        adds the student to the next group available
+        '''
+        for group in self.groups:
+            if len(group.members) < self.target_group_size+self.target_group_margin_upper:
+                group.members.append(student)
+                self.students.remove(student)
+                return
+
+    def add_student_to_next_empty_group(self, student: models.SurveyRecord):
+        '''
+        Adds the student to the next empty group or the next group that has the least members
+        '''
+        member_count = 0
+        while student in self.students:
+            for group in self.groups:
+                if len(group.members) == member_count:
+                    group.members.append(student)
+                    self.students.remove(student)
+                    break
+            member_count += 1
 
     def balance_groups(self):
         '''
@@ -85,7 +125,8 @@ class Grouper2:
             for other_group in groups_with_enough_mems:
                 # loop through all members in the other groups and see if they can be added to the current group
                 for member in other_group.members:
-
+                    if member.lock_in_group:
+                        continue
                     # if the member meets the given hard reqs, add them to the targeted undersized group
                     if meets_hard_requirement(member, group, self.target_group_size):
                         other_group.members.remove(member)
@@ -104,12 +145,16 @@ class Grouper2:
             # and just making sure there are enough members
             # by pulling a member from another group that has enough members to spare
             for other_group in groups_with_enough_mems:
-                member = other_group.members.pop()
+                student: models.SurveyRecord
+                for member in other_group.members:
+                    if not member.lock_in_group:
+                        other_group.members.remove(member)
+                        student = member
+
                 if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
                     groups_with_enough_mems.remove(other_group)
-                group.members.append(member)
+                group.members.append(student)
                 break
-    
 
     def optimize_groups(self):
         '''
@@ -135,6 +180,8 @@ class Grouper2:
             self.console_printer.print(f'optimization pass #{group_pass+1}')
             for group in self.groups:
                 for mem in group.members:
+                    if mem.lock_in_group:
+                        continue
                     scenario = self.run_swap_scenarios(group, mem)
                     if scenario is None:
                         continue
@@ -233,10 +280,12 @@ class Grouper2:
     def run_swap_scenarios(self, group: models.GroupRecord, student: models.SurveyRecord) -> Optional[models.SwapScenario]:
         '''
         gives a list of scenarios if the student were to be swapped for another group.
-        
+
         '''
-        self.cache = {student.student_id + str(group.members): group}
-        
+
+        if student.lock_in_group:
+            return None
+
         scenarios: list[models.SwapScenario] = []
         # loop through the groups and create a copy of each to run scenarios
         for other_group in self.groups:
@@ -257,8 +306,13 @@ class Grouper2:
         removes the student from the group and checks adding them to the other group with certain members removed
         '''
 
+        if student.lock_in_group:
+            return []
+
         scenarios: list[models.SwapScenario] = []
         for member in other_group.members:
+            if member.lock_in_group:
+                continue
             oth_group_copy = copy.deepcopy(other_group)
             oth_group_copy.members.remove(member)
             oth_group_copy.members.append(student)
@@ -280,16 +334,18 @@ class Grouper2:
         """
         creates scenarios for all possible situations with the group
         """
+
         scenarios: list[models.Scenario] = []
         for mem in group.members:
-            group_new = copy.deepcopy(group)
-            group_new.members.remove(mem)
-            group_new.members.append(student)
-            score = self.rank_group(group_new)
-            if self.rank_group(group) < score and score >= 0:
-                scenario = models.Scenario(
-                    group_new, score, mem)
-                scenarios.append(scenario)
+            if not mem.lock_in_group:
+                group_new = copy.deepcopy(group)
+                group_new.members.remove(mem)
+                group_new.members.append(student)
+                score = self.rank_group(group_new)
+                if self.rank_group(group) < score and score >= 0:
+                    scenario = models.Scenario(
+                        group_new, score, mem)
+                    scenarios.append(scenario)
 
         return scenarios
 
@@ -311,6 +367,10 @@ def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupReco
     '''
     checks if the basic hard requirements are met including the group size, availability, and dislikes
     '''
+
+    if student.lock_in_group:
+        return False
+
     group_copy = copy.deepcopy(group)
     group_copy.members.append(student)
     meets_dislikes = validate.meets_dislike_requirement(group_copy)
