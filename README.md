@@ -48,7 +48,7 @@ The gen file generates random survey data. The gen command will output the gener
 
 ## group
 
-group SURVEYFILE [-o,--outputfile PATH_TO_OUTPUT_FILE] [-c,--configfile PATH_TO_CONFIG_FILE] [--report|--no-report] [-r,--reportfile PATH_TO_REPORT_FILE][-a, --allstudentsfile path_to_roster_of_all_students]
+group SURVEYFILE [-o,--outputfile PATH_TO_OUTPUT_FILE] [-c,--configfile PATH_TO_CONFIG_FILE] [--report|--no-report] [-r,--reportfile PATH_TO_REPORT_FILE][-a, --allstudentsfile PATH_TO_ROSTER_OF_ALL_STUDENTS]
 
 The group command performs grouping on survey data. The survey data is expected to be in CSV format with the first record being a header for the column names.
 The group command takes one required parameter and four optional parameters.

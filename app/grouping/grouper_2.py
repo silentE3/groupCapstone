@@ -29,7 +29,6 @@ class Grouper2:
         for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
         self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
-        self.cache = {}
 
     def group_students(self) -> list[models.GroupRecord]:
         """
