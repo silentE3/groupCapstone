@@ -2,8 +2,12 @@
 Contains helper functions for test scripts.
 '''
 
+from app.data import load
+from app import config, models
 
-def verify_groups(output_filename: str, expected_min_num_groups: int, expected_max_num_groups: int, expected_students: list[str]):
+
+def verify_groups(report_filename: str, expected_min_num_groups: int,
+                  expected_max_num_groups: int, expected_students_asurite: list[str]):
     '''
     Helper function that verifies the following for a grouping solution:
     - The proper/expected number of groups were created
@@ -14,28 +18,31 @@ def verify_groups(output_filename: str, expected_min_num_groups: int, expected_m
     expected_students: list[str] -- list containing the expected students' asurite.
     '''
 
-    file = open(output_filename, "r", encoding="utf-8-sig")
-    content = file.readlines()
-    file.close()
-
     # Verify that:
     #   - all students were assigned to a group
     #   - only the expected students were assigned to a group and only once
-    students = []
-    groups = []
-    # get rid of the header
-    content.pop(0)
-    for line in content:
-        # first item is group, second item is student
-        group = line.split(",")[0].strip()
-        student = line.split(",")[1].strip()
-        if not group in groups:
-            groups.append(group)
-        assert student.strip() in expected_students
-        assert student not in students
-        students.append(student)
-    # Verify the expected number of students were in the groupings
-    assert len(students) == len(expected_students)
+
+    config_data: models.Configuration = config.read_report_config(
+        report_filename)
+    survey_data = load.read_report_survey_data(report_filename,
+                                               config_data['field_mappings'])
+    # returns a list of group record lists
+    group_solutions: list[list[models.GroupRecord]] = load.read_report_groups(
+        report_filename, survey_data.records)
+    
     # Verify that the proper number of groups were created
-    assert len(groups) >= expected_min_num_groups and len(
-        groups) <= expected_max_num_groups
+
+    for groups in group_solutions:
+        students = []
+        # check that the groups are the expected size
+        assert len(groups) >= expected_min_num_groups and len(
+            groups) <= expected_max_num_groups
+        # get all of the members from the gorups
+        for group in groups:
+            for member in group.members:
+                students.append(member.student_id)
+        # Verify the expected number of students were in the groupings
+        for asurite in expected_students_asurite:
+            assert asurite in students
+
+        assert len(students) == len(expected_students_asurite)
