@@ -1,6 +1,7 @@
 """
 module for an additional grouping algorithm implementation
 """
+from typing import List, Any
 import copy
 from random import randint
 from typing import Optional
@@ -353,14 +354,8 @@ class Grouper2:
         '''
         uses the scoring algorithm to rank the group
         '''
-        scoring_vars = models.GroupSetData(group.group_id,
-                                           self.config["target_group_size"],
-                                           len((self.config["field_mappings"])[
-                                               "preferred_students_field_names"]),
-                                           self.num_students,
-                                           len((self.config["field_mappings"])[
-                                               "availability_field_names"]))
-        return scoring.score_individual_group(group, scoring_vars)
+        scoring_vars = score_group(group.members)
+        return scoring_vars
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
@@ -413,3 +408,57 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
+
+
+def score_group(members: List[models.SurveyRecord]) -> float:
+    '''
+    scores a group based on availability, disliked students in the group, and preferred students in the group
+    '''
+    # Start with a base score of 100
+    group_score = 100
+
+    # Compute the maximum possible score based on the number of members in the group
+    n_members = len(members)
+    max_possible_score = 100 + 20*(n_members-1) + 10*(n_members-1)**2
+
+    # Compute the weight of availability factor
+    availability_weight = max(0.0, 1.0 - (n_members - 1)*0.05)
+
+    # For each member in the group
+    for member in members:
+        # # Skip members with no available time slots
+        # if not member.provided_availability:
+        #     continue
+
+        # Check each other member in the group
+        for other_member in members:
+            # Skip the same member and members with no available time slots
+            if other_member is member:
+                continue
+
+            # Check if there is at least one matching availability slot for both members
+            matching_slots = set(member.availability).intersection(
+                other_member.availability)
+
+            if matching_slots:
+                # Add to the group score based on the availability factor and the number of matching slots
+                group_score += availability_weight * 20 * len(matching_slots)
+
+            # Check if the member dislikes any other members in the group
+            if member.disliked_students and other_member.student_id in member.disliked_students:
+                # Subtract from the group score based on the number of disliked members
+                group_score -= 10 * len(member.disliked_students)
+
+            # Check if the member likes any other members in the group
+            if member.preferred_students and other_member.student_id in member.preferred_students:
+                # Add to the group score based on the number of liked members
+                group_score += 10 * len(member.preferred_students)
+
+    # If any member dislikes another member or there are no matching availability slots, set the group score to 0
+    if group_score == 100:
+        group_score = 0
+
+    # Normalize the group score by dividing by the maximum possible score
+    normalized_score = group_score / max_possible_score
+
+    return normalized_score
