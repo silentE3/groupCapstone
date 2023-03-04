@@ -143,8 +143,6 @@ def test_colored_columns():
     worksheet = workbook1.add_worksheet()
     green_bg = workbook1.add_format({"bg_color": "#00FF00"})
 
-    random1 = random.randint(0,1)
-    
     worksheet.write('A1', 1, green_bg)
     worksheet.write('B1', 1)
     worksheet.write('C1', 1, green_bg)
@@ -170,7 +168,5 @@ def test_colored_columns():
     assert cell4color != "FF00FF00"
     assert cell5color == "FF00FF00"
     assert cell6color != "FF00FF00"
-    
-    os.remove("Random.xlsx")
 
-    
+    os.remove("Random.xlsx")
