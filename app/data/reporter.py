@@ -9,8 +9,7 @@ from app.file import xlsx
 from app import config as cfg
 
 
-
-def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[list[str]], data_config: models.Configuration, filename: str):
+def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.SurveyData, data_config: models.Configuration, filename: str):
     '''
     writes the report to an xlsx file
     '''
@@ -23,6 +22,10 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
         formatted_data = formatter.format_individual_report(solution)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
+        # pylint: disable=unused-variable
+        availability_map = formatter.generate_availability_map(
+            solution, survey_data)
+
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
         xlsx_writer.write_sheet(
@@ -34,7 +37,8 @@ def write_report(solutions: list[list[models.GroupRecord]], report_rows: list[li
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
-    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(report_rows))
+    xlsx_writer.write_sheet(
+        'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
     xlsx_writer.save()
 
@@ -50,6 +54,7 @@ def get_user_availability(user: models.SurveyRecord):
                 day + " @ " + validate.extract_time(time_slot))
 
     return available_slots
+
 
 class ReportFormatter():
     '''
@@ -386,3 +391,89 @@ class ReportFormatter():
             headers.append(xlsx.Cell('Standard Deviation of Groups'))
 
         return headers
+
+    def generate_availability_map(self, data: list[models.GroupRecord], survey_data: models.SurveyData) -> models.AvailabilityMap:
+        '''
+        Generates the availability map per group, per user, per availability slot
+        '''
+        availability_map = models.AvailabilityMap(
+            self.__generate_availability_slot_map(survey_data), [])
+        # first create the map of groups with members
+        for group in data:
+            group_availability = models.GroupAvailabilityMap(
+                group.group_id, {})
+            for user in group.members:
+                group_availability.users[user.student_id] = self.__generate_user_availability_list(
+                    user, availability_map)
+
+            availability_map.group_availability.append(group_availability)
+
+        return availability_map
+
+    def __generate_user_availability_list(self, user: models.SurveyRecord, slot_map: models.AvailabilityMap) -> list[bool]:
+        '''
+        given a user and the map of availability slots, a list of 
+        bools are created that indicated the time slots available.
+
+        map:
+
+        [....availability slot....][....availability slot....]
+        [day1][day2][day3]...[day7][day1][day2][day3]...[day7]
+          .     .     .        .     .     .     .        .       
+          .     .     .        .     .     .     .        .
+        list of bools for user:.     .     .     .        .
+          .     .     .        .     .     .     .        .
+        [bool][bool][bool]...[bool][bool][bool][bool]...[bool]
+
+        '''
+        availability: list[bool] = []
+
+        for slot in slot_map.availability_slots:
+            # first see if the user has that slot
+            user_availability = user.availability[slot]
+            # if they do, add bools to the availability list
+            if user_availability:
+                for time in slot_map.availability_slots[slot]:
+                    availability.append(time in user_availability)
+            # else just add a bunch of False values to the list
+            # equal to the size of the times in the slot
+            else:
+                availability.extend(
+                    [False] * len(slot_map.availability_slots[slot]))
+
+        return availability
+
+    def __are_time_slots_days(self, survey_data: models.SurveyData) -> bool:
+        '''
+        Scans all user availability slots. If all are day-name values, returns true
+        '''
+        for users in survey_data.records:
+            for slot_val in users.availability.values():
+                for time in slot_val:
+                    if time not in validate.WEEK_DAYS:
+                        return False
+        return True
+
+    # NOTE: this method may not need to check each user if we can assume a fixed set of days for each time slot
+    def __generate_availability_slot_map(self, survey_data: models.SurveyData) -> dict[str, list[str]]:
+        '''
+        Creates a dictionary of all current slots across all users
+        '''
+        slot_map: dict[str, list[str]] = {}
+
+        # if we are sure the time slots are day-names, then just fill with the day names
+        if self.__are_time_slots_days(survey_data):
+            for slot in cfg.CONFIG_DATA['field_mappings']['availability_field_names']:
+                slot_map[slot] = validate.WEEK_DAYS
+
+            return slot_map
+
+        for survey in survey_data.records:
+            for slot in survey.availability:
+                # pylint: disable=consider-iterating-dictionary
+                if slot not in slot_map.keys():
+                    slot_map[slot] = []
+                slot_map[slot] = list(set(slot_map[slot])
+                                      | set(survey.availability[slot]))
+
+        return slot_map

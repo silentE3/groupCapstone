@@ -154,3 +154,26 @@ class NoSurveyGroupMethodConsts:
     STANDARD_GROUPING: ClassVar[int] = 0
     DISTRIBUTE_EVENLY: ClassVar[int] = 1
     GROUP_TOGETHER: ClassVar[int] = 2
+
+@dataclass
+class GroupAvailabilityMap:
+    '''
+    data structure for a spread-out availability map
+    per user per group
+    users is a dictionary of users with the key being the user id
+    and the value being a list of bools indicating availability for 
+    a time slot
+    '''
+    group_id: str
+    users: dict[str, list[bool]]
+
+@dataclass 
+class AvailabilityMap:
+    '''
+    data structure that holds a list of the availability slots
+    and the individual times for each slot
+    
+    '''
+
+    availability_slots: dict[str, list[str]]
+    group_availability: list[GroupAvailabilityMap]
