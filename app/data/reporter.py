@@ -365,11 +365,6 @@ class ReportFormatter():
         record.append(xlsx.Cell(num_groups_no_avail))
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
-        record.append(xlsx.Cell(num_groups_total))
-        record.append(xlsx.Cell(num_disliked_pairings))
-        record.append(xlsx.Cell(num_groups_no_avail))
-        record.append(xlsx.Cell(num_liked_pairings))
-        record.append(xlsx.Cell(num_additional_overlap))
 
         if self.report_config['show_scores']:
             scoring_vars = models.GroupSetData("solution_1",
@@ -401,8 +396,6 @@ class ReportFormatter():
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
-            headers.append(xlsx.Cell('Score'))
-            headers.append(xlsx.Cell('Standard Deviation of Groups'))
             headers.append(xlsx.Cell('Score'))
             headers.append(xlsx.Cell('Standard Deviation of Groups'))
 
