@@ -201,7 +201,17 @@ def test_format_individual_report_check_for_cell_format():
                                     'availability_field_names'][7]: validate.WEEK_DAYS
                                 }),
             models.SurveyRecord(
-                'asurite3', preferred_students=['asurite1']),
+                'asurite3', availability={
+                    report_formatter.data_config['field_mappings']['availability_field_names'][0]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][1]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][2]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][3]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][4]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][5]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings']['availability_field_names'][6]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+                    report_formatter.data_config['field_mappings'][
+                        'availability_field_names'][7]: ['tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+                }),
             models.SurveyRecord('asurite4', preferred_students=['asurite2'])]),
         models.GroupRecord('2', [
             models.SurveyRecord('asurite5'),
@@ -217,10 +227,12 @@ def test_format_individual_report_check_for_cell_format():
 
     for field in report[1][13:]:
         assert field.cell_format is not "this is a green background"
-    
     for field in report[2][13:]:
         assert field.cell_format is "this is a green background"
-
+    for field in report[3][13:21]:
+        assert field.cell_format is not "this is a green background"
+    for field in report[3][21:]:
+        assert field.cell_format is "this is a green background"
 
 def test_format_config_flatten_headers():
     data_config: models.Configuration = config.read_json(
