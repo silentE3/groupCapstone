@@ -122,19 +122,18 @@ def __report_filename(surveyfile: str, reportfile: str) -> str:
         reportfile = f'{surveyfile.removesuffix(".csv")}_report'
 
     # ensure the report filename ends .xlsx
-    report_filename: str = ""
-    report_filename = f'{reportfile.removesuffix(".xlsx")}.xlsx'
+    report_filename: str = f'{reportfile.removesuffix(".xlsx")}.xlsx'
 
     # Append integer value to avoid output file overwriting
     if Path('./' + report_filename).is_file():
         print(report_filename + " already exists...", end='')
         append_value: int = 1
         new_filename: str = report_filename.removesuffix(
-            'xlsx') + '_' + str(append_value) + 'xlsx'
+            '.xlsx') + '_' + str(append_value) + '.xlsx'
         while (Path('./' + new_filename).is_file()):
             append_value += 1
             new_filename = report_filename.removesuffix(
-                'xlsx') + '_' + str(append_value) + 'xlsx'
+                '.xlsx') + '_' + str(append_value) + '.xlsx'
         print('available filename: ' + new_filename)
         report_filename = new_filename
 

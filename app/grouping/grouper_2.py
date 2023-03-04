@@ -146,15 +146,25 @@ class Grouper2:
             # and just making sure there are enough members
             # by pulling a member from another group that has enough members to spare
             for other_group in groups_with_enough_mems:
+                student = None
                 for member in other_group.members:
-                    student: models.SurveyRecord
                     if member.lock_in_group:
                         continue
                     other_group.members.remove(member)
                     student = member
-                    if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
-                        groups_with_enough_mems.remove(other_group)
+                if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
+                    groups_with_enough_mems.remove(other_group)
+
+                if student:
                     group.members.append(student)
+
+            # if we make it to this, we are ignoring the students "locked" and allowing them to be removed from the group to balance sizes
+            for other_group in groups_with_enough_mems:
+                member = other_group.members.pop()
+                if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
+                    groups_with_enough_mems.remove(other_group)
+
+                group.members.append(member)
 
     def optimize_groups(self):
         '''
