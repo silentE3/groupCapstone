@@ -122,8 +122,9 @@ class ReportFormatter():
 
                 # color-coded availability
                 # NOTE: The complexity here comes from the desire to ouput these values
-                # in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
-                # monday 3 - 6 AM, then monday 6 - 9 AM, and so on).
+                #   in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
+                #   monday 3 - 6 AM, then monday 6 - 9 AM, and so on) under typical usage
+                #   conditions (where the availability fields are a time range).
                 slot_indexing: dict[tuple[str, str], int] = self.__get_avail_slot_indexing(
                     availability_map)
                 if user.student_id in group_availability_map.users:
@@ -171,8 +172,9 @@ class ReportFormatter():
 
         # color-coded availability headers
         # NOTE: The complexity here comes from the desire to ouput these values
-        # in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
-        # monday 3 - 6 AM, then monday 6 - 9 AM, and so on).
+        #   in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
+        #   monday 3 - 6 AM, then monday 6 - 9 AM, and so on) under typical usage
+        #   conditions (where the availability fields are a time range & slots are days).
         covered_slots: list[str] = []
         for slots_lists in availability_map.availability_slots.values():
             for slot in slots_lists:
