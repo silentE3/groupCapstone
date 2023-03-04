@@ -1,13 +1,15 @@
+import datetime
 import os
 import shutil
 from click.testing import CliRunner
-import click
+from app.data import reporter
+from app import config, models
 from app.commands import report
 from os.path import exists
 from openpyxl import load_workbook, workbook
+from app.file import xlsx
 import xlsxwriter
 import random
-from app.file import xlsx
 
 runner = CliRunner()
 
@@ -112,6 +114,7 @@ def test_update_report_invalid_report_file():
                              './tests/test_files/reports/Nonexistent_File.xlsx'])
     assert response.exit_code == 2
 
+
 def test_dev_reporting_contains_sheets():
     '''
     Checks the generated excel file for the expected sheets
@@ -130,6 +133,7 @@ def test_dev_reporting_contains_sheets():
     # add more asserts for more sheet names here
 
     os.remove("./grouping_results_report.xlsx")
+
 
 def test_colored_columns():
     '''
