@@ -16,7 +16,7 @@ runner = CliRunner()
 
 def test_dev_reporting_basic():
     '''
-    Runs a simple test against the dev data set 
+    Runs a simple test against the dev data set
     '''
     response = runner.invoke(report.report, [
                              './tests/test_files/dev_data/output.csv',
