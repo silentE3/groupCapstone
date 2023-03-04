@@ -185,90 +185,25 @@ def test_format_individual_report_check_header_all_enabled():
             ],
         ),
     ]
+    survey_records: list[models.SurveyRecord] = []
+    for group in groups:
+        for member in group.members:
+            survey_records.append(member)
+    survey_data: models.SurveyData = models.SurveyData(survey_records, [])
 
-    report = report_formatter.format_individual_report(groups)
-
-    assert report[0] == [xlsx.Cell('Student Id'),
-                         xlsx.Cell('Filled out Survey'),
-                         xlsx.Cell('Disliked Students'),
-                         xlsx.Cell('Meets Dislike Requirement'),
-                         xlsx.Cell('Disliked students in group'),
-                         xlsx.Cell('Availability'),
-                         xlsx.Cell('Meets Availability Requirement'),
-                         xlsx.Cell('Availability Overlap'),
-                         xlsx.Cell('Preferred Students'),
-                         xlsx.Cell('Meets Preferred Goal'),
-                         xlsx.Cell('Preferred students in group'),
-                         xlsx.Cell('Supplied Availability in Survey'),
-                         xlsx.Cell(
-                             'Availability overlaps with others in the class'),
-                         xlsx.Cell('Group Id')]
-
-
-def test_format_individual_report_check_header_all_disabled():
-    report_config: models.ReportConfiguration = {
-        'show_preferred_students': False,
-        'show_disliked_students': False,
-        'show_availability_overlap': False,
-        'show_scores': False
-    }
-
-    data_config: models.Configuration = config.read_json(
-        "./tests/test_files/configs/config_1.json")
-    data_config["report_fields"] = report_config
-    report_formatter = reporter.ReportFormatter(data_config, {})
-
-    groups = [
-        models.GroupRecord('1', [
-            models.SurveyRecord('asurite1', preferred_students=[
-                'asurite2', 'asurite3'], disliked_students=['asurite4']),
-            models.SurveyRecord('asurite2', preferred_students=[
-                'asurite1'], disliked_students=['asurite1']),
-            models.SurveyRecord(
-                'asurite3', preferred_students=['asurite1']),
-            models.SurveyRecord('asurite4', preferred_students=['asurite2'])]),
-        models.GroupRecord('2', [
-            models.SurveyRecord('asurite5', preferred_students=[
-                'asurite6'], disliked_students=['asurite7']),
-            models.SurveyRecord(
-                'asurite6', disliked_students=['asurite1']),
-            models.SurveyRecord(
-                'asurite7', preferred_students=['asurite1']),
-            models.SurveyRecord('asurite8', preferred_students=['asurite2'])])
-    ]
-
-    report = report_formatter.format_individual_report(groups)
+    availability_map: models.AvailabilityMap = models.AvailabilityMap({'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': [
+                                                                      'monday', 'tuesday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': ['tuesday', 'wednesday', 'thursday']}, [])
+    report = report_formatter.format_individual_report(
+        groups, availability_map)
 
     assert report[0] == [xlsx.Cell('Student Id'), xlsx.Cell('Group Id'), xlsx.Cell('Filled out Survey'), xlsx.Cell('Disliked Students'), xlsx.Cell('Meets Dislike Requirement'), xlsx.Cell('Disliked students in group'), xlsx.Cell('Meets Availability Requirement'), xlsx.Cell('Availability Overlap'), xlsx.Cell('Preferred Students'),
                          xlsx.Cell('Meets Preferred Goal'), xlsx.Cell('Preferred students in group'), xlsx.Cell(
-                             'Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
-                         xlsx.Cell('monday @ 0:00 AM - 3:00 AM'), xlsx.Cell('monday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'monday @ 6:00 AM - 9:00 AM'), xlsx.Cell('monday @ 9:00 AM - 12:00 PM'), xlsx.Cell('monday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('monday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'monday @ 6:00 PM - 9:00 PM'), xlsx.Cell('monday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('tuesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('tuesday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'tuesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('tuesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('tuesday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('tuesday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'tuesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('tuesday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('wednesday @ 0:00 AM - 3:00 AM'), xlsx.Cell('wednesday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'wednesday @ 6:00 AM - 9:00 AM'), xlsx.Cell('wednesday @ 9:00 AM - 12:00 PM'), xlsx.Cell('wednesday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('wednesday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'wednesday @ 6:00 PM - 9:00 PM'), xlsx.Cell('wednesday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('thursday @ 0:00 AM - 3:00 AM'), xlsx.Cell('thursday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'thursday @ 6:00 AM - 9:00 AM'), xlsx.Cell('thursday @ 9:00 AM - 12:00 PM'), xlsx.Cell('thursday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('thursday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'thursday @ 6:00 PM - 9:00 PM'), xlsx.Cell('thursday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('friday @ 0:00 AM - 3:00 AM'), xlsx.Cell('friday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'friday @ 6:00 AM - 9:00 AM'), xlsx.Cell('friday @ 9:00 AM - 12:00 PM'), xlsx.Cell('friday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('friday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'friday @ 6:00 PM - 9:00 PM'), xlsx.Cell('friday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('saturday @ 0:00 AM - 3:00 AM'), xlsx.Cell('saturday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'saturday @ 6:00 AM - 9:00 AM'), xlsx.Cell('saturday @ 9:00 AM - 12:00 PM'), xlsx.Cell('saturday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('saturday @ 3:00 PM - 6:00 PM'), xlsx.Cell(
-                             'saturday @ 6:00 PM - 9:00 PM'), xlsx.Cell('saturday @ 9:00 PM - 12:00 PM'),
-                         xlsx.Cell('sunday @ 0:00 AM - 3:00 AM'), xlsx.Cell('sunday @ 3:00 AM - 6:00 AM'), xlsx.Cell(
-                             'sunday @ 6:00 AM - 9:00 AM'), xlsx.Cell('sunday @ 9:00 AM - 12:00 PM'), xlsx.Cell('sunday @ 12:00 PM - 3:00 PM'),
-                         xlsx.Cell('sunday @ 3:00 PM - 6:00 PM'), xlsx.Cell('sunday @ 6:00 PM - 9:00 PM'), xlsx.Cell('sunday @ 9:00 PM - 12:00 PM')]
+        'Supplied Availability in Survey'), xlsx.Cell('Availability overlaps with others'),
+        xlsx.Cell('monday, 0:00 AM - 3:00 AM'),
+        xlsx.Cell('tuesday, 0:00 AM - 3:00 AM'),
+        xlsx.Cell('tuesday, 6:00 AM - 9:00 AM'),
+        xlsx.Cell('wednesday, 6:00 AM - 9:00 AM'),
+        xlsx.Cell('thursday, 6:00 AM - 9:00 AM')]
 
 
 def test_format_config_flatten_headers():

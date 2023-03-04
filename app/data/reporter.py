@@ -19,12 +19,12 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(
             data_config, formatters={'green_bg': green_bg})
-        formatted_data = formatter.format_individual_report(solution)
-        group_formatted_report = formatter.format_group_report(solution)
-        overall_formatted_report = formatter.format_overall_report(solution)
-        # pylint: disable=unused-variable
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
+        formatted_data = formatter.format_individual_report(
+            solution, availability_map)
+        group_formatted_report = formatter.format_group_report(solution)
+        overall_formatted_report = formatter.format_overall_report(solution)
 
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
@@ -37,7 +37,8 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
 
-    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
+    xlsx_writer.write_sheet(
+        'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
     xlsx_writer.save()
 
@@ -64,15 +65,18 @@ class ReportFormatter():
         self.data_config = config
         self.report_config = config["report_fields"]
         self.formatters = formatters
+        self.avail_slot_header_order: list[tuple[str, str]] = []
 
-    def format_individual_report(self, groups: list[models.GroupRecord]):
+    def format_individual_report(self, groups: list[models.GroupRecord], availability_map: models.AvailabilityMap):
         '''
         formats the grouping information into a format for reporting. Builds the headers into the report
         '''
-        records: list[list[xlsx.Cell]] = [self.__individual_report_header()]
+        records: list[list[xlsx.Cell]] = [
+            self.__individual_report_header(availability_map)]
         user_perfs = validate.generate_preferred_list_per_user(groups)
-
         for group in groups:
+            group_availability_map: models.GroupAvailabilityMap = self.__get_group_availability_map(
+                availability_map, group)
             for user in group.members:
 
                 record: list[xlsx.Cell] = []
@@ -81,8 +85,7 @@ class ReportFormatter():
 
                 record.append(xlsx.Cell(user.provided_survey_data))
 
-                if self.report_config['show_disliked_students']:
-                    record.append(xlsx.Cell(';'.join(user.disliked_students)))
+                record.append(xlsx.Cell(';'.join(user.disliked_students)))
 
                 meets_dislike_req: str = str(
                     len(validate.user_dislikes_group(user, group)) == 0)
@@ -100,8 +103,7 @@ class ReportFormatter():
                     record.append(
                         xlsx.Cell(';'.join(validate.group_availability_strings(group))))
 
-                if self.report_config['show_preferred_students']:
-                    record.append(xlsx.Cell(";".join(user.preferred_students)))
+                record.append(xlsx.Cell(";".join(user.preferred_students)))
 
                 if len(user.preferred_students) == 0:
                     record.append(xlsx.Cell("none provided"))
@@ -118,12 +120,16 @@ class ReportFormatter():
                 record.append(xlsx.Cell(user.provided_availability))
                 record.append(xlsx.Cell(user.has_matching_availability))
 
-                availability = get_user_availability(user)
-
                 # color-coded availability
-                for day in validate.WEEK_DAYS:
-                    for availability_field in self.data_config['field_mappings']['availability_field_names']:
-                        if day + ' @ ' + validate.extract_time(availability_field) in availability:
+                # NOTE: The complexity here comes from the desire to ouput these values
+                # in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
+                # monday 3 - 6 AM, then monday 6 - 9 AM, and so on).
+                slot_indexing: dict[tuple[str, str], int] = self.__get_avail_slot_indexing(
+                    availability_map)
+                if user.student_id in group_availability_map.users:
+                    user_availability_map = group_availability_map.users[user.student_id]
+                    for avail_slot_tuple in self.avail_slot_header_order:
+                        if user_availability_map[slot_indexing[avail_slot_tuple]]:
                             record.append(
                                 xlsx.Cell(' ', self.formatters.get('green_bg')))
                         else:
@@ -133,12 +139,20 @@ class ReportFormatter():
 
         return records
 
-    def __individual_report_header(self):
+    def __get_avail_slot_indexing(self, availability_map: models.AvailabilityMap) -> dict[tuple[str, str], int]:
+        index: int = 0
+        result: dict[tuple[str, str], int] = {}
+        for availability_field in availability_map.availability_slots:
+            for slot in availability_map.availability_slots[availability_field]:
+                result[(availability_field, slot)] = index
+                index = index + 1
+        return result
+
+    def __individual_report_header(self, availability_map: models.AvailabilityMap):
         header = [xlsx.Cell('Student Id')]
         header.append(xlsx.Cell('Group Id'))
         header.append(xlsx.Cell('Filled out Survey'))
-        if self.report_config['show_disliked_students']:
-            header.append(xlsx.Cell('Disliked Students'))
+        header.append(xlsx.Cell('Disliked Students'))
         header.append(xlsx.Cell('Meets Dislike Requirement'))
         if self.report_config['show_disliked_students']:
             header.append(xlsx.Cell('Disliked students in group'))
@@ -147,21 +161,28 @@ class ReportFormatter():
         if self.report_config['show_availability_overlap']:
             header.append(xlsx.Cell('Availability Overlap'))
 
-        if self.report_config['show_preferred_students']:
-            header.append(xlsx.Cell('Preferred Students'))
+        header.append(xlsx.Cell('Preferred Students'))
         header.append(xlsx.Cell('Meets Preferred Goal'))
         if self.report_config['show_preferred_students']:
             header.append(xlsx.Cell('Preferred students in group'))
 
         header.append(xlsx.Cell('Supplied Availability in Survey'))
-        header.append(
-            xlsx.Cell('Availability overlaps with others in the class'))
+        header.append(xlsx.Cell('Availability overlaps with others'))
 
         # color-coded availability headers
-        for day in validate.WEEK_DAYS:
-            for availability_field in self.data_config['field_mappings']['availability_field_names']:
-                header.append(
-                    xlsx.Cell(day + ' @ ' + validate.extract_time(availability_field)))
+        # NOTE: The complexity here comes from the desire to ouput these values
+        # in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
+        # monday 3 - 6 AM, then monday 6 - 9 AM, and so on).
+        covered_slots: list[str] = []
+        for slots_lists in availability_map.availability_slots.values():
+            for slot in slots_lists:
+                for availability_field in availability_map.availability_slots.keys():
+                    if slot not in covered_slots and slot in availability_map.availability_slots[availability_field]:
+                        header.append(
+                            xlsx.Cell(slot + ', ' + validate.extract_time(availability_field)))
+                        self.avail_slot_header_order.append(
+                            (availability_field, slot))
+                covered_slots.append(slot)
 
         return header
 
@@ -223,6 +244,12 @@ class ReportFormatter():
             records.append(record)
 
         return records
+
+    def __get_group_availability_map(self, availability_map: models.AvailabilityMap, group: models.GroupRecord) -> models.GroupAvailabilityMap:
+        for group_map in availability_map.group_availability:
+            if group_map.group_id == group.group_id:
+                return group_map
+        return models.GroupAvailabilityMap('invalid', {})
 
     def __group_report_header(self) -> list[xlsx.Cell]:
         headers = []
@@ -374,6 +401,11 @@ class ReportFormatter():
         record.append(xlsx.Cell(num_groups_no_avail))
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
+        record.append(xlsx.Cell(num_groups_total))
+        record.append(xlsx.Cell(num_disliked_pairings))
+        record.append(xlsx.Cell(num_groups_no_avail))
+        record.append(xlsx.Cell(num_liked_pairings))
+        record.append(xlsx.Cell(num_additional_overlap))
 
         if self.report_config['show_scores']:
             scoring_vars = models.GroupSetData("solution_1",
@@ -405,6 +437,8 @@ class ReportFormatter():
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
+            headers.append(xlsx.Cell('Score'))
+            headers.append(xlsx.Cell('Standard Deviation of Groups'))
             headers.append(xlsx.Cell('Score'))
             headers.append(xlsx.Cell('Standard Deviation of Groups'))
 
