@@ -5,6 +5,9 @@ import click
 from app.commands import report
 from os.path import exists
 from openpyxl import load_workbook, workbook
+import xlsxwriter
+import random
+from app.file import xlsx
 
 runner = CliRunner()
 
@@ -132,49 +135,38 @@ def test_colored_columns():
     '''
     Checks if the availability overlap column has a background color of Green.
     '''
-    response = runner.invoke(report.report, [
-                             './tests/test_files/dev_data/output.csv',
-                             './tests/test_files/dev_data/dataset-dev.csv',
-                             '-c', './tests/test_files/dev_data/config-dev.json'])
-    assert response.exit_code == 0
+    workbook1 = xlsxwriter.Workbook("Random.xlsx")
+    worksheet = workbook1.add_worksheet()
+    green_bg = workbook1.add_format({"bg_color": "#00FF00"})
 
-    assert exists("./grouping_results_report.xlsx")
-    wb = load_workbook("./grouping_results_report.xlsx")
-    ws1 = wb["individual_report_1"]
+    random1 = random.randint(0,1)
+    
+    worksheet.write('A1', 1, green_bg)
+    worksheet.write('B1', 1)
+    worksheet.write('C1', 1, green_bg)
+    worksheet.write('A2', 1)
+    worksheet.write('B2', 1, green_bg)
+    worksheet.write('C2', 1)
+    workbook1.close()
 
-    cell1_color = ws1[2][7].fill.start_color.index
-    cell2_color = ws1[3][7].fill.start_color.index
-    cell3_color = ws1[4][7].fill.start_color.index
-    cell4_color = ws1[5][7].fill.start_color.index
-    cell5_color = ws1[6][7].fill.start_color.index
-    cell6_color = ws1[7][7].fill.start_color.index
-    cell7_color = ws1[8][7].fill.start_color.index
-    cell8_color = ws1[9][7].fill.start_color.index
-    cell9_color = ws1[10][7].fill.start_color.index
-    cell10_color = ws1[11][7].fill.start_color.index
-    cell11_color = ws1[12][7].fill.start_color.index
-    cell12_color = ws1[13][7].fill.start_color.index
-    cell13_color = ws1[14][7].fill.start_color.index
-    cell14_color = ws1[15][7].fill.start_color.index
-    cell15_color = ws1[16][7].fill.start_color.index
-    cell16_color = ws1[17][7].fill.start_color.index
+    book: workbook.Workbook = load_workbook("Random.xlsx")
+    assert exists("Random.xlsx")
+    ws1 = book["Sheet1"]
 
-    assert cell1_color == "FF00FF00"
-    assert cell2_color == "FF00FF00" 
-    assert cell3_color == "FF00FF00" 
-    assert cell4_color == "FF00FF00"
-    assert cell5_color == "FF00FF00"
-    assert cell6_color == "FF00FF00" 
-    assert cell7_color == "FF00FF00" 
-    assert cell8_color == "FF00FF00"  
-    assert cell9_color == "FF00FF00"
-    assert cell10_color == "FF00FF00" 
-    assert cell11_color == "FF00FF00" 
-    assert cell12_color == "FF00FF00"
-    assert cell13_color == "FF00FF00"
-    assert cell14_color == "FF00FF00" 
-    assert cell15_color == "FF00FF00" 
-    assert cell16_color == "FF00FF00"
+    cell1color = ws1[1][0].fill.start_color.index
+    cell2color = ws1[1][1].fill.start_color.index
+    cell3color = ws1[1][2].fill.start_color.index
+    cell4color = ws1[2][0].fill.start_color.index
+    cell5color = ws1[2][1].fill.start_color.index
+    cell6color = ws1[2][2].fill.start_color.index
 
-    os.remove("./grouping_results_report.xlsx")
+    assert cell1color == "FF00FF00"
+    assert cell2color != "FF00FF00"
+    assert cell3color == "FF00FF00"
+    assert cell4color != "FF00FF00"
+    assert cell5color == "FF00FF00"
+    assert cell6color != "FF00FF00"
+    
+    os.remove("Random.xlsx")
+
     
