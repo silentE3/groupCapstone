@@ -151,19 +151,23 @@ class Grouper2:
                         continue
                     other_group.members.remove(member)
                     student = member
+                    break
                 if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
                     groups_with_enough_mems.remove(other_group)
 
                 if student:
                     group.members.append(student)
+                    break
+            
+            if len(group.members) < self.target_group_size-self.target_group_margin_lower:
+                # if we make it to this, we are ignoring the students "locked" and allowing them to be removed from the group to balance sizes
+                for other_group in groups_with_enough_mems:
+                    member = other_group.members.pop()
+                    if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
+                        groups_with_enough_mems.remove(other_group)
 
-            # if we make it to this, we are ignoring the students "locked" and allowing them to be removed from the group to balance sizes
-            for other_group in groups_with_enough_mems:
-                member = other_group.members.pop()
-                if len(other_group.members) <= self.target_group_size-self.target_group_margin_lower:
-                    groups_with_enough_mems.remove(other_group)
-
-                group.members.append(member)
+                    group.members.append(member)
+                    break
 
     def optimize_groups(self):
         '''
