@@ -64,8 +64,9 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     ########## Run "first" grouping algorithm ##########
 
     # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
-    # best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
-    #     survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+    best_solution_grouper_1: Grouper1 = __run_grouping_alg_1(
+        survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
+
 
     ########## Run "second" grouping algorithm ##########
 
@@ -74,7 +75,8 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1])
 
     ########## Output solutions report if configured ##########
-    solutions: list[list[models.GroupRecord]] = [best_solution_grouper_2]
+    solutions: list[list[models.GroupRecord]] = [
+        best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
     click.echo(f'Writing report to: {report_filename}')
     reporter.write_report(
         solutions, survey_data, config_data, report_filename)
@@ -117,10 +119,10 @@ def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models
             cancel_event.set()
 
             raise exc
-        for future in concurrent.futures.as_completed(exec_results):
+        for idx, future in enumerate(concurrent.futures.as_completed(exec_results)):
             grouper = future.result()
             score = grouper.grade_groups()
-            if score > best_score:
+            if score > best_score or idx == 0:
                 best_score = score
                 best_solution_found = grouper.groups
 
