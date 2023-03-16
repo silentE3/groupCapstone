@@ -3,6 +3,8 @@ This module contains a class for maintaining clean console output when writing (
     a single console line continually during the grouping process.
 '''
 
+from threading import Lock
+
 
 class GroupingConsolePrinter:
     '''
@@ -10,9 +12,11 @@ class GroupingConsolePrinter:
            single line continually during the grouping process.
        '''
     prev_line_length: int
+    lock: Lock
 
     def __init__(self):
         self.prev_line_length = 0
+        self.lock = Lock()
 
     def print(self, text: str):
         '''
