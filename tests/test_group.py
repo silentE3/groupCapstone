@@ -1,6 +1,5 @@
 import os
 from click.testing import CliRunner
-import click
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
