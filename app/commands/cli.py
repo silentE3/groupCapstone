@@ -25,7 +25,9 @@ def guide():
     '''
     commands = {
         'group': group.group,
-        'generate': generate.generate
+        'generate': generate.generate,
+        'update report': report.update_report,
+        'create report': report.report
     }
 
     command_names = list(commands.keys())
@@ -38,13 +40,19 @@ def guide():
         case 'group':
             surveyfile = click.prompt('Enter the path to the survey file', default='dataset.csv')
             configfile = click.prompt('Enter the path to the config file', default='config.json', show_default=True)
+            has_report = click.confirm('Do you already have a report file you want to change?')
+            if has_report:
+                reportfile = click.prompt('Enter the path to the existing report file (.xlsx)', default=None,
+                                               show_default=False)
+            else:
+                reportfile = None
             roster = click.confirm('Do you want to include a class roster with students who did not fill out the survey?')
             if roster:
                 allstudentsfile = click.prompt('Enter the path to the file containing all student IDs', default=None,
                                                show_default=False)
             else:
                 allstudentsfile = None
-            commands[selected_command](surveyfile, configfile, allstudentsfile)
+            commands[selected_command].callback(surveyfile=surveyfile, configfile=configfile, reportfile=reportfile, allstudentsfile=allstudentsfile)
         case 'gen':
             '''get arguments and run generate'''
 
@@ -61,3 +69,5 @@ cli.add_command(report.update_report)
 
 if __name__ == '__main__':
     cli()
+
+
