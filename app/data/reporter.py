@@ -44,7 +44,8 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
     xlsx_writer.save()
 
     worksheets = xlsx_writer.sheets
-    print(worksheets)
+    worksheet = worksheets.get('individual_report_1')
+    worksheet.freeze_panes(1,0)
 
 
 def get_user_availability(user: models.SurveyRecord):
