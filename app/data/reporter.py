@@ -28,9 +28,6 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
 
         xlsx_writer.write_sheet('individual_report_' +
                                 str(index + 1), formatted_data)
-        
-        worksheet = xlsx_writer.sheets.get('individual_report_' + str(index + 1), formatted_data)
-        worksheet.freeze_panes(0,1)
 
         xlsx_writer.write_sheet(
             'group_report_' + str(index + 1), group_formatted_report)
@@ -43,10 +40,11 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
 
     xlsx_writer.write_sheet(
         'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
-
-    
     
     xlsx_writer.save()
+
+    worksheets = xlsx_writer.sheets
+    print(worksheets)
 
 
 def get_user_availability(user: models.SurveyRecord):
