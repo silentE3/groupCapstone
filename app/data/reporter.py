@@ -36,11 +36,11 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
             'overall_report_' + str(index + 1), overall_formatted_report)
         
         worksheets = xlsx_writer.sheets
-        worksheet1 = worksheets.get('individual_report_' + str(index + 1))
-        worksheet1.freeze_panes(0,1)
+        worksheet = worksheets.get('individual_report_' + str(index + 1))
+        worksheet.freeze_panes(0,1)
 
-        worksheet2 = worksheets.get('group_report_' + str(index + 1))
-        worksheet2.freeze_panes(0,1)
+        worksheet = worksheets.get('group_report_' + str(index + 1))
+        worksheet.freeze_panes(0,1)
 
     config_sheet = ReportFormatter(data_config, formatters={
                                    'green_bg': green_bg}).format_config_report()
