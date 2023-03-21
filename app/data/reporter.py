@@ -32,11 +32,13 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
             'group_report_' + str(index + 1), group_formatted_report)
         xlsx_writer.write_sheet(
             'overall_report_' + str(index + 1), overall_formatted_report)
+        sheet = xlsx_writer.sheets.get('individual_report_'+str(index + 1))
+        if sheet is not None:
+            sheet.set_column(0, 100, 50)
 
     config_sheet = ReportFormatter(data_config, formatters={
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
-
     xlsx_writer.write_sheet(
         'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
