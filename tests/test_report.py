@@ -232,6 +232,7 @@ def test_freeze_columns():
 
     workbook1.close()
 
+    assert exists("Random2.xlsx")
     workbook = openpyxl.load_workbook("Random2.xlsx")
 
     worksheet = workbook.active
@@ -239,3 +240,31 @@ def test_freeze_columns():
     assert worksheet.freeze_panes == 'B1'
 
     os.remove("Random2.xlsx")
+
+def test_freeze_columns_2():
+    '''
+    Checks if the first two columns in a sheet is frozen
+    '''
+    workbook1 = xlsxwriter.Workbook("Random3.xlsx")
+    worksheet = workbook1.add_worksheet()
+
+    worksheet.write('A1', "A1")
+    worksheet.write('B1', "B1")
+    worksheet.write('C1', "C1")
+    worksheet.write('A2', "A2")
+    worksheet.write('B2', "B2")
+    worksheet.write('C2', "C2")
+
+    worksheet.freeze_panes(0,2)
+
+    workbook1.close()
+
+    assert exists("Random3.xlsx")
+    workbook = openpyxl.load_workbook("Random3.xlsx")
+    
+
+    worksheet = workbook.active
+
+    assert worksheet.freeze_panes == 'C1'
+
+    os.remove("Random3.xlsx")
