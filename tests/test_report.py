@@ -10,6 +10,7 @@ from openpyxl import load_workbook, workbook
 from app.file import xlsx
 import xlsxwriter
 import random
+import openpyxl
 
 runner = CliRunner()
 
@@ -220,16 +221,21 @@ def test_freeze_columns():
     workbook1 = xlsxwriter.Workbook("Random2.xlsx")
     worksheet = workbook1.add_worksheet()
 
-    worksheet.write('A1', 1)
-    worksheet.write('B1', 1)
-    worksheet.write('C1', 1)
-    worksheet.write('A2', 1)
-    worksheet.write('B2', 1)
-    worksheet.write('C2', 1)
+    worksheet.write('A1', "A1")
+    worksheet.write('B1', "B1")
+    worksheet.write('C1', "C1")
+    worksheet.write('A2', "A2")
+    worksheet.write('B2', "B2")
+    worksheet.write('C2', "C2")
 
     worksheet.freeze_panes(0,1)
 
     workbook1.close()
 
-    book: workbook.Workbook = load_workbook("Random2.xlsx")
-    assert exists("Random2.xlsx")
+    workbook = openpyxl.load_workbook("Random2.xlsx")
+
+    worksheet = workbook.active
+
+    assert worksheet.freeze_panes == 'B1'
+
+    os.remove("Random2.xlsx")
