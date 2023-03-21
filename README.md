@@ -35,6 +35,8 @@ Starting the program will display general help for using the applications, inclu
 along with a short description of what each command does.
 Additionally, using any of these commands followed by --help will provide usage information for that command.
 
+**If you prefer to go use a guilded experience that will prompt you for each input, you may simply run the command python grouper.py or run the executable with no command, at it will run the guided CLI experience.**
+
 These are the commands and their usage:
 
 ## gen
@@ -192,7 +194,7 @@ pipenv install
 pipenv shell
 ```
 
-5. Run the code. This will run the cli.
+5. Run the code. This will run the cli.  (If run as below, it will run the guided UI experience, to use a different command directly, you will need to include the command and the required options and flags)
 
 ```
 python grouper.py
