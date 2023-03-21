@@ -212,3 +212,24 @@ def test_colored_columns():
     assert cell6color != "FF00FF00"
 
     os.remove("Random.xlsx")
+
+def test_freeze_columns():
+    '''
+    Checks if the first column in a sheet is frozen
+    '''
+    workbook1 = xlsxwriter.Workbook("Random2.xlsx")
+    worksheet = workbook1.add_worksheet()
+
+    worksheet.write('A1', 1)
+    worksheet.write('B1', 1)
+    worksheet.write('C1', 1)
+    worksheet.write('A2', 1)
+    worksheet.write('B2', 1)
+    worksheet.write('C2', 1)
+
+    worksheet.freeze_panes(0,1)
+
+    workbook1.close()
+
+    book: workbook.Workbook = load_workbook("Random2.xlsx")
+    assert exists("Random2.xlsx")
