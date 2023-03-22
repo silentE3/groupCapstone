@@ -4,9 +4,10 @@ cli contains the main group for commands
 
 
 import click
-from app.commands import generate, group, report
 import xlsxwriter
 import re
+from app.commands import generate, group, report
+
 
 
 @click.group(invoke_without_command=True)
@@ -65,7 +66,6 @@ def guide():
             args = [reportfile]
 
         case 'create report':
-            '''get arguments and run report'''
             groupfile = click.prompt('Enter the path to the grouping file',
                                      default='output.csv', show_default=True)
             surveyfile = click.prompt('Enter the path to the raw survey file',
@@ -92,6 +92,4 @@ cli.add_command(generate.gen)
 cli.add_command(report.update_report)
 
 if __name__ == '__main__':
-    cli()
-
-
+    cli(None)
