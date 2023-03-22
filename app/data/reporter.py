@@ -18,25 +18,21 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
 
     for index, solution in enumerate(solutions):
         formatter = ReportFormatter(
-            data_config, formatters={'green_bg': green_bg})
+            data_config, cell_formatters={'green_bg': green_bg})
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
         formatted_data = formatter.format_individual_report(
             solution, availability_map)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
-
-        xlsx_writer.write_sheet('individual_report_' +
-                                str(index + 1), formatted_data)
         xlsx_writer.write_sheet(
-            'group_report_' + str(index + 1), group_formatted_report)
+            f'individual_report_{str(index + 1)}', formatted_data).autofit()
         xlsx_writer.write_sheet(
-            'overall_report_' + str(index + 1), overall_formatted_report)
-        sheet = xlsx_writer.sheets.get('individual_report_'+str(index + 1))
-        if sheet is not None:
-            sheet.set_column(0, 100, 50)
+            f'group_report_{str(index + 1)}', group_formatted_report).autofit()
+        xlsx_writer.write_sheet(
+            f'overall_report_{str(index + 1)}', overall_formatted_report).autofit()
 
-    config_sheet = ReportFormatter(data_config, formatters={
+    config_sheet = ReportFormatter(data_config, cell_formatters={
                                    'green_bg': green_bg}).format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
     xlsx_writer.write_sheet(
@@ -63,10 +59,10 @@ class ReportFormatter():
     formatter for writing reports. Uses the provided configuration
     '''
 
-    def __init__(self, config: models.Configuration, formatters: dict[str, Any]) -> None:
+    def __init__(self, config: models.Configuration, cell_formatters: dict[str, Any]) -> None:
         self.data_config = config
         self.report_config = config["report_fields"]
-        self.formatters = formatters
+        self.formatters = cell_formatters
         self.avail_slot_header_order: list[tuple[str, str]] = []
 
     def format_individual_report(self, groups: list[models.GroupRecord], availability_map: models.AvailabilityMap):
