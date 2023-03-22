@@ -3,9 +3,9 @@ cli contains the main group for commands
 '''
 
 
+import re
 import click
 import xlsxwriter
-import re
 from app.commands import generate, group, report
 
 
