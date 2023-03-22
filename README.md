@@ -35,7 +35,13 @@ Starting the program will display general help for using the applications, inclu
 along with a short description of what each command does.
 Additionally, using any of these commands followed by --help will provide usage information for that command.
 
-**If you prefer to go use a guilded experience that will prompt you for each input, you may simply run the command python grouper.py or run the executable with no command, at it will run the guided CLI experience.**
+**If you prefer to go use a guilded experience that will prompt you for each input, you may simply run the command**
+
+```
+ python grouper.py 
+```
+
+**or run the executable with no command, at it will run the guided CLI experience.**
 
 These are the commands and their usage:
 
