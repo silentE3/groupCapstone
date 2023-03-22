@@ -1,6 +1,6 @@
 from app import config
 from app import models
-from app.grouping import grouper_2
+from app.grouping import grouper_2, printer
 
 # At this time, these tests only verify the portions of grouper_2 that are related to accomadating
 #  the variable group sizing margins, which was implemented via Taiga task #171. This includes
@@ -44,7 +44,8 @@ def test_balance_groups_all_start_balanced_1(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:5])
     group_2: models.GroupRecord = models.GroupRecord("2", students[5:10])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 5
     assert len(group_2.members) == 5
@@ -75,7 +76,8 @@ def test_balance_groups_all_start_balanced_2(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:3])
     group_2: models.GroupRecord = models.GroupRecord("2", students[3:7])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 3
     assert len(group_2.members) == 4
@@ -106,7 +108,8 @@ def test_balance_groups_all_start_balanced_3(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:4])
     group_2: models.GroupRecord = models.GroupRecord("2", students[4:9])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 4
     assert len(group_2.members) == 5
@@ -137,7 +140,8 @@ def test_balance_groups_all_start_balanced_4(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:4])
     group_2: models.GroupRecord = models.GroupRecord("2", students[4:10])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 4
     assert len(group_2.members) == 6
@@ -169,7 +173,8 @@ def test_balance_groups_start_unbalanced_1(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:4])
     group_2: models.GroupRecord = models.GroupRecord("2", students[4:10])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 4
     assert len(group_2.members) == 6
@@ -201,7 +206,8 @@ def test_balance_groups_start_unbalanced_2(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:3])
     group_2: models.GroupRecord = models.GroupRecord("2", students[3:8])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 3
     assert len(group_2.members) == 5
@@ -233,7 +239,8 @@ def test_balance_groups_start_unbalanced_3(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:5])
     group_2: models.GroupRecord = models.GroupRecord("2", students[5:7])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 5
     assert len(group_2.members) == 2
@@ -265,7 +272,8 @@ def test_balance_groups_start_unbalanced_4(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", students[0:4])
     group_2: models.GroupRecord = models.GroupRecord("2", students[4:12])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 4
     assert len(group_2.members) == 8
@@ -294,7 +302,8 @@ def test_add_student_to_group_too_many_students(capfd):
     group_1: models.GroupRecord = models.GroupRecord("1", [])
     group_2: models.GroupRecord = models.GroupRecord("2", [])
 
-    grouper2 = grouper_2.Grouper2(students, configuration, 2)
+    grouper2 = grouper_2.Grouper2(
+        students, configuration, 2, printer.GroupingConsolePrinter())
     grouper2.groups = [group_1, group_2]
     assert len(group_1.members) == 0
     assert len(group_2.members) == 0
