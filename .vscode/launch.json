@@ -12,7 +12,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "--report", "-a",  "roster.csv"],
+            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "-a",  "roster.csv"],
             "console": "integratedTerminal",
             "justMyCode": true
         },
@@ -30,7 +30,7 @@
             "type": "python",
             "request": "launch",
             "program": "grouper.py",
-            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "--report", "-a",  "roster.csv"],
+            "args": ["group", "dataset-dev.csv", "-c", "config-dev.json", "-a",  "roster.csv"],
             "console": "integratedTerminal",
             "justMyCode": true
         }
