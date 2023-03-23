@@ -45,7 +45,7 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     config_data: models.Configuration = config.read_json(configfile)
 
     ########## Load the survey data ##########
-    survey_data = load.read_survey(
+    survey_data: models.SurveyData = load.read_survey(
         config_data['field_mappings'], surveyfile)
 
     ########## Load the class roster data, if applicable ##########
@@ -73,10 +73,20 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         config_data["target_minus_one_allowed"])
 
     ########## Run both grouping algorithms in parallel via multiprocessing ##########
+    best_solutions: list[list[models.GroupRecord]] = __run_grouping_algs(
+        survey_data, config_data, min_max_num_groups)
+
+    ########## Output solutions report if configured ##########
+    click.echo(f'Writing report to: {report_filename}')
+    reporter.write_report(best_solutions, survey_data,
+                          config_data, report_filename)
+
+
+def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Configuration, min_max_num_groups: list[int]) -> list[list[models.GroupRecord]]:
     MyManager.register('GroupingConsolePrinter',
                        printer.GroupingConsolePrinter)
     with MyManager() as grouping_manager:
-        #pylint: disable=no-member
+        # pylint: disable=no-member
         grouping_console_printer = grouping_manager.GroupingConsolePrinter()
 
         with ProcessPool(max_workers=2) as executor:
@@ -87,13 +97,19 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
             best_solution_grouper_1: Grouper1 = Grouper1(
                 survey_data.records, config_data, 0, grouping_console_printer)
             futures.append(
-                executor.schedule(__run_grouping_alg_1, args=[survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1], grouping_console_printer]))
+                executor.schedule(__run_grouping_alg_1, args=[survey_data.records,
+                                                              config_data, min_max_num_groups[0],
+                                                              min_max_num_groups[1],
+                                                              grouping_console_printer]))
 
             ########## Launch "second" grouping algorithm ##########
             # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
             best_solution_grouper_2: list[models.GroupRecord] = []
             futures.append(
-                executor.schedule(__run_grouping_alg_2, args=[survey_data.records, config_data, min_max_num_groups[0], min_max_num_groups[1], grouping_console_printer]))
+                executor.schedule(__run_grouping_alg_2, args=[survey_data.records,
+                                                              config_data, min_max_num_groups[0],
+                                                              min_max_num_groups[1],
+                                                              grouping_console_printer]))
 
             _, not_done = wait(futures, timeout=0)
 
@@ -116,10 +132,7 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
                 else:
                     best_solution_grouper_2 = future.result()
 
-    ########## Output solutions report if configured ##########
-    click.echo(f'Writing report to: {report_filename}')
-    reporter.write_report([best_solution_grouper_1.best_solution_found,
-                          best_solution_grouper_2], survey_data, config_data, report_filename)
+        return [best_solution_grouper_1.best_solution_found, best_solution_grouper_2]
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,
