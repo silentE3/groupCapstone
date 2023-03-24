@@ -196,3 +196,10 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
+
+
+def test_group_quality_3():
+    '''
+    Test of grouping 19 students with a target group size of 5 and a tolerance of -1.
+    [group sizes of 4 or 5]
+    '''
