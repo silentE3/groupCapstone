@@ -203,3 +203,6 @@ def test_group_quality_3():
     Test of grouping 19 students with a target group size of 5 and a tolerance of -1.
     [group sizes of 4 or 5]
     '''
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_19.csv', '--configfile', './tests/test_files/configs/config_19.json', '--reportfile', './tests/test_files/survey_results/test_19_report.xlsx'])
+    assert response.exit_code == 0
