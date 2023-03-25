@@ -14,8 +14,6 @@ These test are to verify the proper functioning of the guided UI.  They will moc
 also being handled correctly
 '''
 
-
-
 def test_guide_lists_commands():
     result = runner.invoke(cli.guide)
     assert 'Available commands:' in result.output
