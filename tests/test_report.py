@@ -216,10 +216,9 @@ def test_colored_columns():
     os.remove("Random.xlsx")
 
 
-def test_report_for_correctness():
+def test_report_for_formatted_columns():
     '''
-    Checks the generated excel file for the expected sheets
-    For now, just config
+    Checks the generated report for columns with formatted widths rather than the default
     '''
     response = runner.invoke(report.report, [
                              './tests/test_files/dev_data/output.csv',
