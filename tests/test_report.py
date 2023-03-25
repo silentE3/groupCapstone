@@ -1,4 +1,5 @@
 import datetime
+import math
 import os
 import shutil
 from click.testing import CliRunner
@@ -7,6 +8,7 @@ from app import config, models
 from app.commands import report
 from os.path import exists
 from openpyxl import load_workbook, workbook
+from openpyxl.worksheet import worksheet
 from app.file import xlsx
 import xlsxwriter
 import random
@@ -212,3 +214,33 @@ def test_colored_columns():
     assert cell6color != "FF00FF00"
 
     os.remove("Random.xlsx")
+
+
+def test_report_for_correctness():
+    '''
+    Checks the generated excel file for the expected sheets
+    For now, just config
+    '''
+    response = runner.invoke(report.report, [
+                             './tests/test_files/dev_data/output.csv',
+                             './tests/test_files/dev_data/dataset-dev.csv',
+                             '-c', './tests/test_files/dev_data/config-dev.json',
+                             '--reportfile' './tests/test_files/dev_data/test_report_for_correctness.xlsx'])
+    assert response.exit_code == 0
+
+    assert exists(
+        "./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")
+
+    book: workbook.Workbook = load_workbook(
+        "./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")
+    assert 'config' in list(book.sheetnames)
+    assert 'individual_report_1' in list(book.sheetnames)
+    
+    sheet1: worksheet.Worksheet = book['individual_report_1']
+    
+    # check the width of the columns
+    assert not math.isclose(sheet1.column_dimensions['A'].width, 8.11)
+    assert not math.isclose(sheet1.column_dimensions['B'].width, 8.11)
+    assert not math.isclose(sheet1.column_dimensions['C'].width, 8.11)
+    
+    os.remove("./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")

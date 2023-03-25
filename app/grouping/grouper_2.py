@@ -16,7 +16,7 @@ class Grouper2:
     class with operations that perform an algorithm to group students
     '''
 
-    def __init__(self, students, config, group_count: int) -> None:
+    def __init__(self, students, config, group_count: int, console_printer: printer.GroupingConsolePrinter) -> None:
         self.students: list[models.SurveyRecord] = copy.deepcopy(students)
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
@@ -29,7 +29,7 @@ class Grouper2:
         self.num_students: int = len(self.students)
         for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
-        self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
+        self.console_printer: printer.GroupingConsolePrinter = console_printer
 
     def group_students(self, cancel_event: Optional[threading.Event] = None) -> list[models.GroupRecord]:
         """

@@ -15,10 +15,10 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
+    formatter = ReportFormatter(
+        data_config, cell_formatters={'green_bg': green_bg})
 
     for index, solution in enumerate(solutions):
-        formatter = ReportFormatter(
-            data_config, cell_formatters={'green_bg': green_bg})
         availability_map = formatter.generate_availability_map(
             solution, survey_data)
         formatted_data = formatter.format_individual_report(
@@ -32,8 +32,7 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
         xlsx_writer.write_sheet(
             f'overall_report_{str(index + 1)}', overall_formatted_report).autofit()
 
-    config_sheet = ReportFormatter(data_config, cell_formatters={
-                                   'green_bg': green_bg}).format_config_report()
+    config_sheet = formatter.format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
     xlsx_writer.write_sheet(
         'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
