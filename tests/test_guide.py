@@ -1,11 +1,8 @@
 import os
 import shutil
-import math
 from click.testing import CliRunner
 from unittest.mock import patch
 from app.commands import cli
-from tests.test_utils.helper_functions import verify_groups
-from os.path import exists
 
 runner = CliRunner()
 

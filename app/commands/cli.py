@@ -4,6 +4,8 @@ cli contains the main group for commands
 
 
 import re
+import sys
+
 import click
 import xlsxwriter
 from app.commands import generate, group, report
@@ -87,7 +89,8 @@ def guide():
 
 
 def quitter():
-    exit(0)
+    '''quits the program if the user types quit'''
+    sys.exit(0)
 
 
 cli.add_command(report.report)
