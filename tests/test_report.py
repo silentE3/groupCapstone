@@ -225,22 +225,31 @@ def test_report_for_correctness():
                              './tests/test_files/dev_data/output.csv',
                              './tests/test_files/dev_data/dataset-dev.csv',
                              '-c', './tests/test_files/dev_data/config-dev.json',
-                             '--reportfile' './tests/test_files/dev_data/test_report_for_correctness.xlsx'])
+                             '-r' 'test_report_for_correctness.xlsx'])
     assert response.exit_code == 0
 
     assert exists(
-        "./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")
+        "test_report_for_correctness.xlsx")
 
     book: workbook.Workbook = load_workbook(
-        "./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")
+        "test_report_for_correctness.xlsx")
     assert 'config' in list(book.sheetnames)
     assert 'individual_report_1' in list(book.sheetnames)
     
-    sheet1: worksheet.Worksheet = book['individual_report_1']
+    individual_report_1: worksheet.Worksheet = book['individual_report_1']
+    individual_report_2: worksheet.Worksheet = book['individual_report_1']
+    group_report_1: worksheet.Worksheet = book['group_report_1']
     
-    # check the width of the columns
-    assert not math.isclose(sheet1.column_dimensions['A'].width, 8.11)
-    assert not math.isclose(sheet1.column_dimensions['B'].width, 8.11)
-    assert not math.isclose(sheet1.column_dimensions['C'].width, 8.11)
+    # check the width of a sampling of the columns and ensure they aren't the default. Kind of a hacky way to check but it should work
+    assert not math.isclose(individual_report_1.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(individual_report_1.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(individual_report_1.column_dimensions['C'].width, 13.0)
     
-    os.remove("./tests/test_files/dev_data/test_report_for_correctness_report.xlsx")
+    assert not math.isclose(individual_report_2.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(individual_report_2.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(individual_report_2.column_dimensions['C'].width, 13.0)
+    
+    assert not math.isclose(group_report_1.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(group_report_1.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(group_report_1.column_dimensions['C'].width, 13.0)
+    os.remove("test_report_for_correctness.xlsx")
