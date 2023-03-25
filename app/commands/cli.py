@@ -29,7 +29,8 @@ def guide():
     commands = {
         'group': group.group,
         'update report': report.update_report,
-        'create report': report.report
+        'create report': report.report,
+        'quit': quitter
     }
 
     command_names = list(commands.keys())
@@ -37,8 +38,6 @@ def guide():
     for name in command_names:
         click.echo(f'* {name}')
     selected_command = click.prompt('Select a command to run', type=click.Choice(command_names))
-    while selected_command not in commands:
-        selected_command = click.prompt('Select a command to run', type=click.Choice(command_names))
     args = []
     match selected_command:
         case 'group':
@@ -82,8 +81,13 @@ def guide():
                 workbook.close()
                 reportfile = f'{group_file_name}_report.xlsx'
             args = [groupfile, surveyfile, reportfile, configfile]
-
+        case 'end':
+            quitter()
     commands[selected_command].callback(*args)
+
+
+def quitter():
+    exit(0)
 
 
 cli.add_command(report.report)

@@ -15,11 +15,12 @@ also being handled correctly
 '''
 
 def test_guide_lists_commands():
-    result = runner.invoke(cli.guide)
+    result = runner.invoke(cli.guide, input='quit\n')
     assert 'Available commands:' in result.output
     assert 'group' in result.output
     assert 'update report' in result.output
     assert 'create report' in result.output
+
 
 @patch('app.commands.group.group')
 def test_group_command(mock_group):
@@ -43,10 +44,9 @@ def test_update_report_command(mock_update_report):
     assert mock_update_report.called_with('dataset_report.xlsx')
 
     # check file was updated
-    assert os.path.getmtime(report_file_path + '.xlsx') > original_file_time
+    assert os.path.getmtime(report_file_path + '_copy.xlsx') > original_file_time
 
-    os.remove(report_file_path + '.xlsx')
-    os.rename(report_file_path + '_copy.xlsx', report_file_path + '.xlsx')
+    os.remove(report_file_path + '_copy.xlsx')
 
 @patch('app.commands.report.report')
 def test_create_report_command(mock_report):
@@ -58,3 +58,4 @@ def test_create_report_command(mock_report):
     assert 'Enter the path to the config file' in result.output
     assert not 'Enter the path to the existing report file' in result.output
     assert mock_report.called_with('output.csv', 'dataset.csv', None, 'config.json')
+    os.remove('tests_report.xlsx')
