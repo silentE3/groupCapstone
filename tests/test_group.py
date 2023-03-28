@@ -1,6 +1,5 @@
 import os
 from click.testing import CliRunner
-import click
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
@@ -16,26 +15,28 @@ runner = CliRunner()
 
 def test_group_1():
     '''
-    Test of grouping 6 students with a target group size of 2 (divides evenly).
+    Test of grouping 12 students with a target group size of 4 (divides evenly), without any +/- margin. 
+
+    T-01
     '''
 
     response = runner.invoke(group.group, [
-        './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
+        './tests/test_files/survey_results/test_group_1.csv', '--configfile', './tests/test_files/configs/test_group_1_config.json'])
     assert response.exit_code == 0
 
-    expected_min_num_groups = math.ceil(6/(2+1))
-    expected_max_num_groups = 6//(2-1)
+    expected_min_num_groups = 3
+    expected_max_num_groups = 3
     expected_students = ['jsmith1', 'jdoe2',
-                         'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
+                         'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6', 'charles7', 'carl8', 'elee9', 'cred10', 'bobbylee11', 'jrogan12']
 
-    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx', expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/test_group_1_report.xlsx', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
 
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
     os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx')
+        './tests/test_files/survey_results/test_group_1_report.xlsx')
 
 
 def test_group_2():
@@ -83,6 +84,26 @@ def test_group_3():
 
     os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
 
+def test_group_quality_2():
+    '''
+    Test of grouping 16 students with a target group size of 3 (does not divide evenly,
+    but still possible to maintain +1, [group sizes of 3 or 4]).
+    '''
+
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_16.csv', '--configfile', './tests/test_files/configs/config_16.json', '--reportfile', './tests/test_files/survey_results/test_16_report.xlsx'])
+    assert response.exit_code == 0
+
+    expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
+                         'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6',
+                         'adumble4_2', 'triddle8_2', 'dmalfoy7_2',
+                         'rweasle3_2', 'hgrange2_2', 'rhagrid5_2', 'hpotter1_2', 'nlongbo6_2']
+    verify_groups('./tests/test_files/survey_results/test_16_report.xlsx', 4,
+                  5, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('./tests/test_files/survey_results/test_16_report.xlsx')
 
 def test_group_size_not_possible():
     '''

@@ -25,16 +25,17 @@ class Grouper1:
     num_groups: int
     console_printer: printer.GroupingConsolePrinter
 
-    def __init__(self, survey_data: list[models.SurveyRecord], config_data: models.Configuration, num_groups: int):
+    def __init__(self, survey_data: list[models.SurveyRecord], config_data: models.Configuration,
+                 num_groups: int, console_printer: printer.GroupingConsolePrinter):
         self.survey_data = survey_data
         self.config_data = config_data
         self.groups = []
         self.best_solution_found = []
         self.best_solution_score = -1
         self.num_groups = num_groups
-        self.console_printer = printer.GroupingConsolePrinter()
+        self.console_printer = console_printer
 
-    def create_groups(self) -> list[models.GroupRecord]:
+    def create_groups(self) -> object:
         '''
         Method for grouping students via a constructive, heuristic approach with local
             backtracking, as follows:
@@ -92,7 +93,7 @@ class Grouper1:
         # Clear any final print statement in preparation for it to be overwritten
         self.console_printer.print("")
 
-        return self.best_solution_found
+        return self
 
     def __start_grouping(self, grouping_pass: int, num_groups: int):
         '''
@@ -469,6 +470,7 @@ class Grouper1:
         #   progress is being made (student_swapped):
         # Continue to attempt to find improvement swaps.
         while (loop_count < max((self.config_data["grouping_passes"]*10), 100) and student_swapped):
+
             loop_count += 1
             self.console_printer.print("Preferred Pairings & Availability Improvement " +
                                        str(loop_count))

@@ -15,7 +15,7 @@ class Grouper2:
     class with operations that perform an algorithm to group students
     '''
 
-    def __init__(self, students, config, group_count: int) -> None:
+    def __init__(self, students, config, group_count: int, console_printer: printer.GroupingConsolePrinter) -> None:
         self.students: list[models.SurveyRecord] = copy.deepcopy(students)
         self.bad_students: list[models.SurveyRecord] = []
         self.groups: list[models.GroupRecord] = []
@@ -28,7 +28,7 @@ class Grouper2:
         self.num_students: int = len(self.students)
         for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
-        self.console_printer: printer.GroupingConsolePrinter = printer.GroupingConsolePrinter()
+        self.console_printer: printer.GroupingConsolePrinter = console_printer
 
     def group_students(self) -> list[models.GroupRecord]:
         """
@@ -158,7 +158,7 @@ class Grouper2:
                 if student:
                     group.members.append(student)
                     break
-            
+
             if len(group.members) < self.target_group_size-self.target_group_margin_lower:
                 # if we make it to this, we are ignoring the students "locked" and allowing them to be removed from the group to balance sizes
                 for other_group in groups_with_enough_mems:

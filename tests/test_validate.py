@@ -1,7 +1,7 @@
 from app.group import validate
 from app.data import load
 from app import config, models, core
-from app.grouping import grouper_1
+from app.grouping import grouper_1, printer
 
 
 def test_user_availability():
@@ -1070,18 +1070,21 @@ def test_all_users_are_grouped():
     # get the number of groups and create a list of groups
     num_groups = core.get_min_max_num_groups(
         surveys_result.records, config_data["target_group_size"], config_data["target_plus_one_allowed"], config_data["target_minus_one_allowed"])[0]
-    grouper = grouper_1.Grouper1(surveys_result.records, config_data, num_groups)
-    groupings = grouper.create_groups()
+    grouper = grouper_1.Grouper1(
+        surveys_result.records, config_data, num_groups, printer.GroupingConsolePrinter())
+    grouper.create_groups()
 
     # verify that all users have been grouped
-    ungrouped = validate.verify_all_users_grouped(surveys_result.records, groupings)
+    ungrouped = validate.verify_all_users_grouped(
+        surveys_result.records, grouper.best_solution_found)
 
     assert len(ungrouped) == 0
 
     # remove a users from one of the groups and test again
-    groupings[0].members.pop()
+    grouper.best_solution_found[0].members.pop()
 
-    ungrouped = validate.verify_all_users_grouped(surveys_result.records, groupings)
+    ungrouped = validate.verify_all_users_grouped(
+        surveys_result.records, grouper.best_solution_found)
 
     assert len(ungrouped) == 1
 
@@ -1173,7 +1176,9 @@ def test_groups_meet_size_constraint():
     groups.append(group_1)
     groups.append(group_2)
 
-    assert validate.groups_meet_size_constraint(groups, 3, False, False) == True
+    assert validate.groups_meet_size_constraint(
+        groups, 3, False, False) == True
+
 
 def test_groups_meet_size_constraint_2():
     '''
@@ -1224,4 +1229,5 @@ def test_groups_meet_size_constraint_2():
     groups_2.append(group_3)
     groups_2.append(group_4)
 
-    assert validate.groups_meet_size_constraint(groups_2, 3, True, False) == True
+    assert validate.groups_meet_size_constraint(
+        groups_2, 3, True, False) == True

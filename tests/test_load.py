@@ -1251,27 +1251,26 @@ def test_read_roster():
     students = load.read_roster("./tests/test_files/example_roster.csv")
 
     assert len(students) == 20
-    students[0] = "asurite1"
-    students[1] = "asurite2"
-    students[2] = "asurite3"
-    students[3] = "asurite4"
-    students[4] = "asurite5"
-    students[5] = "asurite6"
-    students[6] = "asurite7"
-    students[7] = "asurite8"
-    students[8] = "asurite9"
-    students[9] = "asurite10"
-    students[10] = "asurite11"
-    students[11] = "asurite12"
-    students[12] = "asurite13"
-    students[13] = "asurite14"
-    students[14] = "asurite15"
-    students[15] = "asurite16"
-    students[16] = "asurite17"
-    students[17] = "asurite18"
-    students[18] = "asurite19"
-    students[19] = "asurite20"
-
+    assert students[0] == "asurite1"
+    assert students[1] == "asurite2"
+    assert students[2] == "asurite3"
+    assert students[3] == "asurite4"
+    assert students[4] == "asurite5"
+    assert students[5] == "asurite6"
+    assert students[6] == "asurite7"
+    assert students[7] == "asurite8"
+    assert students[8] == "asurite9"
+    assert students[9] == "asurite10"
+    assert students[10] == "asurite11"
+    assert students[11] == "asurite12"
+    assert students[12] == "asurite13"
+    assert students[13] == "asurite14"
+    assert students[14] == "asurite15"
+    assert students[15] == "asurite16"
+    assert students[16] == "asurite17"
+    assert students[17] == "asurite18"
+    assert students[18] == "asurite19"
+    assert students[19] == "asurite20"
 
 def test_read_report():
     '''
@@ -1316,9 +1315,8 @@ def test_read_report():
             if group.group_id in expected_groups:
                 expected_group = expected_groups[group.group_id]
                 for stud_idx, student in enumerate(group.members):
-                    expected_student = expected_group[stud_idx]
                     # Each member of the group is as expected
-                    assert student.student_id == expected_student
+                    assert student.student_id in expected_group
             else:
                 assert False  # group_id was not found/read in properly
 

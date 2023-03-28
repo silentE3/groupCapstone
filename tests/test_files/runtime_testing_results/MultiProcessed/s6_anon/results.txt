@@ -1,0 +1,28 @@
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>time_grouping.cmd S6_Anon.csv config_s6.json
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>git branch --show-current
+TSK#274-Benchmarking
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 14:52:19.24
+14:52:19.24
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>python grouper.py group S6_Anon.csv -c config_s6.json
+
+student 'asurite12' did not provide any availability
+student 'asurite28' did not provide any availability
+student 'asurite29' did not provide any availability
+student 'asurite42' did not provide any availability
+student 'asurite51' did not provide any availability
+student 'asurite58' did not provide any availability
+student 'asurite77' did not provide any availability
+student 'asurite81' did not provide any availability
+student 'asurite92' did not provide any availability
+student 'asurite100' did not provide any availability
+student 'asurite123' did not provide any availability
+student 'asurite124' did not provide any availability
+grouping students from S6_Anon.csv
+Writing report to: S6_Anon_report.xlsx
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 15:00:52.64
+15:00:52.64
