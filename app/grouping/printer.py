@@ -3,20 +3,15 @@ This module contains a class for maintaining clean console output when writing (
     a single console line continually during the grouping process.
 '''
 
-from threading import Lock
-
 
 class GroupingConsolePrinter:
     '''
        Class for maintaining clean console output when  writing (overwriting) a
            single line continually during the grouping process.
        '''
-    prev_line_length: int
-    lock: Lock
 
     def __init__(self):
         self.prev_line_length = 0
-        self.lock = Lock()
 
     def print(self, text: str):
         '''
@@ -25,8 +20,9 @@ class GroupingConsolePrinter:
         with a carriage return rather than new line (in preparation for the line
         to be subsequently overwritten).
         '''
-        with self.lock:
-            new_line_length: int = max(len(text), self.prev_line_length)
-            text = text.ljust(new_line_length)
-            self.prev_line_length = new_line_length
-            print(text, end='\r', flush=True)
+        input_text_length: int = len(text)
+        new_line_length: int = max(
+            input_text_length, self.prev_line_length)
+        text = text.ljust(new_line_length)
+        self.prev_line_length = input_text_length
+        print(text, end='\r', flush=True)
