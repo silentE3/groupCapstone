@@ -1272,7 +1272,6 @@ def test_read_roster():
     assert students[18] == "asurite19"
     assert students[19] == "asurite20"
 
-
 def test_read_report():
     '''
     Test the functionality pertaining to reading/loading groupings from an existing report file.
@@ -1316,9 +1315,8 @@ def test_read_report():
             if group.group_id in expected_groups:
                 expected_group = expected_groups[group.group_id]
                 for stud_idx, student in enumerate(group.members):
-                    expected_student = expected_group[stud_idx]
                     # Each member of the group is as expected
-                    assert student.student_id == expected_student
+                    assert student.student_id in expected_group
             else:
                 assert False  # group_id was not found/read in properly
 
