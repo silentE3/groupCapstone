@@ -53,7 +53,7 @@ def set_freeze_panes(xlsx_writer: xlsx.XLSXWriter, index: int):
     worksheet.freeze_panes(0,2)
     
     worksheet = worksheets.get('group_report_' + str(index + 1))
-    worksheet.freeze_panes(0,2)
+    worksheet.freeze_panes(0,1)
 
 
 def get_user_availability(user: models.SurveyRecord):
