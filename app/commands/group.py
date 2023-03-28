@@ -6,6 +6,7 @@ from pathlib import Path
 from concurrent.futures import as_completed, wait
 from multiprocessing import synchronize, Event
 from multiprocessing.managers import BaseManager
+from time import sleep
 from pebble import ProcessPool, ProcessFuture
 import click
 from app import config, core, models
@@ -122,6 +123,10 @@ def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Conf
             except KeyboardInterrupt as exc:
                 click.echo('\nCancelling grouping...')
                 grouping_cancel_event.set()
+
+                sleep(1)
+                for future in futures:
+                    future.cancel()
 
                 raise exc
 
