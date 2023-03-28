@@ -12,6 +12,7 @@ from openpyxl.worksheet import worksheet
 from app.file import xlsx
 import xlsxwriter
 import random
+import openpyxl
 
 runner = CliRunner()
 
@@ -216,6 +217,30 @@ def test_colored_columns():
     os.remove("Random.xlsx")
 
 
+def test_freeze_columns_2():
+    '''
+    Checks if the first two columns in a sheet is frozen
+    '''
+    response = runner.invoke(report.report, [
+        './tests/test_files/dev_data/output.csv',
+        './tests/test_files/dev_data/dataset-dev.csv',
+        '-c', './tests/test_files/dev_data/config-dev.json',
+        '-r' 'test_report_for_frozen_columns.xlsx'])
+    assert response.exit_code == 0
+
+    assert exists("test_report_for_frozen_columns.xlsx")
+
+    book = load_workbook(
+        "test_report_for_frozen_columns.xlsx")
+    assert 'config' in list(book.sheetnames)
+    assert 'individual_report_1' in list(book.sheetnames)
+    worksheet = book['individual_report_1']
+
+    assert worksheet.freeze_panes == 'C1'
+
+    os.remove("test_report_for_frozen_columns.xlsx")
+
+
 def test_report_for_formatted_columns():
     '''
     Checks the generated report for columns with formatted widths rather than the default
@@ -234,20 +259,26 @@ def test_report_for_formatted_columns():
         "test_report_for_correctness.xlsx")
     assert 'config' in list(book.sheetnames)
     assert 'individual_report_1' in list(book.sheetnames)
-    
+
     individual_report_1: worksheet.Worksheet = book['individual_report_1']
     individual_report_2: worksheet.Worksheet = book['individual_report_1']
     group_report_1: worksheet.Worksheet = book['group_report_1']
-    
+
     # check the width of a sampling of the columns and ensure they aren't the default. Kind of a hacky way to check but it should work
-    assert not math.isclose(individual_report_1.column_dimensions['A'].width, 13.0)
-    assert not math.isclose(individual_report_1.column_dimensions['B'].width, 13.0)
-    assert not math.isclose(individual_report_1.column_dimensions['C'].width, 13.0)
-    
-    assert not math.isclose(individual_report_2.column_dimensions['A'].width, 13.0)
-    assert not math.isclose(individual_report_2.column_dimensions['B'].width, 13.0)
-    assert not math.isclose(individual_report_2.column_dimensions['C'].width, 13.0)
-    
+    assert not math.isclose(
+        individual_report_1.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(
+        individual_report_1.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(
+        individual_report_1.column_dimensions['C'].width, 13.0)
+
+    assert not math.isclose(
+        individual_report_2.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(
+        individual_report_2.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(
+        individual_report_2.column_dimensions['C'].width, 13.0)
+
     assert not math.isclose(group_report_1.column_dimensions['A'].width, 13.0)
     assert not math.isclose(group_report_1.column_dimensions['B'].width, 13.0)
     assert not math.isclose(group_report_1.column_dimensions['C'].width, 13.0)
