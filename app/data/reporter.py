@@ -25,19 +25,35 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
             solution, availability_map)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
+
         xlsx_writer.write_sheet(
             f'individual_report_{str(index + 1)}', formatted_data).autofit()
         xlsx_writer.write_sheet(
             f'group_report_{str(index + 1)}', group_formatted_report).autofit()
         xlsx_writer.write_sheet(
             f'overall_report_{str(index + 1)}', overall_formatted_report).autofit()
+        
+        set_freeze_panes(xlsx_writer, index)
+    config_sheet = formatter.format_config_report()
+        
 
     config_sheet = formatter.format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
     xlsx_writer.write_sheet(
         'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
-
+    
     xlsx_writer.save()
+
+def set_freeze_panes(xlsx_writer: xlsx.XLSXWriter, index: int):
+    '''
+    This method sets up the freeze frames for the reports.
+    '''
+    worksheets = xlsx_writer.sheets
+    worksheet = worksheets.get('individual_report_' + str(index + 1))
+    worksheet.freeze_panes(0,2)
+    
+    worksheet = worksheets.get('group_report_' + str(index + 1))
+    worksheet.freeze_panes(0,1)
 
 
 def get_user_availability(user: models.SurveyRecord):
