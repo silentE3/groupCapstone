@@ -3,6 +3,7 @@ from click.testing import CliRunner
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
+from tests.test_utils.helper_functions import verify_all_students
 from os.path import exists
 
 runner = CliRunner()
@@ -196,3 +197,22 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
+
+
+def test_complete_solution():
+    '''
+    This test is to verify that when a surveyfile containing 100 students is provided to the program, with a target
+    group size of 5 with a tolarance of +1, the program will produce a grouping solution with all 100 students grouped
+    '''
+    complete_solution = runner.invoke(group.group, ['./tests/test_files/survey_results/Example_Survey_Results_100.csv',
+                                                   '-c', './tests/test_files/configs/config_100.json'])
+    expected_min_num_groups = 17
+    expected_max_num_groups = 20
+    expected_students = [(lambda x: f"asurite{x}")(x) for x in range(1, 101)]
+
+    assert complete_solution.exit_code == 0
+
+    verify_all_students('./tests/test_files/survey_results/Example_Survey_Results_100_report.xlsx', expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+
+    os.remove('./tests/test_files/survey_results/Example_Survey_Results_100_report.xlsx')
