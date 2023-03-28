@@ -1,6 +1,5 @@
 import os
 from click.testing import CliRunner
-import click
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
@@ -16,26 +15,28 @@ runner = CliRunner()
 
 def test_group_1():
     '''
-    Test of grouping 6 students with a target group size of 2 (divides evenly).
+    Test of grouping 12 students with a target group size of 4 (divides evenly), without any +/- margin. 
+
+    T-01
     '''
 
     response = runner.invoke(group.group, [
-        './tests/test_files/survey_results/Example_Survey_Results_2.csv', '--configfile', './tests/test_files/configs/config_1.json'])
+        './tests/test_files/survey_results/test_group_1.csv', '--configfile', './tests/test_files/configs/test_group_1_config.json'])
     assert response.exit_code == 0
 
-    expected_min_num_groups = math.ceil(6/(2+1))
-    expected_max_num_groups = 6//(2-1)
+    expected_min_num_groups = 3
+    expected_max_num_groups = 3
     expected_students = ['jsmith1', 'jdoe2',
-                         'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6']
+                         'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6', 'charles7', 'carl8', 'elee9', 'cred10', 'bobbylee11', 'jrogan12']
 
-    verify_groups('./tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx', expected_min_num_groups,
+    verify_groups('./tests/test_files/survey_results/test_group_1_report.xlsx', expected_min_num_groups,
                   expected_max_num_groups, expected_students)
 
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
     os.remove(
-        './tests/test_files/survey_results/Example_Survey_Results_2_report.xlsx')
+        './tests/test_files/survey_results/test_group_1_report.xlsx')
 
 
 def test_group_2():

@@ -1,0 +1,16 @@
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>time_grouping.cmd dataset-300_students.csv config-300_students.json
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>git branch --show-current
+TSK#274-Benchmarking
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 15:45:18.18
+15:45:18.18
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>python grouper.py group dataset-300_students.csv -c config-300_students.json
+
+grouping students from dataset-300_students.csv
+Writing report to: dataset-300_students_report.xlsx
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 18:13:39.48
+18:13:39.48

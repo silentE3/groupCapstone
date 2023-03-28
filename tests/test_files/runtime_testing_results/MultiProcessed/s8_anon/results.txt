@@ -1,0 +1,18 @@
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>time_grouping.cmd S8_Anon.csv config_s8.json
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>git branch --show-current
+TSK#274-Benchmarking
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 14:47:09.83
+14:47:09.83
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>python grouper.py group S8_Anon.csv -c config_s8.json
+
+grouping students from S8_Anon.csv
+Writing report to: S8_Anon_report.xlsx
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 14:47:37.56
+14:47:37.56
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>

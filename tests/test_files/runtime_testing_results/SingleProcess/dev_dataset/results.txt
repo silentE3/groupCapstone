@@ -1,0 +1,18 @@
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>time_grouping.cmd dataset-dev.csv config-dev.json
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>git branch --show-current
+Main_Sprint9_Start
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 18:31:27.62
+18:31:27.62
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>python grouper.py group dataset-dev.csv -c config-dev.json
+
+grouping students from dataset-dev.csv
+Writing report to: dataset-dev_report.xlsx
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>ECHO 18:31:44.12
+18:31:44.12
+
+(team-58-CxcMSUKo) C:\Users\kenzi\Documents\ASU_Courses\SER_401\PROJECT\team-58>

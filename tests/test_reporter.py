@@ -261,7 +261,7 @@ def test_are_time_slots_days():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-        config_data, formatters={'green_bg': green_bg})
+        config_data, cell_formatters={'green_bg': green_bg})
 
     assert formatter._ReportFormatter__are_time_slots_days(
         surveys_result)  # type: ignore
@@ -278,7 +278,7 @@ def test_generate_availability_slot_map():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-        config_data, formatters={'green_bg': green_bg})
+        config_data, cell_formatters={'green_bg': green_bg})
     slot_map = formatter._ReportFormatter__generate_availability_slot_map(
         surveys_result)   # type: ignore
     expected_slot_map: dict[str, list[str]] = {'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday',
@@ -297,7 +297,7 @@ def test_generate_user_availability_list():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-        config_data, formatters={'green_bg': green_bg})
+        config_data, cell_formatters={'green_bg': green_bg})
     slot_map = formatter._ReportFormatter__generate_availability_slot_map(
         surveys_result)   # type: ignore
     availability_map = models.AvailabilityMap(slot_map, [])
