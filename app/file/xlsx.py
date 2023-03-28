@@ -12,7 +12,7 @@ class Cell:
     Cell describes an xlsx cell. It also allows a format to be applied.
     '''
     value: Optional[str | int | bool | float] = ''
-    
+
     '''
     specifies the cells individual format. 
     This can be any format that has been added to the workbook.
@@ -35,7 +35,7 @@ class XLSXWriter():
         adds a new format to the workbook. 
         This allows users to specify certain formats and 
         they will be added to the formatters dict for string based lookup.
-        
+
         Only formats that have been added to the workbook can be applied to cells
         '''
         xlsx_format = self.__workbook.add_format(props)
@@ -60,6 +60,8 @@ class XLSXWriter():
             for j, field in enumerate(row):
                 self.sheets[sheet].write(
                     i, j, field.value, field.cell_format)
+                
+        return self.sheets[sheet]
 
     def save(self):
         '''
