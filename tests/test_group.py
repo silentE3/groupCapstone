@@ -115,12 +115,13 @@ def test_group_quality_3():
     assert response.exit_code == 0
 
     expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
-                         'ulexington4', 'usaratoga5', 'jakagi6', 'jkaga7', 'jzuikaku8',
-                         'jshokaku9', 'uenterprise2_2', 'uhornet3_2', 'uyorktown1_2'
-                         'ulexington4_2', 'usaratoga5_2', 'jakagi6_2', 'jkaga7_2', 'jzuikaku8_2',
-                         'jshokaku9_2', 'jhiryu10']
-    verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 4,
-                  3, expected_students)
+                         'ulexington4', 'usaratoga5', 'jakagi6',
+                         'jkaga7', 'jzuikaku8', 'jshokaku9',
+                         'uenterprise2_2', 'uhornet3_2', 'uyorktown1_2',
+                         'ulexington4_2', 'usaratoga5_2', 'jakagi6_2',
+                         'jkaga7_2', 'jzuikaku8_2', 'jshokaku9_2', 'jhiryu10']
+    verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 3,
+                  4, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
