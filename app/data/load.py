@@ -348,6 +348,8 @@ def read_report_groups(report_filename: str, survey_data: list[models.SurveyReco
                 # first row, write headers and determine group id and student id column numbers
                 writer.writerow([group_id_str, student_id_str])
                 for cell_idx, cell in enumerate(row):
+                    if cell.value is None:
+                        continue
                     if str.lower(cell.value) == str.lower(group_id_str):
                         group_id_col = cell_idx
                     elif str.lower(cell.value) == str.lower(student_id_str):
