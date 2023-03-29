@@ -105,6 +105,27 @@ def test_group_quality_2():
 
     os.remove('./tests/test_files/survey_results/test_16_report.xlsx')
 
+def test_group_quality_3():
+    '''
+    Test of grouping 19 students with a target group size of 5 and a tolerance of -1.
+    [group sizes of 4 or 5]
+    '''
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_19.csv', '--configfile', './tests/test_files/configs/config_19.json', '--reportfile', './tests/test_files/survey_results/test_19_report.xlsx'])
+    assert response.exit_code == 0
+
+    expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
+                         'ulexington4', 'usaratoga5', 'jakagi6', 'jkaga7', 'jzuikaku8',
+                         'jshokaku9', 'uenterprise2_2', 'uhornet3_2', 'uyorktown1_2'
+                         'ulexington4_2', 'usaratoga5_2', 'jakagi6_2', 'jkaga7_2', 'jzuikaku8_2',
+                         'jshokaku9_2', 'jhiryu10']
+    verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 4,
+                  4, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('./tests/test_files/survey_results/test_16_report.xlsx')
+
 def test_group_size_not_possible():
     '''
     Test of grouping eight students with a target group size of 6 (does not divide evenly and
@@ -198,11 +219,3 @@ def test_alt_command_args_1():
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
 
 
-def test_group_quality_3():
-    '''
-    Test of grouping 19 students with a target group size of 5 and a tolerance of -1.
-    [group sizes of 4 or 5]
-    '''
-    response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_19.csv', '--configfile', './tests/test_files/configs/config_19.json', '--reportfile', './tests/test_files/survey_results/test_19_report.xlsx'])
-    assert response.exit_code == 0
