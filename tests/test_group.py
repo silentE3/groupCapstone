@@ -120,11 +120,11 @@ def test_group_quality_3():
                          'ulexington4_2', 'usaratoga5_2', 'jakagi6_2', 'jkaga7_2', 'jzuikaku8_2',
                          'jshokaku9_2', 'jhiryu10']
     verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 4,
-                  4, expected_students)
+                  3, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" not in response.output
 
-    os.remove('./tests/test_files/survey_results/test_16_report.xlsx')
+    os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
 
 def test_group_size_not_possible():
     '''
