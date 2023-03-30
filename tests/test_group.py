@@ -84,9 +84,14 @@ def test_group_3():
 
     os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
 
+
 def test_group_quality_4():
     '''
-    Test of grouping 18 students with a target group size of 5 +/- 1.
+    Test of grouping 18 students with a target group size of 5 +/- 1 (testing +/-
+     1 variability here).
+
+    The expected outcome is that the tool provides solutions consisting
+     of groups whose sizes all fall within the range [4, 6].
     '''
 
     response = runner.invoke(group.group, [
@@ -104,7 +109,8 @@ def test_group_quality_4():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_18_report.xlsx')
-    
+
+
 def test_group_size_not_possible():
     '''
     Test of grouping eight students with a target group size of 6 (does not divide evenly and
