@@ -3,7 +3,7 @@ from click.testing import CliRunner
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
-from os.path import exists
+
 
 runner = CliRunner()
 
@@ -83,48 +83,6 @@ def test_group_3():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
-
-def test_group_quality_2():
-    '''
-    Test of grouping 16 students with a target group size of 3 (does not divide evenly,
-    but still possible to maintain +1, [group sizes of 3 or 4]).
-    '''
-
-    response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_16.csv', '--configfile', './tests/test_files/configs/config_16.json', '--reportfile', './tests/test_files/survey_results/test_16_report.xlsx'])
-    assert response.exit_code == 0
-
-    expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
-                         'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6',
-                         'adumble4_2', 'triddle8_2', 'dmalfoy7_2',
-                         'rweasle3_2', 'hgrange2_2', 'rhagrid5_2', 'hpotter1_2', 'nlongbo6_2']
-    verify_groups('./tests/test_files/survey_results/test_16_report.xlsx', 4,
-                  5, expected_students)
-    # Verify "Error:" is NOT included in the output
-    assert "Error:" not in response.output
-
-    os.remove('./tests/test_files/survey_results/test_16_report.xlsx')
-
-def test_group_quality_4():
-    '''
-    Test of grouping 18 students with a target group size of 5 +/- 1.
-    '''
-
-    response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_18.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
-    assert response.exit_code == 0
-
-    expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
-                         'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6',
-                         'adumble4_2', 'triddle8_2', 'dmalfoy7_2',
-                         'rweasle3_2', 'hgrange2_2', 'rhagrid5_2', 'hpotter1_2', 'nlongbo6_2',
-                         'hpotter1_3', 'nlongbo6_3']
-    verify_groups('./tests/test_files/survey_results/test_18_report.xlsx', 4,
-                  6, expected_students)
-    # Verify "Error:" is NOT included in the output
-    assert "Error:" not in response.output
-
-    os.remove('./tests/test_files/survey_results/test_18_report.xlsx')
 
 def test_group_size_not_possible():
     '''

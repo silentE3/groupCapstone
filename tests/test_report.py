@@ -1,4 +1,5 @@
 import datetime
+import math
 import os
 import shutil
 from click.testing import CliRunner
@@ -7,9 +8,11 @@ from app import config, models
 from app.commands import report
 from os.path import exists
 from openpyxl import load_workbook, workbook
+from openpyxl.worksheet import worksheet
 from app.file import xlsx
 import xlsxwriter
 import random
+import openpyxl
 
 runner = CliRunner()
 
@@ -169,7 +172,7 @@ def test_availability_map():
     xlsx_writer = xlsx.XLSXWriter()
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
     formatter = reporter.ReportFormatter(
-        config_data, formatters={'green_bg': green_bg})
+        config_data, cell_formatters={'green_bg': green_bg})
     expected_map: models.AvailabilityMap = models.AvailabilityMap(availability_slots={'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]': ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']},
                                                                   group_availability=[models.GroupAvailabilityMap(group_id='1', users={'jsmith1': [False, False, False, True, True, False, True, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'jschmo4': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'bwillia5': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'jdoe2': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False], 'mmuster3': [False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, False, True, True, False, False, False, False, False, False, True, False, False, False, False, False, False, False, True, False, False]})])
     availability_map = formatter.generate_availability_map(data, survey_data)
@@ -212,3 +215,71 @@ def test_colored_columns():
     assert cell6color != "FF00FF00"
 
     os.remove("Random.xlsx")
+
+
+def test_freeze_columns_2():
+    '''
+    Checks if the first two columns in a sheet is frozen
+    '''
+    response = runner.invoke(report.report, [
+        './tests/test_files/dev_data/output.csv',
+        './tests/test_files/dev_data/dataset-dev.csv',
+        '-c', './tests/test_files/dev_data/config-dev.json',
+        '-r' 'test_report_for_frozen_columns.xlsx'])
+    assert response.exit_code == 0
+
+    assert exists("test_report_for_frozen_columns.xlsx")
+
+    book = load_workbook(
+        "test_report_for_frozen_columns.xlsx")
+    assert 'config' in list(book.sheetnames)
+    assert 'individual_report_1' in list(book.sheetnames)
+    worksheet = book['individual_report_1']
+
+    assert worksheet.freeze_panes == 'C1'
+
+    os.remove("test_report_for_frozen_columns.xlsx")
+
+
+def test_report_for_formatted_columns():
+    '''
+    Checks the generated report for columns with formatted widths rather than the default
+    '''
+    response = runner.invoke(report.report, [
+                             './tests/test_files/dev_data/output.csv',
+                             './tests/test_files/dev_data/dataset-dev.csv',
+                             '-c', './tests/test_files/dev_data/config-dev.json',
+                             '-r' 'test_report_for_correctness.xlsx'])
+    assert response.exit_code == 0
+
+    assert exists(
+        "test_report_for_correctness.xlsx")
+
+    book: workbook.Workbook = load_workbook(
+        "test_report_for_correctness.xlsx")
+    assert 'config' in list(book.sheetnames)
+    assert 'individual_report_1' in list(book.sheetnames)
+
+    individual_report_1: worksheet.Worksheet = book['individual_report_1']
+    individual_report_2: worksheet.Worksheet = book['individual_report_1']
+    group_report_1: worksheet.Worksheet = book['group_report_1']
+
+    # check the width of a sampling of the columns and ensure they aren't the default. Kind of a hacky way to check but it should work
+    assert not math.isclose(
+        individual_report_1.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(
+        individual_report_1.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(
+        individual_report_1.column_dimensions['C'].width, 13.0)
+
+    assert not math.isclose(
+        individual_report_2.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(
+        individual_report_2.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(
+        individual_report_2.column_dimensions['C'].width, 13.0)
+
+    assert not math.isclose(group_report_1.column_dimensions['A'].width, 13.0)
+    assert not math.isclose(group_report_1.column_dimensions['B'].width, 13.0)
+    assert not math.isclose(group_report_1.column_dimensions['C'].width, 13.0)
+    os.remove("test_report_for_correctness.xlsx")
