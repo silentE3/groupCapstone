@@ -84,6 +84,7 @@ def test_group_3():
 
     os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
 
+
 def test_group_size_not_possible():
     '''
     Test of grouping eight students with a target group size of 6 (does not divide evenly and
@@ -175,3 +176,5 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
+
+
