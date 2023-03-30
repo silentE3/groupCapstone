@@ -107,12 +107,11 @@ def test_group_quality_2():
 
 def test_group_quality_4():
     '''
-    Test of grouping 16 students with a target group size of 3 (does not divide evenly,
-    but still possible to maintain +1, [group sizes of 3 or 4]).
+    Test of grouping 18 students with a target group size of 5 +/- 1.
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_16.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
+                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_18.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
     assert response.exit_code == 0
 
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
