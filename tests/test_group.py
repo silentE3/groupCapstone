@@ -3,7 +3,7 @@ from click.testing import CliRunner
 import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
-from os.path import exists
+
 
 runner = CliRunner()
 
