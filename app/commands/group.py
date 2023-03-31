@@ -65,12 +65,23 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     # Run grouping algorithms
     click.echo(f'grouping students from {surveyfile}')
 
+    ########################################################################################
+    # NOTE: We're no longer doing this (getting a "true" min and max group size). The sponsor
+    #  has decided that she would prefer it if the algorithms adhere to the target size to
+    #  the extent possible, which means there will only be one "proper" number of groups.
+
     # Determine min and max possible number of groups
-    min_max_num_groups: list[int] = core.get_min_max_num_groups(
-        survey_data.records,
-        config_data["target_group_size"],
-        config_data["target_plus_one_allowed"],
-        config_data["target_minus_one_allowed"])
+    # min_max_num_groups: list[int] = core.get_min_max_num_groups(
+    #    survey_data.records,
+    #    config_data["target_group_size"],
+    #    config_data["target_plus_one_allowed"],
+    #    config_data["target_minus_one_allowed"])
+    ########################################################################################
+    num_groups: int = core.get_num_groups(survey_data.records,
+                                          config_data["target_group_size"],
+                                          config_data["target_plus_one_allowed"],
+                                          config_data["target_minus_one_allowed"])
+    min_max_num_groups: list[int] = [num_groups, num_groups]
 
     ########## Run both grouping algorithms in parallel via multiprocessing ##########
     best_solutions: list[list[models.GroupRecord]] = __run_grouping_algs(
