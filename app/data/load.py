@@ -385,3 +385,5 @@ def read_report_survey_data(report_filename: str, field_mappings: models.SurveyF
     # load and return the survey data from the io buffer
     text_buffer.seek(0)
     return read_survey_from_io(field_mappings, text_buffer)
+
+def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRecord]):
