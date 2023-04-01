@@ -55,19 +55,16 @@ class Grouper2:
 
         if self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.STANDARD_GROUPING:
             # do nothing
-            self.console_printer.print(
-                'no survey group method is set to random, so no preparation is needed')
+            self.console_printer.print('no survey group method is set to random, so no preparation is needed')
         elif self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY:
             self.lock_students()
-            students_locked = list(
-                filter(lambda student: student.lock_in_group, self.students))
+            students_locked = list(filter(lambda student: student.lock_in_group, self.students))
             for student in students_locked:
                 if student.lock_in_group:
                     self.add_student_to_next_empty_group(student)
         elif self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.GROUP_TOGETHER:
             self.lock_students()
-            students_locked = list(
-                filter(lambda student: student.lock_in_group, self.students))
+            students_locked = list(filter(lambda student: student.lock_in_group, self.students))
             for student in students_locked:
                 if student.lock_in_group:
                     self.add_student_to_next_group(student)
@@ -113,6 +110,7 @@ class Grouper2:
                 self.console_printer.print(
                     f'balancing group: {group.group_id} with size {len(group.members)}')
                 self.balance_group(group)
+        
 
     def balance_group(self, group: models.GroupRecord):
         '''
@@ -209,27 +207,11 @@ class Grouper2:
         '''
         computes the score of the overall grouping
         '''
-        num_pairings_disliked: int = validate.total_disliked_pairings(
-            self.groups)
-        num_groups_no_avail: int = validate.total_groups_no_availability(
-            self.groups)
-        num_pairings_liked: int = validate.total_liked_pairings(self.groups)
-        num_additional_overlap: int = sum(
-            # subtract one to get "additional"
-            max(validate.availability_overlap_count(group) - 1, 0) for group in self.groups)
-
-        scoring_vars = models.GroupSetData("solution_2",
-                                           self.target_group_size,
-                                           len((self.config["field_mappings"])[
-                                               "preferred_students_field_names"]),
-                                           self.num_students,
-                                           len((self.config["field_mappings"])[
-                                               "availability_field_names"]),
-                                           num_groups_no_avail,
-                                           num_pairings_disliked,
-                                           num_pairings_liked,
-                                           num_additional_overlap)
-        return scoring.score_groups(scoring_vars)
+        total_score = 0
+        for group in self.groups:
+            group_score = score_group(group, self.num_students)
+            total_score += group_score
+        return total_score
 
     def add_student_to_group(self, student: models.SurveyRecord):
         """
@@ -366,14 +348,7 @@ class Grouper2:
         '''
         uses the scoring algorithm to rank the group
         '''
-        scoring_vars = models.GroupSetData(group.group_id,
-                                           self.config["target_group_size"],
-                                           len((self.config["field_mappings"])[
-                                               "preferred_students_field_names"]),
-                                           self.num_students,
-                                           len((self.config["field_mappings"])[
-                                               "availability_field_names"]))
-        return scoring.score_individual_group(group, scoring_vars)
+        return score_group(group, self.num_students)
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
@@ -426,3 +401,20 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
+    
+
+def score_group(group: models.GroupRecord, total_students_count: int):
+    '''
+    scores the group based on the number of liked students, disliked students, and balance
+    '''
+    base_score = 0
+    reqs_met = validate.meets_group_availability_requirement(group) and validate.meets_dislike_requirement(group)
+    if not reqs_met:
+        return -1
+    bonus = validate.total_liked_pairings([group])
+
+    penalty = validate.total_disliked_pairings([group])
+    balance = abs(len(group.members) - 5)  # target balance is 50%
+    balance_weight = max(1, 5 ** 2 / 16)
+    balance_penalty = balance_weight * (balance ** 2)
+    return max(0, base_score + bonus - penalty - balance_penalty)
