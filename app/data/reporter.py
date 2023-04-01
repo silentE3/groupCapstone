@@ -103,7 +103,7 @@ class ReportFormatter():
                 meets_dislike_req: str = str(
                     len(validate.user_dislikes_group(user, group)) == 0)
                 if len(user.disliked_students) == 0:
-                    meets_dislike_req = 'none provided'
+                    meets_dislike_req = 'True'
                 record.append(xlsx.Cell(meets_dislike_req))
                 if self.report_config['show_disliked_students']:
                     record.append(xlsx.Cell(
@@ -122,7 +122,7 @@ class ReportFormatter():
                 meets_preferred_req: str = str(
                     len(user_perfs[user.student_id]) > 0)
                 if len(user.preferred_students) == 0:
-                    meets_preferred_req = "none provided"
+                    meets_preferred_req = "True"
                 record.append(xlsx.Cell(meets_preferred_req))
 
                 if self.report_config['show_preferred_students']:
