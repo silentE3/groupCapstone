@@ -386,4 +386,15 @@ def read_report_survey_data(report_filename: str, field_mappings: models.SurveyF
     text_buffer.seek(0)
     return read_survey_from_io(field_mappings, text_buffer)
 
-def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRecord]):
+def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRecord], roster_filename: str) -> list[models.SurveyRecord]:
+    '''
+    Removes students from the survey if they are not in the roster.
+    '''
+    updated_list : list[models.SurveyRecord]
+    updated_list = []
+    roster_list = read_roster(roster_filename)
+
+    for index, val in enumerate(roster_list, start=1):
+        print(index, val)
+    
+    return updated_list
