@@ -101,8 +101,10 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
             print(
                 f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
+        # remove self from list of disliked
         if student.student_id in student.disliked_students:
             student.disliked_students.remove(student.student_id)
+        # remove self from list of preferred
         if student.student_id in student.preferred_students:
             student.preferred_students.remove(student.student_id)
 
