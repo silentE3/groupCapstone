@@ -3,6 +3,7 @@ import json
 import sys
 from io import TextIOWrapper, StringIO
 from openpyxl import load_workbook
+from app import models
 from app.models import Configuration, NoSurveyGroupMethodConsts
 
 
@@ -101,6 +102,7 @@ def read_report_config(report_filename: str) -> Configuration:
 
 
 def __check_config_validity(config_data: Configuration):
+    validate_field_mappings(config_data['field_mappings'])
     valid_no_survey_group_methods = [NoSurveyGroupMethodConsts.STANDARD_GROUPING,
                                      NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY, NoSurveyGroupMethodConsts.GROUP_TOGETHER]
     if "no_survey_group_method" not in config_data:
@@ -109,5 +111,28 @@ def __check_config_validity(config_data: Configuration):
         print('Invalid configuration selection for "no_survey_group_method".')
         sys.exit(1)
 
+def validate_field_mappings(fields: models.SurveyFieldMapping):
+    '''
+    Validates the field mappings in the configuration data.
+    '''
+    if fields.get('availability_field_names') is None or len(fields.get('availability_field_names')) == 0:
+        raise ValueError(
+            "No availability field names were specified in the configuration file.")
+        
+    if fields.get('disliked_students_field_names') is None or len(fields.get('disliked_students_field_names')) == 0:
+        raise ValueError(
+            "No disliked students field names were specified in the configuration file.")
+    
+    if fields.get('preferred_students_field_names') is None or len(fields.get('preferred_students_field_names')) == 0:
+        raise ValueError(
+            "No preferred students field names were specified in the configuration file.")
+    
+    if fields.get('student_id_field_name') is None:
+        raise ValueError(
+            "No student id field name was specified in the configuration file.")
+    
+    if fields.get('submission_timestamp_field_name') is None:
+        raise ValueError(
+            "No submission timestamp field name was specified in the configuration file.")
 
 CONFIG_DATA = None
