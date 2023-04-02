@@ -283,3 +283,40 @@ def test_report_for_formatted_columns():
     assert not math.isclose(group_report_1.column_dimensions['B'].width, 13.0)
     assert not math.isclose(group_report_1.column_dimensions['C'].width, 13.0)
     os.remove("test_report_for_correctness.xlsx")
+
+def test_report_shows_true_in_meets_preferred_column():
+    '''
+    This test will check to make sure that if a student did not specify any preferred students, the meets preferred
+    column will show true
+    '''
+
+    shutil.copyfile('tests/test_files/reports/dataset_305_report.xlsx', 'tests/test_files/reports/dataset_305_report_temp.xlsx')
+
+    response = runner.invoke(report.update_report, ['tests/test_files/reports/dataset_305_report_temp.xlsx'])
+
+    book = load_workbook('tests/test_files/reports/dataset_305_report_temp.xlsx')
+    worksheet = book['individual_report_1']
+    worksheet2 = book['individual_report_2']
+    assert worksheet['J2'].value == 'True'
+    assert worksheet2['J3'].value == 'True'
+
+    os.remove('tests/test_files/reports/dataset_305_report_temp.xlsx')
+
+
+def test_report_shows_blank_in_meets_disliked_column():
+    '''
+    This test will check to make sure that if a student didn't specify disliked students, the meets disliked requirment
+    column will show true
+    '''
+
+    shutil.copyfile('tests/test_files/reports/dataset_305_report.xlsx', 'tests/test_files/reports/dataset_305_report_temp.xlsx')
+
+    response = runner.invoke(report.update_report, ['tests/test_files/reports/dataset_305_report_temp.xlsx'])
+
+    book = load_workbook('tests/test_files/reports/dataset_305_report_temp.xlsx')
+    worksheet = book['individual_report_1']
+    worksheet2 = book['individual_report_2']
+    assert worksheet['E3'].value == None
+    assert worksheet2['E2'].value == None
+
+    os.remove('tests/test_files/reports/dataset_305_report_temp.xlsx')
