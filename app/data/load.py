@@ -393,8 +393,17 @@ def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRec
     updated_list : list[models.SurveyRecord]
     updated_list = []
     roster_list = read_roster(roster_filename)
-
+    non_roster_ids = []
+    
     for index, val in enumerate(roster_list, start=1):
-        print(index, val)
+        check = False
+        for index2, val2 in enumerate(survey_data, start=1):
+            if val2 == val:
+                check = True
+                break
+
+        if check == False:
+
+            
     
     return updated_list
