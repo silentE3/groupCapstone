@@ -6,9 +6,10 @@ import copy
 import csv
 from io import TextIOWrapper
 from io import StringIO
+import logging
 import re
 import datetime as dt
-from typing import Union
+from typing import Sequence, Union
 from openpyxl import load_workbook
 from app import models
 from app.group import validate
@@ -106,16 +107,16 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     '''
     parses a survey record from a row in the dataset
     '''
-    if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
-        raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(parse_asurite(
-        row[field_mapping['student_id_field_name']]))
+    if row.get(field_mapping['student_id_field_name']) is None or len(row[field_mapping['student_id_field_name']].strip()) == 0:
+        raise ValueError(f"found empty student id field in row: {row}")
+
+    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
         if re.search(r'\S', row[field]):
-            survey.preferred_students.append(
-                parse_asurite(row[field]).lower())
+            survey.preferred_students.append(parse_asurite(row[field]).lower())
+
     survey.preferred_students = list(set(survey.preferred_students))
 
     for field in field_mapping['disliked_students_field_names']:
@@ -194,12 +195,47 @@ def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
     return rows
 
 
+def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields: Sequence[str]):
+    '''
+    Checks that the fields in the survey data file match the field mapping
+    '''
+    valid_headers = True
+    if field_mapping['student_id_field_name'] not in fields:
+        print(__field_map_error_msg(field_mapping['student_id_field_name']))
+        valid_headers = False
+    for field in field_mapping['preferred_students_field_names']:
+        if field not in fields:
+            print("Error: preferred students header '%s' does not exist in the data file. Please check your field_mapping configuration", field)
+            valid_headers = False
+    for field in field_mapping['disliked_students_field_names']:
+        if field not in fields:
+            print("Error: disliked students header '%s' does not exist in the data file. Please check your field_mapping configuration", field)
+            valid_headers = False
+    for field in field_mapping['availability_field_names']:
+        if field not in fields:
+            print("Error: availability header %s does not exist in the data file. Please check your field_mapping configuration", field)
+            valid_headers = False
+
+    if field_mapping.get('submission_timestamp_field_name') and field_mapping['submission_timestamp_field_name'] not in fields:
+        print("Error: submission timestamp field name '%s' does not exist in the data file. Please check your field_mapping configuration",
+                      field_mapping['submission_timestamp_field_name'])
+        valid_headers = False
+
+    if valid_headers is False:
+        raise ValueError("Invalid or missing field headers in data file")
+
+def __field_map_error_msg(field: str):
+    return f"Error: student id header '{field}' does not exist in the data file. Please check your field_mapping configuration"
+
 def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:
     '''
     reads in a csv file using a csv dictreader and maps the fields back to the survey records
     '''
     reader = csv.DictReader(data_file)
     surveys: list[models.SurveyRecord] = []
+
+    check_survey_field_headers(field_mapping, reader.fieldnames)
+
     for row in reader:
         survey = parse_survey_record(field_mapping, row)
 

@@ -55,8 +55,6 @@ def score_groups(variables: models.GroupSetData) -> float:
             - A solution with the same number of disliked pairings AND groups with an overlapping
                 time slot AND preferred pairings as another, but more “additional overlapping time
                 slots” will always score better (higher).
-
-
     '''
     total_score: float = 0
 

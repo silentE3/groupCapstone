@@ -367,23 +367,20 @@ class ReportFormatter():
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
 
-        if self.report_config['show_scores']:
-            scoring_vars = models.GroupSetData("solution_1",
-                                               self.data_config["target_group_size"],
-                                               len((self.data_config["field_mappings"])[
-                                                   "preferred_students_field_names"]),
-                                               sum(len(group.members)
-                                                   for group in groups),
-                                               len((self.data_config["field_mappings"])[
-                                                   "availability_field_names"]),
-                                               num_groups_no_avail,
-                                               num_disliked_pairings,
-                                               num_liked_pairings,
-                                               num_additional_overlap)
-            record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
-            record.append(xlsx.Cell(
-                round(scoring.standard_dev_groups(groups, scoring_vars), 3)))
-
+        scoring_vars = models.GroupSetData("solution_1",
+                                           self.data_config["target_group_size"],
+                                           len((self.data_config["field_mappings"])[
+                                               "preferred_students_field_names"]),
+                                           sum(len(group.members)
+                                               for group in groups),
+                                           len((self.data_config["field_mappings"])[
+                                               "availability_field_names"]),
+                                           num_groups_no_avail,
+                                           num_disliked_pairings,
+                                           num_liked_pairings,
+                                           num_additional_overlap)
+        record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
+        record.append(xlsx.Cell(round(scoring.standard_dev_groups(groups, scoring_vars), 3)))
         records.append(record)
 
         return records

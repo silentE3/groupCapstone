@@ -1,5 +1,6 @@
 '''config holds the logic to read in a configuration object'''
 import json
+import logging
 import sys
 from io import TextIOWrapper, StringIO
 from openpyxl import load_workbook
@@ -63,7 +64,7 @@ def read_report_config(report_filename: str) -> Configuration:
         for row_num, cell in enumerate(col):
             if row_num == 0:
                 # The header of the column (first row) contains the item's key
-                config_item_key = cell.value
+                config_item_key = str(cell.value)
             elif cell.value is None:
                 continue
             else:
@@ -111,28 +112,26 @@ def __check_config_validity(config_data: Configuration):
         print('Invalid configuration selection for "no_survey_group_method".')
         sys.exit(1)
 
+
 def validate_field_mappings(fields: models.SurveyFieldMapping):
     '''
-    Validates the field mappings in the configuration data.
+    Validates the field mappings specification in the configuration data.
     '''
     if fields.get('availability_field_names') is None or len(fields.get('availability_field_names')) == 0:
-        raise ValueError(
-            "No availability field names were specified in the configuration file.")
-        
+        logging.error(
+            'No availability field names were specified in the configuration file. Please provide a value for "availability_field_names".')
+
     if fields.get('disliked_students_field_names') is None or len(fields.get('disliked_students_field_names')) == 0:
-        raise ValueError(
-            "No disliked students field names were specified in the configuration file.")
-    
+        logging.error(
+            'No disliked students field names were specified in the configuration file. Please provide a value for "disliked_students_field_names".')
+
     if fields.get('preferred_students_field_names') is None or len(fields.get('preferred_students_field_names')) == 0:
-        raise ValueError(
-            "No preferred students field names were specified in the configuration file.")
-    
+        logging.error(
+            'No preferred students field names were specified in the configuration file. Please provide a value for "preferred_students_field_names".')
+
     if fields.get('student_id_field_name') is None:
-        raise ValueError(
-            "No student id field name was specified in the configuration file.")
-    
-    if fields.get('submission_timestamp_field_name') is None:
-        raise ValueError(
-            "No submission timestamp field name was specified in the configuration file.")
+        logging.error(
+            'No student id field name was specified in the configuration file for the field_mappings. Please provide a value for "student_id_field_name". ')
+
 
 CONFIG_DATA = None

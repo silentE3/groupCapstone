@@ -38,15 +38,13 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
     '''
     ########## Determine Output Filenames ##########
-    report_filename: str = __report_filename(
-        surveyfile, reportfile)
+    report_filename: str = __report_filename(surveyfile, reportfile)
 
     ########## Load the config data ##########
     config_data: models.Configuration = config.read_json(configfile)
 
     ########## Load the survey data ##########
-    survey_data: models.SurveyData = load.read_survey(
-        config_data['field_mappings'], surveyfile)
+    survey_data: models.SurveyData = load.read_survey(config_data['field_mappings'], surveyfile)
 
     ########## Load the class roster data, if applicable ##########
     if allstudentsfile:
