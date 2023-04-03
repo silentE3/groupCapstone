@@ -6,10 +6,9 @@ import copy
 import csv
 from io import TextIOWrapper
 from io import StringIO
-import logging
 import re
 import datetime as dt
-from typing import Sequence, Union
+from typing import Union
 from openpyxl import load_workbook
 from app import models
 from app.group import validate
@@ -93,13 +92,11 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
     '''
     for student in students:
         if not student.provided_availability:
-            print(
-                f"student '{student.student_id}' did not provide any availability")
+            print(f"student '{student.student_id}' did not provide any availability")
             student.availability = wildcard_availability(
                 field_mapping["availability_field_names"])
         if total_availability_matches(student, students) == 0:
-            print(
-                f"student '{student.student_id}' did not have matching availability with anyone else")
+            print(f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
 
 
@@ -135,14 +132,11 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
-        )
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
-        )
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
-        )
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
@@ -195,7 +189,7 @@ def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
     return rows
 
 
-def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields: Sequence[str]):
+def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields):
     '''
     Checks that the fields in the survey data file match the field mapping
     '''
@@ -205,27 +199,28 @@ def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields:
         valid_headers = False
     for field in field_mapping['preferred_students_field_names']:
         if field not in fields:
-            print("Error: preferred students header '%s' does not exist in the data file. Please check your field_mapping configuration", field)
+            print(__field_map_error_msg(field))
             valid_headers = False
     for field in field_mapping['disliked_students_field_names']:
         if field not in fields:
-            print("Error: disliked students header '%s' does not exist in the data file. Please check your field_mapping configuration", field)
+            print(__field_map_error_msg(field))
             valid_headers = False
     for field in field_mapping['availability_field_names']:
         if field not in fields:
-            print("Error: availability header %s does not exist in the data file. Please check your field_mapping configuration", field)
+            print(__field_map_error_msg(field))
             valid_headers = False
 
     if field_mapping.get('submission_timestamp_field_name') and field_mapping['submission_timestamp_field_name'] not in fields:
-        print("Error: submission timestamp field name '%s' does not exist in the data file. Please check your field_mapping configuration",
-                      field_mapping['submission_timestamp_field_name'])
+        print(__field_map_error_msg(field_mapping['submission_timestamp_field_name']))
         valid_headers = False
 
     if valid_headers is False:
-        raise ValueError("Invalid or missing field headers in data file")
+        raise ValueError("Headers from survey data file do not match the field mapping configuration")
+
 
 def __field_map_error_msg(field: str):
-    return f"Error: student id header '{field}' does not exist in the data file. Please check your field_mapping configuration"
+    return f"Error: student id header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
+
 
 def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:
     '''
