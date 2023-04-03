@@ -110,28 +110,31 @@ def __check_config_validity(config_data: Configuration):
         config_data["no_survey_group_method"] = NoSurveyGroupMethodConsts.STANDARD_GROUPING
     if config_data['no_survey_group_method'] not in valid_no_survey_group_methods:
         print('Invalid configuration selection for "no_survey_group_method".')
-        sys.exit(1)
 
 
 def validate_field_mappings(fields: models.SurveyFieldMapping):
     '''
     Validates the field mappings specification in the configuration data.
     '''
+    valid_fields = True
     if fields.get('availability_field_names') is None or len(fields.get('availability_field_names')) == 0:
-        logging.error(
-            'No availability field names were specified in the configuration file. Please provide a value for "availability_field_names".')
+        print('No availability field names were specified in the configuration file. Please provide a value for "availability_field_names".')
+        valid_fields = False
 
     if fields.get('disliked_students_field_names') is None or len(fields.get('disliked_students_field_names')) == 0:
-        logging.error(
-            'No disliked students field names were specified in the configuration file. Please provide a value for "disliked_students_field_names".')
+        print('No disliked students field names were specified in the configuration file. Please provide a value for "disliked_students_field_names".')
+        valid_fields = False
 
     if fields.get('preferred_students_field_names') is None or len(fields.get('preferred_students_field_names')) == 0:
-        logging.error(
-            'No preferred students field names were specified in the configuration file. Please provide a value for "preferred_students_field_names".')
+        print('No preferred students field names were specified in the configuration file. Please provide a value for "preferred_students_field_names".')
+        valid_fields = False
 
     if fields.get('student_id_field_name') is None:
-        logging.error(
-            'No student id field name was specified in the configuration file for the field_mappings. Please provide a value for "student_id_field_name". ')
+        print('No student id field name was specified in the configuration file for the field_mappings. Please provide a value for "student_id_field_name". ')
+        valid_fields = False
+
+    if valid_fields is False:
+        raise AttributeError('Invalid or missing field mappings in the configuration file.')
 
 
 CONFIG_DATA = None
