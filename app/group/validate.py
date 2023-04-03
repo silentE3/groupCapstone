@@ -432,12 +432,18 @@ def generate_preferred_pairs_per_group(groupings: list[models.GroupRecord]) -> d
         group_id: str = group.group_id
         groups[group_id] = pairs
         for user in group.members:
-            for pref in user.preferred_students:
-                if __contains_id(pref, group.members):
-                    pair: tuple[str, str] = (user.student_id, pref)
-                    pairs.append(pair)
+            if len(user.preferred_students) == 0:
+                # Add a default tuple if the user's preferred_students list is empty
+                pair: tuple[str, str] = (user.student_id, user.student_id)
+                pairs.append(pair)
+            else:
+                for pref in user.preferred_students:
+                    if __contains_id(pref, group.members):
+                        pair: tuple[str, str] = (user.student_id, pref)
+                        pairs.append(pair)
         pairs.sort(key=lambda x: x[0])
     return groups
+
 
 
 def generate_preferred_list_per_user(groupings: list[models.GroupRecord]) -> dict[str, list[str]]:

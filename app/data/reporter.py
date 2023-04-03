@@ -122,7 +122,7 @@ class ReportFormatter():
                 meets_preferred_req: str = str(
                     len(user_perfs[user.student_id]) > 0)
                 if len(user.preferred_students) == 0:
-                    meets_preferred_req = "True"
+                    meets_preferred_req = ""
                 record.append(xlsx.Cell(meets_preferred_req))
 
                 if self.report_config['show_preferred_students']:
