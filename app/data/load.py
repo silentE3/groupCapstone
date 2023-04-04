@@ -6,6 +6,7 @@ import copy
 import csv
 from io import TextIOWrapper
 from io import StringIO
+import logging
 import re
 import datetime as dt
 from typing import Union
@@ -13,6 +14,8 @@ from openpyxl import load_workbook
 from app import models
 from app.group import validate
 from app import config
+
+__logger = logging.getLogger(__name__)
 
 
 def parse_asurite(val: str) -> str:
@@ -195,23 +198,23 @@ def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields)
     '''
     valid_headers = True
     if field_mapping['student_id_field_name'] not in fields:
-        print(__field_map_error_msg(field_mapping['student_id_field_name']))
+        __logger.error(__field_map_error_msg(field_mapping['student_id_field_name']))
         valid_headers = False
     for field in field_mapping['preferred_students_field_names']:
         if field not in fields:
-            print(__field_map_error_msg(field))
+            __logger.error(__field_map_error_msg(field))
             valid_headers = False
     for field in field_mapping['disliked_students_field_names']:
         if field not in fields:
-            print(__field_map_error_msg(field))
+            __logger.error(__field_map_error_msg(field))
             valid_headers = False
     for field in field_mapping['availability_field_names']:
         if field not in fields:
-            print(__field_map_error_msg(field))
+            __logger.error(__field_map_error_msg(field))
             valid_headers = False
 
     if field_mapping.get('submission_timestamp_field_name') and field_mapping['submission_timestamp_field_name'] not in fields:
-        print(__field_map_error_msg(field_mapping['submission_timestamp_field_name']))
+        __logger.error(__field_map_error_msg(field_mapping['submission_timestamp_field_name']))
         valid_headers = False
 
     if valid_headers is False:
@@ -219,7 +222,7 @@ def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields)
 
 
 def __field_map_error_msg(field: str):
-    return f"Error: student id header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
+    return f"Header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
 
 
 def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:

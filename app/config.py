@@ -1,12 +1,12 @@
 '''config holds the logic to read in a configuration object'''
 import json
-import logging
-import sys
 from io import TextIOWrapper, StringIO
+import logging
 from openpyxl import load_workbook
 from app import models
 from app.models import Configuration, NoSurveyGroupMethodConsts
 
+__logger = logging.getLogger(__name__)
 
 def read_json(config_path: str) -> Configuration:
     """Reads in a json configuration file"""
@@ -118,23 +118,27 @@ def validate_field_mappings(fields: models.SurveyFieldMapping):
     '''
     valid_fields = True
     if fields.get('availability_field_names') is None or len(fields.get('availability_field_names')) == 0:
-        print('No availability field names were specified in the configuration file. Please provide a value for "availability_field_names".')
+        __logger.error(__field_error_msg('availability_field_names'))
         valid_fields = False
 
     if fields.get('disliked_students_field_names') is None or len(fields.get('disliked_students_field_names')) == 0:
-        print('No disliked students field names were specified in the configuration file. Please provide a value for "disliked_students_field_names".')
+        __logger.error(__field_error_msg('disliked_students_field_names'))
         valid_fields = False
 
     if fields.get('preferred_students_field_names') is None or len(fields.get('preferred_students_field_names')) == 0:
-        print('No preferred students field names were specified in the configuration file. Please provide a value for "preferred_students_field_names".')
+        __logger.error(__field_error_msg('preferred_students_field_names'))
         valid_fields = False
 
     if fields.get('student_id_field_name') is None:
-        print('No student id field name was specified in the configuration file for the field_mappings. Please provide a value for "student_id_field_name". ')
+        __logger.error(__field_error_msg('student_id_field_name'))
         valid_fields = False
 
     if valid_fields is False:
         raise AttributeError('Invalid or missing field mappings in the configuration file.')
+
+
+def __field_error_msg(field_name: str) -> str:
+    return f'No {field_name} field name was specified in the configuration file. Please provide a value for "{field_name}".'
 
 
 CONFIG_DATA = None
