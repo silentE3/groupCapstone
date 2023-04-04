@@ -109,8 +109,8 @@ def __check_config_validity(config_data: Configuration):
     if "no_survey_group_method" not in config_data:
         config_data["no_survey_group_method"] = NoSurveyGroupMethodConsts.STANDARD_GROUPING
     if config_data['no_survey_group_method'] not in valid_no_survey_group_methods:
-        print('Invalid configuration selection for "no_survey_group_method".')
-
+        __logger.error('Invalid configuration selection for "no_survey_group_method".')
+        raise ValueError('Invalid configuration selection for "no_survey_group_method".')
 
 def validate_field_mappings(fields: models.SurveyFieldMapping):
     '''
