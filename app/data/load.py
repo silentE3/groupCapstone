@@ -390,20 +390,24 @@ def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRec
     '''
     Removes students from the survey if they are not in the roster.
     '''
-    updated_list : list[models.SurveyRecord]
-    updated_list = []
+    current_list : list[models.SurveyRecord]
+    current_list = survey_data
     roster_list = read_roster(roster_filename)
     non_roster_ids = []
     
-    for index, val in enumerate(roster_list, start=1):
+    #This part focuses on finding and listing all the ids not found in the roster.
+    for index, val in enumerate(current_list, start=1):
         check = False
-        for index2, val2 in enumerate(survey_data, start=1):
-            if val2 == val:
+        for index2, val2 in enumerate(roster_list, start=1):
+            if val2 == val.student_id:
                 check = True
                 break
 
-        if check == False:
+        if check is False:
+            non_roster_ids.append(val)
 
-            
-    
-    return updated_list
+    #This part focuses on removing all the ids not found in the roster.
+    for index, val in enumerate(non_roster_ids, start=1):
+        current_list.remove(val)
+
+    return current_list
