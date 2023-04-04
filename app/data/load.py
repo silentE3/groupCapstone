@@ -222,7 +222,7 @@ def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields)
 
 
 def __field_map_error_msg(field: str):
-    return f"Header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
+    return f"Error: header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
 
 
 def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:

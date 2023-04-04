@@ -138,7 +138,7 @@ def validate_field_mappings(fields: models.SurveyFieldMapping):
 
 
 def __field_error_msg(field_name: str) -> str:
-    return f'No {field_name} field name was specified in the configuration file. Please provide a value for "{field_name}".'
+    return f'Error: No {field_name} field name was specified in the configuration file. Please provide a value for "{field_name}".'
 
 
 CONFIG_DATA = None
