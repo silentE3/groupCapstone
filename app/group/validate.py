@@ -1,6 +1,7 @@
 '''
 validate is used for validating groups
 '''
+from math import trunc
 import re
 import itertools
 from app import models
@@ -456,6 +457,34 @@ def generate_preferred_list_per_user(groupings: list[models.GroupRecord]) -> dic
     return users
 
 
+def student_pref_pair_possible(students: list[models.SurveyRecord], in_student: models.SurveyRecord) -> bool:
+    '''
+    This function determines if a student could "possibly" be grouped with one of their preferred
+     student selections.
+
+    This requires that:
+     - The student selected one or more preferred students (listing themself doesn't count) 
+     - One or more of their preferred students did NOT list them as "disliked"
+    '''
+
+    # Return False if the student didn't provide any preferred student selections
+    if not in_student.provided_pref_students:
+        return False
+
+    # For each student in the input student's "preferred" list, if the
+    #  student did not list the input student as disliked, then return True
+    for student_id in in_student.preferred_students:
+        if student_id == in_student.student_id:
+            # listing themself doesn't count
+            continue
+        for student in students:
+            if student_id == student.student_id:
+                if in_student.student_id not in student.disliked_students:
+                    return True
+
+    return False
+
+
 def __contains_id(student_id: str, members: list[models.SurveyRecord]) -> bool:
     '''
     Specifically looks for a student in a list of survey records based on student id.
@@ -481,3 +510,17 @@ def stud_prev_overlap_idx(group: models.GroupRecord) -> int:
         if meets_group_availability_requirement(test_group):
             return idx
     return -1  # No single student preventing overlap found
+
+
+def max_num_groups_possible_scoring(target_group_size: int, num_students: int) -> int:
+    '''
+    Returns the maximum number of groups possible, based on the target group size +/-1. This
+        value is used as part of the solution scoring.
+    '''
+
+    if target_group_size <= 1 or num_students <= target_group_size:
+        # divide by 0 and invalid target group size protection
+        target_group_size = 1
+        return trunc(num_students / target_group_size)
+    # "else"
+    return trunc(num_students / (target_group_size - 1))
