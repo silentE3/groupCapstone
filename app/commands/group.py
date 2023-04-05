@@ -79,8 +79,7 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(best_solutions, survey_data,
                               config_data, report_filename)
-    except (ValueError, AttributeError) as exception:
-        print(exception)
+    except (ValueError, AttributeError):
         sys.exit(1)
 
 
