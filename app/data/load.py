@@ -89,6 +89,7 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
     - checking for students that have availability that didn't match to anyone else's
     - checking for students that have preferred students that in turn disliked them (Not yet implemented)
     - checking for students that have preferred students that didn't match in their availability (Not yet implemented)
+    - checking for students that put themselves as preferred or disliked and removing them from the preferred/disliked lists
     '''
     for student in students:
         if not student.provided_availability:
@@ -100,6 +101,12 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
             print(
                 f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
+        # remove self from list of disliked
+        if student.student_id in student.disliked_students:
+            student.disliked_students.remove(student.student_id)
+        # remove self from list of preferred
+        if student.student_id in student.preferred_students:
+            student.preferred_students.remove(student.student_id)
 
 
 def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> models.SurveyRecord:
