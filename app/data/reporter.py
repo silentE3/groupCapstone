@@ -67,6 +67,7 @@ class ReportFormatter():
 
     def __init__(self, config: models.Configuration, cell_formatters: dict[str, Any]) -> None:
         self.data_config = config
+        self.report_config = config["report_fields"]
         self.formatters = cell_formatters
         self.avail_slot_header_order: list[tuple[str, str]] = []
 
@@ -81,32 +82,49 @@ class ReportFormatter():
             group_availability_map: models.GroupAvailabilityMap = self.__get_group_availability_map(
                 availability_map, group)
             for user in group.members:
-                record: list[xlsx.Cell] = [
-                    xlsx.Cell(user.student_id),
-                    xlsx.Cell(group.group_id),
-                    xlsx.Cell(user.provided_survey_data),
-                    xlsx.Cell(';'.join(user.disliked_students))
-                ]
 
-                meets_dislike_req: str = str(len(validate.user_dislikes_group(user, group)) == 0)
+                record: list[xlsx.Cell] = []
+                record.append(xlsx.Cell(user.student_id))
+                record.append(xlsx.Cell(group.group_id))
+
+                record.append(xlsx.Cell(user.provided_survey_data))
+                if self.report_config['show_disliked_students']:
+                    record.append(xlsx.Cell(';'.join(user.disliked_students)))
+
+                meets_dislike_req: str = str(
+                    len(validate.user_dislikes_group(user, group)) == 0)
                 if len(user.disliked_students) == 0:
                     meets_dislike_req = 'none provided'
-                record.extend([
-                    xlsx.Cell(meets_dislike_req),
-                    xlsx.Cell(str(validate.meets_group_availability_requirement(group))),
-                    xlsx.Cell(';'.join(validate.group_availability_strings(group))),
-                    xlsx.Cell(";".join(user.preferred_students))
-                ])
+                record.append(xlsx.Cell(meets_dislike_req))
+                if self.report_config['show_disliked_students']:
+                    record.append(xlsx.Cell(
+                        ';'.join(validate.user_dislikes_group(user, group))))
 
-                meets_preferred_req: str = str(len(user_perfs[user.student_id]) > 0)
+                record.append(
+                    xlsx.Cell(str(validate.meets_group_availability_requirement(group))))
+
+                if self.report_config['show_availability_overlap']:
+                    record.append(
+                        xlsx.Cell(';'.join(validate.group_availability_strings(group))))
+
+                if self.report_config['show_preferred_students']:
+                    record.append(xlsx.Cell(";".join(user.preferred_students)))
+
+                meets_preferred_req: str = str(
+                    len(user_perfs[user.student_id]) > 0)
                 if len(user.preferred_students) == 0:
                     meets_preferred_req = "none provided"
-                record.extend([
-                    xlsx.Cell(meets_preferred_req),
-                    xlsx.Cell(";".join(user_perfs[user.student_id])),
-                    xlsx.Cell(user.provided_availability),
-                    xlsx.Cell(user.has_matching_availability)
-                ])
+                record.append(xlsx.Cell(meets_preferred_req))
+
+                if self.report_config['show_preferred_students']:
+                    # for preferred list
+                    record.append(
+                        xlsx.Cell(";".join(user_perfs[user.student_id])))
+
+                # calc if user provided any availability
+                record.append(xlsx.Cell(user.provided_availability))
+                record.append(xlsx.Cell(user.has_matching_availability))
+
                 # color-coded availability
                 # NOTE: The complexity here comes from the desire to ouput these values
                 #   in the manner that the sponsor is used to seeing (monaday 0 - 3AM, then
@@ -136,21 +154,27 @@ class ReportFormatter():
         return result
 
     def __individual_report_header(self, availability_map: models.AvailabilityMap):
-        header = [
-            xlsx.Cell('Student Id'),
-            xlsx.Cell('Group Id'),
-            xlsx.Cell('Filled out Survey'),
-            xlsx.Cell('Disliked Students'),
-            xlsx.Cell('Meets Dislike Requirement'),
-            xlsx.Cell('Disliked students in group'),
-            xlsx.Cell('Meets Availability Requirement'),
-            xlsx.Cell('Availability Overlap'),
-            xlsx.Cell('Preferred Students'),
-            xlsx.Cell('Meets Preferred Goal'),
-            xlsx.Cell('Preferred students in group'),
-            xlsx.Cell('Supplied Availability in Survey'),
-            xlsx.Cell('Availability overlaps with others')
-        ]
+        header = [xlsx.Cell('Student Id')]
+        header.append(xlsx.Cell('Group Id'))
+        header.append(xlsx.Cell('Filled out Survey'))
+        if self.report_config['show_disliked_students']:
+            header.append(xlsx.Cell('Disliked Students'))
+        header.append(xlsx.Cell('Meets Dislike Requirement'))
+        if self.report_config['show_disliked_students']:
+            header.append(xlsx.Cell('Disliked students in group'))
+
+        header.append(xlsx.Cell('Meets Availability Requirement'))
+        if self.report_config['show_availability_overlap']:
+            header.append(xlsx.Cell('Availability Overlap'))
+
+        if self.report_config['show_preferred_students']:
+            header.append(xlsx.Cell('Preferred Students'))
+        header.append(xlsx.Cell('Meets Preferred Goal'))
+        if self.report_config['show_preferred_students']:
+            header.append(xlsx.Cell('Preferred students in group'))
+
+        header.append(xlsx.Cell('Supplied Availability in Survey'))
+        header.append(xlsx.Cell('Availability overlaps with others'))
 
         # color-coded availability headers
         # NOTE: The complexity here comes from the desire to ouput these values
@@ -178,20 +202,28 @@ class ReportFormatter():
         group_pairs = validate.generate_preferred_pairs_per_group(groups)
 
         for group in groups:
-            record: list[xlsx.Cell] = [
-                xlsx.Cell(group.group_id),
-                xlsx.Cell(len(group.members)),
-                xlsx.Cell(validate.meets_dislike_requirement(group)),
-                xlsx.Cell(';'.join(validate.users_disliked_in_group(group))),
-                xlsx.Cell(validate.meets_group_availability_requirement(group)),
-                xlsx.Cell(';'.join(validate.group_availability_strings(group)))
-            ]
+            record: list[xlsx.Cell] = []
+            record.append(xlsx.Cell(group.group_id))
+            record.append(xlsx.Cell(len(group.members)))
+
+            record.append(xlsx.Cell(validate.meets_dislike_requirement(group)))
+            if self.report_config['show_disliked_students']:
+                record.append(xlsx.Cell(
+                    ';'.join(validate.users_disliked_in_group(group))))
+
+            record.append(xlsx.Cell(
+                validate.meets_group_availability_requirement(group)))
+            if self.report_config['show_availability_overlap']:
+                record.append(xlsx.Cell(
+                    ';'.join(validate.group_availability_strings(group))))
+
             pairs = []
             for pair in group_pairs[group.group_id]:
                 pairs.append(pair[0] + "/" + pair[1])
             record.append(xlsx.Cell((len(pairs) > 0)))
-            record.append(xlsx.Cell(';'.join(pairs)))
-            record.append(xlsx.Cell(len(pairs)))
+            if self.report_config['show_preferred_students']:
+                record.append(xlsx.Cell(';'.join(pairs)))
+                record.append(xlsx.Cell(len(pairs)))
 
             # Create the pairs of user dislikes
             pairs = []
@@ -200,19 +232,22 @@ class ReportFormatter():
                 for dislike in dislikes:
                     pairs.append(member.student_id + "/" + dislike)
 
-            record.append(xlsx.Cell(';'.join(pairs)))
-            record.append(xlsx.Cell(len(pairs)))
+            if self.report_config['show_disliked_students']:
+                record.append(xlsx.Cell(';'.join(pairs)))
+                record.append(xlsx.Cell(len(pairs)))
 
-            # Note: the first 4 values are "don't care" for individual group scoring
-            scoring_vars = models.GroupSetData(group.group_id,
-                                               self.data_config["target_group_size"],
-                                               len((self.data_config["field_mappings"])[
-                                                   "preferred_students_field_names"]),
-                                               sum(len(group.members)
-                                                   for group in groups),
-                                               len((self.data_config["field_mappings"])[
-                                                   "availability_field_names"]))
-            record.append(xlsx.Cell(scoring.score_individual_group(group, scoring_vars)))
+            if self.report_config['show_scores']:
+                # Note: the first 4 values are "don't care" for individual group scoring
+                scoring_vars = models.GroupSetData(group.group_id,
+                                                   self.data_config["target_group_size"],
+                                                   len((self.data_config["field_mappings"])[
+                                                       "preferred_students_field_names"]),
+                                                   sum(len(group.members)
+                                                       for group in groups),
+                                                   len((self.data_config["field_mappings"])[
+                                                       "availability_field_names"]))
+                record.append(xlsx.Cell(scoring.score_individual_group(
+                    group, scoring_vars)))
 
             records.append(record)
 
@@ -225,20 +260,28 @@ class ReportFormatter():
         return models.GroupAvailabilityMap('invalid', {})
 
     def __group_report_header(self) -> list[xlsx.Cell]:
-        headers = [
-            xlsx.Cell('Group Id'),
-            xlsx.Cell('Group Size'),
-            xlsx.Cell('Meets Dislike Requirement'),
-            xlsx.Cell('Disliked students in group'),
-            xlsx.Cell('Meets Availability Requirement'),
-            xlsx.Cell('Availability Overlap'),
-            xlsx.Cell('Meets Preferred Goal'),
-            xlsx.Cell('Preferred pairs in group'),
-            xlsx.Cell('Preferred pair count'),
-            xlsx.Cell('Disliked pairs in group'),
-            xlsx.Cell('Disliked pair count'),
-            xlsx.Cell('Score')
-        ]
+        headers = []
+        headers.append(xlsx.Cell('Group Id'))
+        headers.append(xlsx.Cell('Group Size'))
+        headers.append(xlsx.Cell('Meets Dislike Requirement'))
+        if self.report_config['show_disliked_students']:
+            headers.append(xlsx.Cell('Disliked students in group'))
+
+        headers.append(xlsx.Cell('Meets Availability Requirement'))
+        if self.report_config['show_availability_overlap']:
+            headers.append(xlsx.Cell('Availability Overlap'))
+
+        headers.append(xlsx.Cell('Meets Preferred Goal'))
+        if self.report_config['show_preferred_students']:
+            headers.append(xlsx.Cell('Preferred pairs in group'))
+            headers.append(xlsx.Cell('Preferred pair count'))
+
+        if self.report_config['show_disliked_students']:
+            headers.append(xlsx.Cell('Disliked pairs in group'))
+            headers.append(xlsx.Cell('Disliked pair count'))
+
+        if self.report_config['show_scores']:
+            headers.append(xlsx.Cell('Score'))
 
         return headers
 
@@ -367,34 +410,37 @@ class ReportFormatter():
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
 
-        scoring_vars = models.GroupSetData("solution_1",
-                                           self.data_config["target_group_size"],
-                                           len((self.data_config["field_mappings"])[
-                                               "preferred_students_field_names"]),
-                                           sum(len(group.members)
-                                               for group in groups),
-                                           len((self.data_config["field_mappings"])[
-                                               "availability_field_names"]),
-                                           num_groups_no_avail,
-                                           num_disliked_pairings,
-                                           num_liked_pairings,
-                                           num_additional_overlap)
-        record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
-        record.append(xlsx.Cell(round(scoring.standard_dev_groups(groups, scoring_vars), 3)))
+        if self.report_config['show_scores']:
+            scoring_vars = models.GroupSetData("solution_1",
+                                               self.data_config["target_group_size"],
+                                               len((self.data_config["field_mappings"])[
+                                                   "preferred_students_field_names"]),
+                                               sum(len(group.members)
+                                                   for group in groups),
+                                               len((self.data_config["field_mappings"])[
+                                                   "availability_field_names"]),
+                                               num_groups_no_avail,
+                                               num_disliked_pairings,
+                                               num_liked_pairings,
+                                               num_additional_overlap)
+            record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
+            record.append(xlsx.Cell(
+                round(scoring.standard_dev_groups(groups, scoring_vars), 3)))
+
         records.append(record)
 
         return records
 
     def __overall_report_header(self) -> list[xlsx.Cell]:
-        headers = [
-            xlsx.Cell("Number of Groups"),
-            xlsx.Cell('Disliked Pairings'),
-            xlsx.Cell('Number of Groups Without Overlapping Time Slot'),
-            xlsx.Cell('Preferred Pairings'),
-            xlsx.Cell('"Additional" Overlapping Time Slots'),
-            xlsx.Cell('Score'),
-            xlsx.Cell('Standard Deviation of Groups')
-        ]
+        headers = []
+        headers.append(xlsx.Cell("Number of Groups"))
+        headers.append(xlsx.Cell('Disliked Pairings'))
+        headers.append(xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
+        headers.append(xlsx.Cell('Preferred Pairings'))
+        headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
+        if self.report_config['show_scores']:
+            headers.append(xlsx.Cell('Score'))
+            headers.append(xlsx.Cell('Standard Deviation of Groups'))
 
         return headers
 

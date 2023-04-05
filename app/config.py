@@ -103,7 +103,6 @@ def read_report_config(report_filename: str) -> Configuration:
 
 
 def __check_config_validity(config_data: Configuration):
-    validate_field_mappings(config_data['field_mappings'])
     valid_no_survey_group_methods = [NoSurveyGroupMethodConsts.STANDARD_GROUPING,
                                      NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY, NoSurveyGroupMethodConsts.GROUP_TOGETHER]
     if "no_survey_group_method" not in config_data:

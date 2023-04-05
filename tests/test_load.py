@@ -991,7 +991,7 @@ def test_parse_survey_record_fails_on_student_id():
         'pref 2': '',
         '1': 'monday;tuesday'
     }
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         record = load.parse_survey_record(config, row)
 
 

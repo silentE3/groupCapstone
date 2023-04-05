@@ -22,6 +22,26 @@ class SurveyFieldMapping(TypedDict):
 
 
 @dataclass
+class ReportConfiguration(TypedDict):
+    '''
+    Data class for the report layout
+    TODO: Add additional attributes to this
+    '''
+
+    # show preferred students found in the grouping
+    show_preferred_students: bool
+
+    # show disliked students found in the grouping
+    show_disliked_students: bool
+
+    # show availability that matched in the grouping
+    show_availability_overlap: bool
+
+    # show group-level and solution-level scores
+    show_scores: bool
+
+
+@dataclass
 class Configuration(TypedDict):
     """Data class for the app configuration"""
     class_name: str
@@ -32,6 +52,10 @@ class Configuration(TypedDict):
     grouping_passes: int
     availability_values_delimiter: str
     field_mappings: SurveyFieldMapping
+    report_fields: ReportConfiguration
+    output_student_name: bool
+    output_student_email: bool
+    output_student_login: bool
 
 
 @dataclass
