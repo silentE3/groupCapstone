@@ -1,7 +1,9 @@
 import os
 from click.testing import CliRunner
 import math
+from app import config, models
 from app.commands import group
+from app.data import load
 from tests.test_utils.helper_functions import verify_groups
 
 
@@ -178,3 +180,54 @@ def test_alt_command_args_1():
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
 
 
+def test_group_adheres_to_target_size():
+    '''
+    Test of grouping 31 students with a target group size of 5 plus 1 divides into 3 groups of 5 and 4 group of 4
+    '''
+    survey_file = 'test_group_adheres_to_target_size'
+    response = runner.invoke(group.group, [
+                             f'./tests/test_files/survey_results/{survey_file}.csv', '--configfile', f'./tests/test_files/configs/{survey_file}.json'])
+    assert response.exit_code == 0
+
+    config_data: models.Configuration = config.read_report_config(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+    
+    survey_data = load.read_report_survey_data(f'./tests/test_files/survey_results/{survey_file}_report.xlsx',
+                                               config_data['field_mappings'])
+    # returns a list of group record lists
+    group_solutions: list[list[models.GroupRecord]] = load.read_report_groups(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx', survey_data.records)
+    
+    for solution in group_solutions:
+        groups_with_5_members = list(filter(lambda group: len(group.members) == 5, solution))
+        assert len(groups_with_5_members) == 5
+        assert len(solution)-len(groups_with_5_members) == 1            
+
+    os.remove(f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+
+
+def test_group_adheres_to_target_size_1():
+    '''
+    Test of grouping 29 students with a target group size of 5 with the ability to shrink by 1 into 5 groups of 5 and 1 group of 4
+    '''
+    survey_file = 'test_group_adheres_to_target_size_1'
+    response = runner.invoke(group.group, [
+                             f'./tests/test_files/survey_results/{survey_file}.csv', '--configfile', f'./tests/test_files/configs/{survey_file}.json'])
+    assert response.exit_code == 0
+
+    config_data: models.Configuration = config.read_report_config(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+
+    survey_data = load.read_report_survey_data(f'./tests/test_files/survey_results/{survey_file}_report.xlsx',
+                                               config_data['field_mappings'])
+    # returns a list of group record lists
+    group_solutions: list[list[models.GroupRecord]] = load.read_report_groups(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx', survey_data.records)
+
+    for solution in group_solutions:
+        groups_with_5_members = list(
+            filter(lambda group: len(group.members) == 5, solution))
+        assert len(groups_with_5_members) == 5
+        assert len(solution)-len(groups_with_5_members) == 1
+
+    os.remove(f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
