@@ -388,7 +388,8 @@ def test_format_config_flatten_headers():
     expected_headers = ["class_name", "availability_values_delimiter", "student_id_field_name", "timezone_field_name",
                         "preferred_students_field_names", "disliked_students_field_names", "availability_field_names",
                         "target_group_size", "target_plus_one_allowed", "target_minus_one_allowed", "grouping_passes",
-                        "show_preferred_students", "show_disliked_students", "show_availability_overlap", "show_scores", "no_survey_group_method"]
+                        "show_preferred_students", "show_disliked_students", "show_availability_overlap", "show_scores",
+                        "no_survey_group_method", "prioritize_preferred_over_availability"]
 
     assert flattened_headers == expected_headers
 
@@ -405,25 +406,25 @@ def test_format_config_flatten_data():
                       'In what time zone do you live or will you be during the session? Please use UTC so we can match it easier.',
                       'Preferred team member 1', 'Non-preferred student 1',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [0:00 AM - 3:00 AM]',
-                      2, True, True, 2, False, False, False, False, 0],
+                      2, True, True, 2, False, False, False, False, False, 0],
                      ['', '', '', '', 'Preferred team member 2', 'Non-preferred student 2', 'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 AM - 6:00 AM]',
-                     '', '', '', '', '', '', '', '', ''],
+                     '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', 'Preferred team member 3', 'Non-preferred student 3',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 AM - 9:00 AM]',
-                      '', '', '', '', '', '', '', '', ''],
+                      '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', 'Preferred team member 4', '',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 AM - 12:00 PM]',
-                      '', '', '', '', '', '', '', '', ''],
+                      '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', 'Preferred team member 5', '',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [12:00 PM - 3:00 PM]',
-                      '', '', '', '', '', '', '', '', ''],
+                      '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', '', '',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [3:00 PM - 6:00 PM]',
-                      '', '', '', '', '', '', '', '', ''],
+                      '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', '', '',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [6:00 PM - 9:00 PM]',
-                      '', '', '', '', '', '', '', '', ''],
+                      '', '', '', '', '', '', '', '', '', ''],
                      ['', '', '', '', '', '',
                       'Please choose times that are good for your team to meet. Times are in the Phoenix, AZ time zone! [9:00 PM - 12:00 PM]',
-                      '', '', '', '', '', '', '', '', '']]
+                      '', '', '', '', '', '', '', '', '', '']]
     assert flattened_data == expected_data
