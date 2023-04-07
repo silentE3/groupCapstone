@@ -1501,3 +1501,32 @@ def test_load_raw_survey_data():
                                                                                                 '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ['', '', 'bwillia5', '', '', '', '', '', '', '', '', '', '', '',
                                                                                                                                                           '', '', '', '', '', '', '', '', '', '']]
     assert raw_data == expected_data
+
+def test_remove_students_not_in_roster_from_survey():
+    '''
+    Tests if a student not found in the roster is removed from survey.
+    '''
+    roster = []
+    roster = load.read_roster("./tests/test_files/example_roster_2.csv")
+    result = []
+
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False)                   
+    ]
+
+    result = load.remove_students_not_in_roster_from_survey(survey, roster)
+
+    assert len(result) == 4
+    assert result[0].student_id == "asurite1"
+    assert result[1].student_id == "asurite2"
+    assert result[2].student_id == "asurite3"
+    assert result[3].student_id == "asurite4"
