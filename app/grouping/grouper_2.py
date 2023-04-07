@@ -376,6 +376,7 @@ class Grouper2:
                                            self.num_students,
                                            len((self.config["field_mappings"])[
                                                "availability_field_names"]))
+        #TODO: does this need to be changed?
         return scoring.score_individual_group(group, scoring_vars)
 
 

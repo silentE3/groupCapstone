@@ -172,6 +172,7 @@ def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models
             if (no_finished_runs or
                 (best_solution_found.best_solution_score <= grouper.best_solution_score) or
                 (best_solution_found.best_solution_score == grouper.best_solution_score) and
+                    #TODO:  Does this need changing?  should it be handled by the person changing alg 1?
                     (scoring.standard_dev_groups(best_solution_found.best_solution_found, best_solution_found.scoring_vars) >=
                         scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars))):
                 best_solution_found = grouper
