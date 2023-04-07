@@ -50,7 +50,9 @@ class Grouper2:
 
     def prepare_students_for_grouping(self):
         '''
-        ensures the survey data is ready to be grouped
+        ensures the survey data is ready to be grouped by checking to see how the students with no survey data will be
+        grouped and if the config specifies that they should be grouped together or distributed evenly, then they are
+        locked into groups
         '''
 
         if self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.STANDARD_GROUPING:
@@ -209,6 +211,7 @@ class Grouper2:
         '''
         computes the score of the overall grouping
         '''
+        #TODO: see if I need to make changes to this to account for the different priorities that could be specified in the config
         num_pairings_disliked: int = validate.total_disliked_pairings(
             self.groups)
         num_groups_no_avail: int = validate.total_groups_no_availability(
@@ -380,6 +383,7 @@ def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupReco
     '''
     checks if the basic hard requirements are met including the group size, availability, and dislikes
     '''
+    #TODO: investigate if i need to change this so that it will look for one pairing if that is specified as the priority in the config
 
     if student.lock_in_group:
         return False
