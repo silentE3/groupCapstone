@@ -1,10 +1,15 @@
 '''
 This file includes functions to score entire group sets as well as
  individual groups, based on certain criteria.
+
+ NOTE: This file follows the initial (original/standard) scoring design,
+    where all groups having at least one overlapping time slot is
+    prioritized above each student having at least one preferred pairing.
 '''
-from math import trunc, sqrt
+from math import sqrt
 from app import models
 from app.group import validate
+from app.group import scoring_alternative
 
 
 def score_groups(variables: models.GroupSetData) -> float:
@@ -64,15 +69,8 @@ def score_groups(variables: models.GroupSetData) -> float:
         variables.num_survey_preferred_slots
     constant_2: float = constant_1 + 1
 
-    max_num_groups_pos: int  # based on target group size
-    if variables.target_group_size <= 1 or variables.num_students <= variables.target_group_size:
-        # divide by 0 and invalid target group size protection
-        variables.target_group_size = 1
-        max_num_groups_pos = trunc(
-            variables.num_students / variables.target_group_size)
-    else:
-        max_num_groups_pos = trunc(
-            variables.num_students / (variables.target_group_size - 1))
+    max_num_groups_pos: int = validate.max_num_groups_possible_scoring(
+        variables.target_group_size, variables.num_students)
 
     constant_3: float = constant_2 * max_num_groups_pos + constant_1 + 1
     constant_4: float = 0.1/(max_num_groups_pos *
@@ -86,11 +84,10 @@ def score_groups(variables: models.GroupSetData) -> float:
     return round(total_score, 4)
 
 
-def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData) -> float:
+def score_individual_group(group: models.GroupRecord, variables: models.GroupSetData, use_alternative_scoring: bool = False) -> float:
     '''
-    This function scores an individual group using the S (p, t, s, d) equation in the score_groups
-     function, but with p, t, s, and d being specific to the group (i.e., s is 0 or 1 for the group,
-     d is number of disliked pairings within the group, etc.).
+    This function scores an individual group using the overall scoring equation in the score_groups
+     function, but with the input values being specific to the group.
 
     '''
     variables.num_disliked_pairs = validate.total_disliked_pairings([group])
@@ -99,10 +96,20 @@ def score_individual_group(group: models.GroupRecord, variables: models.GroupSet
         validate.total_groups_no_availability([group])
     variables.num_additional_overlap = max(validate.availability_overlap_count(
         group) - 1, 0)  # subtract one to get "additional"
+
+    if use_alternative_scoring:
+        variables.num_students_no_pref_pairs = 0  # ensure it starts at 0
+        for student in group.members:
+            if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
+                variables.num_students_no_pref_pairs += 1
+        variables.num_additional_pref_pairs = variables.num_preferred_pairs - \
+            (len(group.members) - variables.num_students_no_pref_pairs)
+        return scoring_alternative.score_groups(variables)
+    # "else"
     return score_groups(variables)
 
 
-def standard_dev_groups(groups: list[models.GroupRecord], variables: models.GroupSetData) -> float:
+def standard_dev_groups(groups: list[models.GroupRecord], variables: models.GroupSetData, use_alternative_scoring: bool = False) -> float:
     '''
     This function computes the standard deviation of the individual group scores within
     a Group Set.
@@ -114,7 +121,8 @@ def standard_dev_groups(groups: list[models.GroupRecord], variables: models.Grou
     mean_groups: float = 0
     group_scores: list[float] = []
     for group in groups:
-        score = score_individual_group(group, variables)
+        score = score_individual_group(
+            group, variables, use_alternative_scoring)
         mean_groups += score
         group_scores.append(score)
     mean_groups = mean_groups / len(groups)
