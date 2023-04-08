@@ -40,5 +40,6 @@
     },
     "output_student_name": false,
     "output_student_email": true,
-    "output_student_login": true
+    "output_student_login": true,
+    "prioritize_preferred_over_availability": false
 }
