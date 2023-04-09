@@ -906,13 +906,16 @@ def test_preprocess_survey_data_good_avail():
     students = [
         models.SurveyRecord('asurite1', availability={
             '1': ['monday'],
-        }, provided_availability=True),
+        }, provided_availability=True,
+            provided_pref_students=False, pref_pairing_possible=False),
         models.SurveyRecord('asurite2', availability={
             '1': ['monday'],
-        }, provided_availability=True),
+        }, provided_availability=True,
+            provided_pref_students=False, pref_pairing_possible=False),
         models.SurveyRecord('asurite3', availability={
             '1': ['monday'],
-        }, provided_availability=True)
+        }, provided_availability=True,
+            provided_pref_students=False, pref_pairing_possible=False)
     ]
 
     students_copy = copy.deepcopy(students)
@@ -991,7 +994,7 @@ def test_parse_survey_record_fails_on_student_id():
         'pref 2': '',
         '1': 'monday;tuesday'
     }
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         record = load.parse_survey_record(config, row)
 
 
@@ -1272,6 +1275,7 @@ def test_read_roster():
     assert students[18] == "asurite19"
     assert students[19] == "asurite20"
 
+
 def test_read_report():
     '''
     Test the functionality pertaining to reading/loading groupings from an existing report file.
@@ -1470,7 +1474,7 @@ def test_load_raw_survey_data():
     text_buffer = StringIO()
     writer = csv.writer(text_buffer)
     for row in survey_data_sheet.rows:
-        writer.writerow([cell.value for cell in row])
+        writer.writerow([cell.value for cell in row])  # type: ignore
 
     # load and return the survey data from the io buffer
     text_buffer.seek(0)
@@ -1501,3 +1505,66 @@ def test_load_raw_survey_data():
                                                                                                 '', '', '', '', '', '', '', '', '', '', '', '', '', ''], ['', '', 'bwillia5', '', '', '', '', '', '', '', '', '', '', '',
                                                                                                                                                           '', '', '', '', '', '', '', '', '', '']]
     assert raw_data == expected_data
+
+
+def test_remove_self_from_preferred():
+    '''
+    Ensure that the user, who added themselves to their preferred list
+    is removed from that preferred list
+    '''
+    config_data = config.read_json(
+        "./tests/test_files/configs/config_1_full.json")
+    surveys_result = load.read_survey(
+        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full_self_pref_dislike.csv')
+
+    load.preprocess_survey_data(
+        surveys_result.records, config_data['field_mappings'])
+
+    assert len(surveys_result.records[0].preferred_students) == 1
+    assert len(surveys_result.records[1].preferred_students) == 2
+    assert len(surveys_result.records[2].preferred_students) == 2
+
+
+def test_remove_self_from_disliked():
+    '''
+    Ensure that the user, who added themselves to their disliked list
+    is removed from that disliked list
+    '''
+    config_data = config.read_json(
+        "./tests/test_files/configs/config_1_full.json")
+    surveys_result = load.read_survey(
+        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full_self_pref_dislike.csv')
+
+    assert len(surveys_result.records[0].disliked_students) == 2
+    assert len(surveys_result.records[1].disliked_students) == 2
+    assert len(surveys_result.records[2].disliked_students) == 1
+
+
+def test_no_change_self_not_in_preferred():
+    '''
+    Ensure that there is no change to the preferred list
+    if the user did not add themselves
+    '''
+    config_data = config.read_json(
+        "./tests/test_files/configs/config_1_full.json")
+    surveys_result = load.read_survey(
+        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
+
+    assert len(surveys_result.records[0].preferred_students) == 1
+    assert len(surveys_result.records[1].preferred_students) == 2
+    assert len(surveys_result.records[2].preferred_students) == 2
+
+
+def test_no_change_self_not_in_disliked():
+    '''
+    Ensure that there is no change to the disliked list
+    if the user did not add themselves
+    '''
+    config_data = config.read_json(
+        "./tests/test_files/configs/config_1_full.json")
+    surveys_result = load.read_survey(
+        config_data['field_mappings'], './tests/test_files/survey_results/Example_Survey_Results_1_full.csv')
+
+    assert len(surveys_result.records[0].disliked_students) == 2
+    assert len(surveys_result.records[1].disliked_students) == 2
+    assert len(surveys_result.records[2].disliked_students) == 1

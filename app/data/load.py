@@ -6,6 +6,7 @@ import copy
 import csv
 from io import TextIOWrapper
 from io import StringIO
+import logging
 import re
 import datetime as dt
 from typing import Union
@@ -13,6 +14,8 @@ from openpyxl import load_workbook
 from app import models
 from app.group import validate
 from app import config
+
+__logger = logging.getLogger(__name__)
 
 
 def parse_asurite(val: str) -> str:
@@ -89,33 +92,45 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
     - checking for students that have availability that didn't match to anyone else's
     - checking for students that have preferred students that in turn disliked them (Not yet implemented)
     - checking for students that have preferred students that didn't match in their availability (Not yet implemented)
+    - checking for students that put themselves as preferred or disliked and removing them from the preferred/disliked lists
+    - checking for students that could "possibly" be paired with one of their preferred students (they provided
+        preferred student(s) and at list one of these students didn't list them as "disliked")
     '''
     for student in students:
         if not student.provided_availability:
-            print(
-                f"student '{student.student_id}' did not provide any availability")
+            print(f"student '{student.student_id}' did not provide any availability")
             student.availability = wildcard_availability(
                 field_mapping["availability_field_names"])
         if total_availability_matches(student, students) == 0:
-            print(
-                f"student '{student.student_id}' did not have matching availability with anyone else")
+            print(f"student '{student.student_id}' did not have matching availability with anyone else")
             student.has_matching_availability = False
+        # remove self from list of disliked
+        if student.student_id in student.disliked_students:
+            student.disliked_students.remove(student.student_id)
+        # remove self from list of preferred
+        if student.student_id in student.preferred_students:
+            student.preferred_students.remove(student.student_id)
+        # did student provide preferred student selection
+        student.provided_pref_students = len(student.disliked_students) > 0
+        # could student "possibly" (reasonably) be paired with one of their preferred selections
+        student.pref_pairing_possible = validate.student_pref_pair_possible(
+            students, student)
 
 
 def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> models.SurveyRecord:
     '''
     parses a survey record from a row in the dataset
     '''
-    if not field_mapping.get('student_id_field_name') or len(row[field_mapping['student_id_field_name']]) == 0:
-        raise AttributeError('student id not specified or is empty')
 
-    survey = models.SurveyRecord(parse_asurite(
-        row[field_mapping['student_id_field_name']]))
+    if row.get(field_mapping['student_id_field_name']) is None or len(row[field_mapping['student_id_field_name']].strip()) == 0:
+        raise ValueError(f"found empty student id field in row: {row}")
+
+    survey = models.SurveyRecord(parse_asurite(row[field_mapping['student_id_field_name']]))
 
     for field in field_mapping['preferred_students_field_names']:
         if re.search(r'\S', row[field]):
-            survey.preferred_students.append(
-                parse_asurite(row[field]).lower())
+            survey.preferred_students.append(parse_asurite(row[field]).lower())
+
     survey.preferred_students = list(set(survey.preferred_students))
 
     for field in field_mapping['disliked_students_field_names']:
@@ -134,14 +149,11 @@ def parse_survey_record(field_mapping: models.SurveyFieldMapping, row: dict) -> 
     if field_mapping.get('timezone_field_name'):
         survey.timezone = row[field_mapping['timezone_field_name']].strip()
     if (field_mapping.get("student_name_field_name") and row[field_mapping["student_name_field_name"]]):
-        survey.student_name = row[field_mapping["student_name_field_name"]].strip(
-        )
+        survey.student_name = row[field_mapping["student_name_field_name"]].strip()
     if (field_mapping.get("student_email_field_name") and row[field_mapping["student_email_field_name"]]):
-        survey.student_email = row[field_mapping["student_email_field_name"]].strip(
-        )
+        survey.student_email = row[field_mapping["student_email_field_name"]].strip()
     if (field_mapping.get("student_login_field_name") and row[field_mapping["student_login_field_name"]]):
-        survey.student_login = row[field_mapping["student_login_field_name"]].strip(
-        )
+        survey.student_login = row[field_mapping["student_login_field_name"]].strip()
     if (field_mapping.get("submission_timestamp_field_name") and row[field_mapping["submission_timestamp_field_name"]]):
         survey.submission_date = dt.datetime.strptime(
             row[field_mapping["submission_timestamp_field_name"]][:-4], '%Y/%m/%d %I:%M:%S %p')
@@ -194,12 +206,48 @@ def read_survey_raw(data_file: TextIOWrapper) -> list[list[str]]:
     return rows
 
 
+def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields):
+    '''
+    Checks that the fields in the survey data file match the field mapping
+    '''
+    valid_headers = True
+    if field_mapping['student_id_field_name'] not in fields:
+        __logger.error(__field_map_error_msg(field_mapping['student_id_field_name']))
+        valid_headers = False
+    for field in field_mapping['preferred_students_field_names']:
+        if field not in fields:
+            __logger.error(__field_map_error_msg(field))
+            valid_headers = False
+    for field in field_mapping['disliked_students_field_names']:
+        if field not in fields:
+            __logger.error(__field_map_error_msg(field))
+            valid_headers = False
+    for field in field_mapping['availability_field_names']:
+        if field not in fields:
+            __logger.error(__field_map_error_msg(field))
+            valid_headers = False
+
+    if field_mapping.get('submission_timestamp_field_name') and field_mapping['submission_timestamp_field_name'] not in fields:
+        __logger.error(__field_map_error_msg(field_mapping['submission_timestamp_field_name']))
+        valid_headers = False
+
+    if valid_headers is False:
+        raise ValueError("Headers from survey data file do not match the field mapping configuration")
+
+
+def __field_map_error_msg(field: str):
+    return f"Error: header '{field}' does not exist in the survey data file. Please check your field_mapping configuration"
+
+
 def read_survey_records(field_mapping: models.SurveyFieldMapping, data_file: TextIOWrapper) -> list[models.SurveyRecord]:
     '''
     reads in a csv file using a csv dictreader and maps the fields back to the survey records
     '''
     reader = csv.DictReader(data_file)
     surveys: list[models.SurveyRecord] = []
+
+    check_survey_field_headers(field_mapping, reader.fieldnames)
+
     for row in reader:
         survey = parse_survey_record(field_mapping, row)
 

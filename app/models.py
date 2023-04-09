@@ -56,7 +56,7 @@ class Configuration(TypedDict):
     output_student_name: bool
     output_student_email: bool
     output_student_login: bool
-
+    prioritize_preferred_over_availability: bool
 
 @dataclass
 class SurveyRecord:
@@ -75,8 +75,11 @@ class SurveyRecord:
     has_matching_availability: bool = True
     provided_availability: bool = True
     provided_survey_data: bool = True
+    provided_pref_students: bool = True
+    pref_pairing_possible: bool = True
     group_id: str = ""
     lock_in_group: bool = False
+
     def __lt__(self, other):
         return self.okay_with_rank + self.avail_rank < other.okay_with_rank + other.avail_rank
 
@@ -116,6 +119,11 @@ class GroupSetData:
     num_disliked_pairs: int = 0
     num_preferred_pairs: int = 0
     num_additional_overlap: int = 0
+    # NOTE: A student should only be included in the num_students_no_pref_pairs value below if they
+    # don't have a preferred pair AND they theoretically could (they listed preferred student(s)
+    # and at least one of these student(s) did not list them as disliked).
+    num_students_no_pref_pairs: int = 0
+    num_additional_pref_pairs: int = 0
 
 
 @dataclass
@@ -154,6 +162,7 @@ class NoSurveyGroupMethodConsts:
     DISTRIBUTE_EVENLY: ClassVar[int] = 1
     GROUP_TOGETHER: ClassVar[int] = 2
 
+
 @dataclass
 class GroupAvailabilityMap:
     '''
@@ -166,12 +175,13 @@ class GroupAvailabilityMap:
     group_id: str
     users: dict[str, list[bool]]
 
-@dataclass 
+
+@dataclass
 class AvailabilityMap:
     '''
     data structure that holds a list of the availability slots
     and the individual times for each slot
-    
+
     '''
 
     availability_slots: dict[str, list[str]]

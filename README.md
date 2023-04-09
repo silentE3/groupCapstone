@@ -167,7 +167,10 @@ JSON format. The following is the structure and explication of the configuration
   /*boolean, include the student's email address in the grouping output*/
   "output_student_email": true,
   /*boolean, include the student's login name in the grouping output*/
-  "output_student_login": true
+  "output_student_login": true,
+  /*boolean. By default, groups with at least one matching time slot are prioritized over preferred lists.
+  Setting this to true will cause the preferred matches to be prioritized.*/
+  "prioritize_preferred_over_availability": false
 }
 ```
 
