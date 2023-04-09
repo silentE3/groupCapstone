@@ -4,7 +4,7 @@ format handles the formatting for data output
 from typing import Any
 from app import models
 from app.group import validate
-from app.group import scoring
+from app.group import scoring, scoring_alternative
 from app.file import xlsx
 from app import config as cfg
 
@@ -15,22 +15,33 @@ def write_report(solutions: list[list[models.GroupRecord]], survey_data: models.
     '''
     xlsx_writer = xlsx.XLSXWriter(filename)
     green_bg = xlsx_writer.new_format("green_bg", {"bg_color": "#00FF00"})
-    formatter = ReportFormatter(data_config, cell_formatters={'green_bg': green_bg})
+    formatter = ReportFormatter(
+        data_config, cell_formatters={'green_bg': green_bg})
 
     for index, solution in enumerate(solutions):
-        availability_map = formatter.generate_availability_map(solution, survey_data)
-        formatted_data = formatter.format_individual_report(solution, availability_map)
+        availability_map = formatter.generate_availability_map(
+            solution, survey_data)
+        formatted_data = formatter.format_individual_report(
+            solution, availability_map)
         group_formatted_report = formatter.format_group_report(solution)
         overall_formatted_report = formatter.format_overall_report(solution)
 
-        xlsx_writer.write_sheet(f'individual_report_{str(index + 1)}', formatted_data).autofit()
-        xlsx_writer.write_sheet(f'group_report_{str(index + 1)}', group_formatted_report).autofit()
-        xlsx_writer.write_sheet(f'overall_report_{str(index + 1)}', overall_formatted_report).autofit()
+        xlsx_writer.write_sheet(
+            f'individual_report_{str(index + 1)}', formatted_data).autofit()
+        xlsx_writer.write_sheet(
+            f'group_report_{str(index + 1)}', group_formatted_report).autofit()
+        overall_sheet = xlsx_writer.write_sheet(
+            f'overall_report_{str(index + 1)}', overall_formatted_report)
+        overall_sheet.autofit()
+        overall_sheet.set_row(0, 30)  # Increase the row height of the top row
 
         set_freeze_panes(xlsx_writer, index)
     config_sheet = formatter.format_config_report()
+
+    config_sheet = formatter.format_config_report()
     xlsx_writer.write_sheet('config', config_sheet)
-    xlsx_writer.write_sheet('survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
+    xlsx_writer.write_sheet(
+        'survey_data', xlsx.convert_to_cells(survey_data.raw_rows))
 
     xlsx_writer.save()
 
@@ -247,7 +258,7 @@ class ReportFormatter():
                                                    len((self.data_config["field_mappings"])[
                                                        "availability_field_names"]))
                 record.append(xlsx.Cell(scoring.score_individual_group(
-                    group, scoring_vars)))
+                    group, scoring_vars, self.data_config['prioritize_preferred_over_availability'])))
 
             records.append(record)
 
@@ -394,7 +405,8 @@ class ReportFormatter():
 
         record = []
 
-        num_groups_total: int = len(groups)
+        num_students: int = sum(len(group.members)
+                                for group in groups)
         num_disliked_pairings: int = validate.total_disliked_pairings(groups)
         num_groups_no_avail: int = validate.total_groups_no_availability(
             groups)
@@ -404,8 +416,22 @@ class ReportFormatter():
             max(validate.availability_overlap_count(group) - 1, 0)
             for group in groups)
 
-        record.append(xlsx.Cell(num_groups_total))
+        num_students_no_pref_pairs: int = 0
+        num_students_pref_pair_not_possible: int = 0
+        for group in groups:
+            for student in group.members:
+                if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
+                    num_students_no_pref_pairs += 1
+                elif not student.pref_pairing_possible:
+                    num_students_pref_pair_not_possible += 1
+        num_additional_pref_pairs: int = num_liked_pairings - \
+            (num_students - num_students_no_pref_pairs -
+             num_students_pref_pair_not_possible)
+
+        record.append(xlsx.Cell(len(groups)))  # total number of groups
         record.append(xlsx.Cell(num_disliked_pairings))
+        if self.data_config['prioritize_preferred_over_availability']:
+            record.append(xlsx.Cell(num_students_no_pref_pairs))
         record.append(xlsx.Cell(num_groups_no_avail))
         record.append(xlsx.Cell(num_liked_pairings))
         record.append(xlsx.Cell(num_additional_overlap))
@@ -422,10 +448,16 @@ class ReportFormatter():
                                                num_groups_no_avail,
                                                num_disliked_pairings,
                                                num_liked_pairings,
-                                               num_additional_overlap)
-            record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
+                                               num_additional_overlap,
+                                               num_students_no_pref_pairs,
+                                               num_additional_pref_pairs)
+            if self.data_config['prioritize_preferred_over_availability']:
+                record.append(
+                    xlsx.Cell(scoring_alternative.score_groups(scoring_vars)))
+            else:
+                record.append(xlsx.Cell(scoring.score_groups(scoring_vars)))
             record.append(xlsx.Cell(
-                round(scoring.standard_dev_groups(groups, scoring_vars), 3)))
+                round(scoring.standard_dev_groups(groups, scoring_vars, self.data_config['prioritize_preferred_over_availability']), 3)))
 
         records.append(record)
 
@@ -435,8 +467,13 @@ class ReportFormatter():
         headers = []
         headers.append(xlsx.Cell("Number of Groups"))
         headers.append(xlsx.Cell('Disliked Pairings'))
-        headers.append(xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
+        if self.data_config['prioritize_preferred_over_availability']:
+            headers.append(
+                xlsx.Cell('Num Student w/o Preferred Paring\n(Of those that "could" have one)'))
+        headers.append(
+            xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
         headers.append(xlsx.Cell('Preferred Pairings'))
+        headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
             headers.append(xlsx.Cell('Score'))
@@ -464,14 +501,14 @@ class ReportFormatter():
 
     def __generate_user_availability_list(self, user: models.SurveyRecord, slot_map: models.AvailabilityMap) -> list[bool]:
         '''
-        given a user and the map of availability slots, a list of 
+        given a user and the map of availability slots, a list of
         bools are created that indicated the time slots available.
 
         map:
 
         [....availability slot....][....availability slot....]
         [day1][day2][day3]...[day7][day1][day2][day3]...[day7]
-          .     .     .        .     .     .     .        .       
+          .     .     .        .     .     .     .        .
           .     .     .        .     .     .     .        .
         list of bools for user:.     .     .     .        .
           .     .     .        .     .     .     .        .

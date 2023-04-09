@@ -111,7 +111,7 @@ def preprocess_survey_data(students: list[models.SurveyRecord], field_mapping: m
         if student.student_id in student.preferred_students:
             student.preferred_students.remove(student.student_id)
         # did student provide preferred student selection
-        student.provided_pref_students = len(student.disliked_students) > 0
+        student.provided_pref_students = len(student.preferred_students) > 0
         # could student "possibly" (reasonably) be paired with one of their preferred selections
         student.pref_pairing_possible = validate.student_pref_pair_possible(
             students, student)

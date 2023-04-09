@@ -13,6 +13,7 @@ def read_json(config_path: str) -> Configuration:
     with open(config_path, mode="r", encoding="UTF-8") as json_file:
         data: Configuration = read_json_from_io(json_file)
 
+
 # The following global module variables and assignments are a move towards
 # creating a single instance of the configuration that does not need to be
 # passed to each method.
@@ -30,6 +31,11 @@ def read_json_from_io(text_buffer: TextIOWrapper) -> Configuration:
     text_buffer.seek(0)
     data: Configuration = json.load(text_buffer)
     __check_config_validity(data)
+
+    try:
+        data["prioritize_preferred_over_availability"]
+    except KeyError:
+        data["prioritize_preferred_over_availability"] = False
 
     # pylint: disable=global-statement
     global CONFIG_DATA

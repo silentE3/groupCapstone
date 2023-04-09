@@ -1,5 +1,5 @@
 '''
-module for a grouping algorithm implementation that creates groups via a constructive, 
+module for a grouping algorithm implementation that creates groups via a constructive,
     heuristic approach with local backtracking.
 '''
 
@@ -7,7 +7,7 @@ from copy import deepcopy
 import random as rnd
 from app import models
 from app.group import validate
-from app.group import scoring
+from app.group import scoring, scoring_alternative
 from app.grouping import printer
 
 
@@ -15,25 +15,19 @@ class Grouper1:
     '''
     This class is used to create groups via a constructive, heuristic approach with local backtracking.
     '''
-    survey_data: list[models.SurveyRecord]
-    config_data: models.Configuration
-    cur_sol_score: float
-    scoring_vars: models.GroupSetData
-    groups: list[models.GroupRecord]
-    best_solution_found: list[models.GroupRecord]
-    best_solution_score: float
-    num_groups: int
-    console_printer: printer.GroupingConsolePrinter
 
     def __init__(self, survey_data: list[models.SurveyRecord], config_data: models.Configuration,
                  num_groups: int, console_printer: printer.GroupingConsolePrinter):
-        self.survey_data = survey_data
-        self.config_data = config_data
-        self.groups = []
-        self.best_solution_found = []
-        self.best_solution_score = -1
-        self.num_groups = num_groups
-        self.console_printer = console_printer
+        self.survey_data: list[models.SurveyRecord] = survey_data
+        self.config_data: models.Configuration = config_data
+        self.cur_sol_score: float
+        self.scoring_vars: models.GroupSetData
+        self.groups: list[models.GroupRecord] = []
+        self.best_solution_found: list[models.GroupRecord] = []
+        self.best_solution_score: float
+        self.num_groups: int = num_groups
+        self.use_alternative_scoring: bool = config_data["prioritize_preferred_over_availability"]
+        self.console_printer: printer.GroupingConsolePrinter = console_printer
 
     def create_groups(self) -> object:
         '''
@@ -120,7 +114,8 @@ class Grouper1:
         # Check if the current solution (groups) score better than the saved best solution
         if (grouping_pass == 0 or (self.cur_sol_score > self.best_solution_score) or
             ((self.cur_sol_score == self.best_solution_score)
-                and (scoring.standard_dev_groups(self.groups, self.scoring_vars) < scoring.standard_dev_groups(self.best_solution_found, self.scoring_vars)))):
+                and (scoring.standard_dev_groups(self.groups, self.scoring_vars, self.use_alternative_scoring) <
+                     scoring.standard_dev_groups(self.best_solution_found, self.scoring_vars, self.use_alternative_scoring)))):
             self.best_solution_found = self.groups
             self.best_solution_score = self.cur_sol_score
 
@@ -316,12 +311,27 @@ class Grouper1:
                                     # subtract one to get "additional"
                                     max(validate.availability_overlap_count(
                                         group) - 1, 0)
-                                    for group in self.groups))
-        self.cur_sol_score = scoring.score_groups(self.scoring_vars)
+                                    for group in self.groups),
+
+                                num_students_no_pref_pairs=0,  # "don't care" unless alternative scoring
+                                num_additional_pref_pairs=0  # "don't care" unless alternative scoring
+                                )
+        if self.use_alternative_scoring:
+            self.__calc_alternative_scoring_vars()
+            self.cur_sol_score = scoring_alternative.score_groups(
+                self.scoring_vars)
+        else:
+            self.cur_sol_score = scoring.score_groups(self.scoring_vars)
 
         # Attempt to eliminate disliked pairings by swapping students that are part of such
         # pairings into other groups.
         self.__eliminate_dislikes(grouping_pass)
+
+        # If each student having at least one preferred pairing is prioritized above each group having
+        # at least one overlapping time slot, then attempt to eliminate students without a preferred
+        # pairing by swapping key students into other groups.
+        if self.config_data["prioritize_preferred_over_availability"]:
+            self.__eliminate_missing_pref_pairing(grouping_pass)
 
         # Attempt to eliminate groups without an overlapping time slot by swapping key students
         #   into other groups.
@@ -386,6 +396,53 @@ class Grouper1:
                     if self.__attempt_swap(idx_stud_most_dislike, group_max_disliked_pairs, True):
                         student_swapped = True
                         break
+
+    def __eliminate_missing_pref_pairing(self, grouping_pass: int):
+        '''
+        This private/helper method attempts to match each student that could potentially have at least one
+            preferred pairing with at at least one of their preferred students (without increasing the
+            total number of dislikes, of course).
+        '''
+        student_swapped = True
+        improvement_swap = True
+        no_improvement_count = 0
+        loop_count = 0
+
+        # While there are more than 0 students that could potentially have a preferred student but do not AND
+        #   the iteration limit has not been met AND
+        #   progress is being made (student_swapped):
+        # Continue to attempt to find improvement swaps.
+        while ((validate.total_students_no_preferred_pair(self.groups) > 0) and
+                (loop_count < max((self.config_data["grouping_passes"]*10), 100)) and
+                (student_swapped and no_improvement_count < 10)):
+
+            loop_count += 1
+            self.console_printer.print("Loop " + str(grouping_pass + 1) +
+                                       " Targetting at least one pref pairing improvement " + str(loop_count))
+            improvement_swap: bool = False
+            student_swapped = False
+
+            # For each student that could potentially have at least one preferred pairing but does not:
+            for group in self.groups:
+                for idx_student, student in enumerate(group.members):
+                    if not student.pref_pairing_possible or len(validate.user_likes_group(student, group)) > 0:
+                        continue
+
+                    # For each student in other groups, if swapping the students would improve
+                    # (lower) the overall solution score, swap the two students.
+                    if self.__attempt_swap(idx_student, group, False):
+                        improvement_swap = True
+                        student_swapped = True
+                    # If no improvement swap was found, try to find an "equivalent" swap instead
+                    elif self.__attempt_swap(idx_student, group, True):
+                        student_swapped = True
+
+            # increment the counter tracking the number of loops without improvement, as necessary
+            if improvement_swap:
+                no_improvement_count = 0
+                continue
+            # loop didn't produce an improvement
+            no_improvement_count += 1
 
     def __eliminate_missing_overlap(self, grouping_pass: int):
         '''
@@ -518,7 +575,7 @@ class Grouper1:
             cur_sol_std_dev: float = 0
             if equiv_swap_ok:
                 cur_sol_std_dev = scoring.standard_dev_groups(
-                    self.groups, self.scoring_vars)
+                    self.groups, self.scoring_vars, self.use_alternative_scoring)
 
             # shuffle the group to avoid getting stuck swapping the same student over and over
             rnd.shuffle(group.members)
@@ -541,18 +598,24 @@ class Grouper1:
                 self.scoring_vars.num_preferred_pairs = validate.total_liked_pairings(
                     self.groups)
 
-                new_sol_score: float = scoring.score_groups(
-                    self.scoring_vars)
+                new_sol_score: float
+                if self.use_alternative_scoring:
+                    self.__calc_alternative_scoring_vars()
+                    new_sol_score = scoring_alternative.score_groups(
+                        self.scoring_vars)
+                else:
+                    new_sol_score = scoring.score_groups(self.scoring_vars)
+
                 if equiv_swap_ok:
                     if (new_sol_score > self.cur_sol_score or
                             (new_sol_score == self.cur_sol_score and
-                             (cur_sol_std_dev >= scoring.standard_dev_groups(self.groups, self.scoring_vars)))):
+                             (cur_sol_std_dev >= scoring.standard_dev_groups(self.groups, self.scoring_vars, self.use_alternative_scoring)))):
                         self.cur_sol_score = new_sol_score
                         break
                 else:
                     if ((new_sol_score > self.cur_sol_score) or
                             (new_sol_score == self.cur_sol_score and
-                             (cur_sol_std_dev > scoring.standard_dev_groups(self.groups, self.scoring_vars)))):
+                             (cur_sol_std_dev > scoring.standard_dev_groups(self.groups, self.scoring_vars, self.use_alternative_scoring)))):
                         self.cur_sol_score = new_sol_score
                         break
 
@@ -673,3 +736,18 @@ class Grouper1:
                 max_dislike_pairs = disliked_pairs
                 group_max_disliked_pairs = group
         return group_max_disliked_pairs
+
+    def __calc_alternative_scoring_vars(self):
+        num_students_pref_pair_not_possible: int = 0
+        self.scoring_vars.num_students_no_pref_pairs = 0  # reset before computing
+        for group in self.groups:
+            for student in group.members:
+                if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
+                    self.scoring_vars.num_students_no_pref_pairs += 1
+                elif not student.pref_pairing_possible:
+                    num_students_pref_pair_not_possible += 1
+
+        self.scoring_vars.num_additional_pref_pairs = self.scoring_vars.num_preferred_pairs - \
+            ((sum(len(group.members) for group in self.groups)) -  # num students
+                self.scoring_vars.num_students_no_pref_pairs -
+                num_students_pref_pair_not_possible)

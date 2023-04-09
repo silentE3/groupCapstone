@@ -374,6 +374,20 @@ def total_disliked_pairings(groups: list[models.GroupRecord]) -> int:
     return result
 
 
+def total_students_no_preferred_pair(groups: list[models.GroupRecord]) -> int:
+    '''
+    This method returns the total number of students that could potentially have
+    at least one preferred pairing but do not.
+    '''
+    result: int = 0
+
+    for group in groups:
+        for student in group.members:
+            if student.pref_pairing_possible and len(user_likes_group(student, group)) == 0:
+                result += 1
+    return result
+
+
 def total_groups_no_availability(groups: list[models.GroupRecord]) -> int:
     '''
     This method returns the total number of groups without an overlapping time
@@ -444,7 +458,6 @@ def generate_preferred_pairs_per_group(groupings: list[models.GroupRecord]) -> d
                         pairs.append(pair)
         pairs.sort(key=lambda x: x[0])
     return groups
-
 
 
 def generate_preferred_list_per_user(groupings: list[models.GroupRecord]) -> dict[str, list[str]]:
