@@ -6,6 +6,7 @@ from pathlib import Path
 from concurrent.futures import as_completed, wait
 from multiprocessing import synchronize, Event
 from multiprocessing.managers import BaseManager
+import sys
 from time import sleep
 from pebble import ProcessPool, ProcessFuture
 import click
@@ -37,49 +38,49 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
 
     SURVEYFILE is path to the raw survey output. [default=dataset.csv]
     '''
-    ########## Determine Output Filenames ##########
-    report_filename: str = __report_filename(
-        surveyfile, reportfile)
+    try:
+        ########## Determine Output Filenames ##########
+        report_filename: str = __report_filename(surveyfile, reportfile)
 
-    ########## Load the config data ##########
-    config_data: models.Configuration = config.read_json(configfile)
+        ########## Load the config data ##########
+        config_data: models.Configuration = config.read_json(configfile)
 
-    ########## Load the survey data ##########
-    survey_data: models.SurveyData = load.read_survey(
-        config_data['field_mappings'], surveyfile)
+        ########## Load the survey data ##########
+        survey_data: models.SurveyData = load.read_survey(config_data['field_mappings'], surveyfile)
 
-    ########## Load the class roster data, if applicable ##########
-    if allstudentsfile:
-        click.echo(
-            f'checking roster for missing students in {allstudentsfile}')
-        survey_data.records = load.add_missing_students(
-            survey_data.records, load.read_roster(allstudentsfile), config_data['field_mappings']['availability_field_names'])
+        ########## Load the class roster data, if applicable ##########
+        if allstudentsfile:
+            click.echo(
+                f'checking roster for missing students in {allstudentsfile}')
+            survey_data.records = load.add_missing_students(
+                survey_data.records, load.read_roster(allstudentsfile), config_data['field_mappings']['availability_field_names'])
+        ########## Grouping ##########
 
-    ########## Grouping ##########
+        # Perform pre-grouping error checking
+        if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
+                                         config_data["target_minus_one_allowed"], survey_data.records):
+            return  # error found -- don't continue
 
-    # Perform pre-grouping error checking
-    if core.pre_group_error_checking(config_data["target_group_size"], config_data["target_plus_one_allowed"],
-                                     config_data["target_minus_one_allowed"], survey_data.records):
-        return  # error found -- don't continue
+        # Run grouping algorithms
+        click.echo(f'grouping students from {surveyfile}')
 
-    # Run grouping algorithms
-    click.echo(f'grouping students from {surveyfile}')
+        # Determine min and max possible number of groups
+        min_max_num_groups: list[int] = core.get_min_max_num_groups(
+            survey_data.records,
+            config_data["target_group_size"],
+            config_data["target_plus_one_allowed"],
+            config_data["target_minus_one_allowed"])
 
-    # Determine min and max possible number of groups
-    min_max_num_groups: list[int] = core.get_min_max_num_groups(
-        survey_data.records,
-        config_data["target_group_size"],
-        config_data["target_plus_one_allowed"],
-        config_data["target_minus_one_allowed"])
+        ########## Run both grouping algorithms in parallel via multiprocessing ##########
+        best_solutions: list[list[models.GroupRecord]] = __run_grouping_algs(
+            survey_data, config_data, min_max_num_groups)
 
-    ########## Run both grouping algorithms in parallel via multiprocessing ##########
-    best_solutions: list[list[models.GroupRecord]] = __run_grouping_algs(
-        survey_data, config_data, min_max_num_groups)
-
-    ########## Output solutions report if configured ##########
-    click.echo(f'Writing report to: {report_filename}')
-    reporter.write_report(best_solutions, survey_data,
-                          config_data, report_filename)
+        ########## Output solutions report if configured ##########
+        click.echo(f'Writing report to: {report_filename}')
+        reporter.write_report(best_solutions, survey_data,
+                              config_data, report_filename)
+    except (ValueError, AttributeError):
+        sys.exit(1)
 
 
 def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Configuration, min_max_num_groups: list[int]) -> list[list[models.GroupRecord]]:

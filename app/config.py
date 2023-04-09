@@ -1,10 +1,12 @@
 '''config holds the logic to read in a configuration object'''
 import json
-import sys
 from io import TextIOWrapper, StringIO
+import logging
 from openpyxl import load_workbook
+from app import models
 from app.models import Configuration, NoSurveyGroupMethodConsts
 
+__logger = logging.getLogger(__name__)
 
 def read_json(config_path: str) -> Configuration:
     """Reads in a json configuration file"""
@@ -62,7 +64,7 @@ def read_report_config(report_filename: str) -> Configuration:
         for row_num, cell in enumerate(col):
             if row_num == 0:
                 # The header of the column (first row) contains the item's key
-                config_item_key = cell.value
+                config_item_key = str(cell.value)
             elif cell.value is None:
                 continue
             else:
@@ -114,8 +116,36 @@ def __check_config_validity(config_data: Configuration):
     if "no_survey_group_method" not in config_data:
         config_data["no_survey_group_method"] = NoSurveyGroupMethodConsts.STANDARD_GROUPING
     if config_data['no_survey_group_method'] not in valid_no_survey_group_methods:
-        print('Invalid configuration selection for "no_survey_group_method".')
-        sys.exit(1)
+        __logger.error('Invalid configuration selection for "no_survey_group_method".')
+        raise ValueError('Invalid configuration selection for "no_survey_group_method".')
+
+def validate_field_mappings(fields: models.SurveyFieldMapping):
+    '''
+    Validates the field mappings specification in the configuration data.
+    '''
+    valid_fields = True
+    if fields.get('availability_field_names') is None or len(fields.get('availability_field_names')) == 0:
+        __logger.error(__field_error_msg('availability_field_names'))
+        valid_fields = False
+
+    if fields.get('disliked_students_field_names') is None or len(fields.get('disliked_students_field_names')) == 0:
+        __logger.error(__field_error_msg('disliked_students_field_names'))
+        valid_fields = False
+
+    if fields.get('preferred_students_field_names') is None or len(fields.get('preferred_students_field_names')) == 0:
+        __logger.error(__field_error_msg('preferred_students_field_names'))
+        valid_fields = False
+
+    if fields.get('student_id_field_name') is None:
+        __logger.error(__field_error_msg('student_id_field_name'))
+        valid_fields = False
+
+    if valid_fields is False:
+        raise AttributeError('Invalid or missing field mappings in the configuration file.')
+
+
+def __field_error_msg(field_name: str) -> str:
+    return f'Error: No {field_name} field name was specified in the configuration file. Please provide a value for "{field_name}".'
 
 
 CONFIG_DATA = None

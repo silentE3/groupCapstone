@@ -431,3 +431,4 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
+    
