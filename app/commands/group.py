@@ -52,10 +52,8 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
     if allstudentsfile:
         click.echo(
             f'checking roster for missing students in {allstudentsfile}')
-        survey_data.records = load.add_missing_students(
-            survey_data.records, load.read_roster(allstudentsfile), config_data['field_mappings']['availability_field_names'])
-        survey_data.records = load.remove_students_not_in_roster_from_survey(survey_data.records, load.read_roster(allstudentsfile))
-
+        survey_data.records = load.match_survey_to_roster(survey_data.records, 
+            load.read_roster(allstudentsfile), config_data['field_mappings']['availability_field_names'])
     ########## Grouping ##########
 
     # Perform pre-grouping error checking
