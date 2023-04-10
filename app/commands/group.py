@@ -6,7 +6,6 @@ from pathlib import Path
 from concurrent.futures import as_completed, wait
 from multiprocessing import synchronize, Event
 from multiprocessing.managers import BaseManager
-import sys
 from time import sleep
 from pebble import ProcessPool, ProcessFuture
 import click
@@ -64,12 +63,23 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         # Run grouping algorithms
         click.echo(f'grouping students from {surveyfile}')
 
-        # Determine min and max possible number of groups
-        min_max_num_groups: list[int] = core.get_min_max_num_groups(
-            survey_data.records,
-            config_data["target_group_size"],
-            config_data["target_plus_one_allowed"],
-            config_data["target_minus_one_allowed"])
+    ########################################################################################
+    # NOTE: We're no longer doing this (getting a "true" min and max group size). The sponsor
+    #  has decided that she would prefer it if the algorithms adhere to the target size to
+    #  the extent possible, which means there will only be one "proper" number of groups.
+
+    # Determine min and max possible number of groups
+    # min_max_num_groups: list[int] = core.get_min_max_num_groups(
+    #    survey_data.records,
+    #    config_data["target_group_size"],
+    #    config_data["target_plus_one_allowed"],
+    #    config_data["target_minus_one_allowed"])
+    ########################################################################################
+    num_groups: int = core.get_num_groups(survey_data.records,
+                                          config_data["target_group_size"],
+                                          config_data["target_plus_one_allowed"],
+                                          config_data["target_minus_one_allowed"])
+    min_max_num_groups: list[int] = [num_groups, num_groups]
 
         ########## Run both grouping algorithms in parallel via multiprocessing ##########
         best_solutions: list[list[models.GroupRecord]] = __run_grouping_algs(
@@ -79,8 +89,14 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(best_solutions, survey_data,
                               config_data, report_filename)
-    except (ValueError, AttributeError):
-        sys.exit(1)
+
+    except ValueError as ve:
+    print(f"ValueError: {ve}\n**Check the paths to the input files, if those are ok, then check them for errors**")
+    sys.exit(1)
+
+    except AttributeError as ae:
+    print(f"AttributeError: {ae}\n**Check the input files for errors**")
+    sys.exit(1)
 
 
 def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Configuration, min_max_num_groups: list[int]) -> list[list[models.GroupRecord]]:

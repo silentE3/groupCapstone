@@ -1,7 +1,9 @@
 import os
 from click.testing import CliRunner
 import math
+from app import config, models
 from app.commands import group
+from app.data import load
 from tests.test_utils.helper_functions import verify_groups
 
 
@@ -83,32 +85,6 @@ def test_group_3():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_3_report.xlsx')
-
-
-def test_group_quality_4():
-    '''
-    Test of grouping 18 students with a target group size of 5 +/- 1 (testing +/-
-     1 variability here).
-
-    The expected outcome is that the tool provides solutions consisting
-     of groups whose sizes all fall within the range [4, 6].
-    '''
-
-    response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_18.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
-    assert response.exit_code == 0
-
-    expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
-                         'rweasle3', 'hgrange2', 'rhagrid5', 'hpotter1', 'nlongbo6',
-                         'adumble4_2', 'triddle8_2', 'dmalfoy7_2',
-                         'rweasle3_2', 'hgrange2_2', 'rhagrid5_2', 'hpotter1_2', 'nlongbo6_2',
-                         'hpotter1_3', 'nlongbo6_3']
-    verify_groups('./tests/test_files/survey_results/test_18_report.xlsx', 4,
-                  6, expected_students)
-    # Verify "Error:" is NOT included in the output
-    assert "Error:" not in response.output
-
-    os.remove('./tests/test_files/survey_results/test_18_report.xlsx')
 
 
 def test_group_size_not_possible():
@@ -202,3 +178,56 @@ def test_alt_command_args_1():
     assert response.output.endswith(
         'Writing report to: test_verify_and_report_file_name_1_report.xlsx\n')
     os.remove('test_verify_and_report_file_name_1_report.xlsx')
+
+
+def test_group_adheres_to_target_size():
+    '''
+    Test of grouping 31 students with a target group size of 5 plus 1 divides into 3 groups of 5 and 4 group of 4
+    '''
+    survey_file = 'test_group_adheres_to_target_size'
+    response = runner.invoke(group.group, [
+                             f'./tests/test_files/survey_results/{survey_file}.csv', '--configfile', f'./tests/test_files/configs/{survey_file}.json'])
+    assert response.exit_code == 0
+
+    config_data: models.Configuration = config.read_report_config(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+
+    survey_data = load.read_report_survey_data(f'./tests/test_files/survey_results/{survey_file}_report.xlsx',
+                                               config_data['field_mappings'])
+    # returns a list of group record lists
+    group_solutions: list[list[models.GroupRecord]] = load.read_report_groups(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx', survey_data.records)
+
+    for solution in group_solutions:
+        groups_with_5_members = list(filter(lambda group: len(group.members) == 5, solution))
+        assert len(groups_with_5_members) == 5
+        assert len(solution)-len(groups_with_5_members) == 1
+
+    os.remove(f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+
+
+def test_group_adheres_to_target_size_1():
+    '''
+    Test of grouping 29 students with a target group size of 5 with the ability to shrink by 1 into 5 groups of 5 and 1 group of 4
+    '''
+    survey_file = 'test_group_adheres_to_target_size_1'
+    response = runner.invoke(group.group, [
+                             f'./tests/test_files/survey_results/{survey_file}.csv', '--configfile', f'./tests/test_files/configs/{survey_file}.json'])
+    assert response.exit_code == 0
+
+    config_data: models.Configuration = config.read_report_config(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
+
+    survey_data = load.read_report_survey_data(f'./tests/test_files/survey_results/{survey_file}_report.xlsx',
+                                               config_data['field_mappings'])
+    # returns a list of group record lists
+    group_solutions: list[list[models.GroupRecord]] = load.read_report_groups(
+        f'./tests/test_files/survey_results/{survey_file}_report.xlsx', survey_data.records)
+
+    for solution in group_solutions:
+        groups_with_5_members = list(
+            filter(lambda group: len(group.members) == 5, solution))
+        assert len(groups_with_5_members) == 5
+        assert len(solution)-len(groups_with_5_members) == 1
+
+    os.remove(f'./tests/test_files/survey_results/{survey_file}_report.xlsx')
