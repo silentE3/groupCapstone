@@ -56,7 +56,7 @@ class Configuration(TypedDict):
     output_student_name: bool
     output_student_email: bool
     output_student_login: bool
-
+    prioritize_preferred_over_availability: bool
 
 @dataclass
 class SurveyRecord:
