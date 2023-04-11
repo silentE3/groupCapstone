@@ -5,6 +5,7 @@ import copy
 import csv
 import datetime
 from io import StringIO
+from operator import contains
 import pytest
 from app import models
 from app import config
@@ -994,7 +995,7 @@ def test_parse_survey_record_fails_on_student_id():
         'pref 2': '',
         '1': 'monday;tuesday'
     }
-    with pytest.raises(AttributeError):
+    with pytest.raises(ValueError):
         record = load.parse_survey_record(config, row)
 
 
@@ -1506,7 +1507,6 @@ def test_load_raw_survey_data():
                                                                                                                                                           '', '', '', '', '', '', '', '', '', '']]
     assert raw_data == expected_data
 
-
 def test_remove_self_from_preferred():
     '''
     Ensure that the user, who added themselves to their preferred list
@@ -1567,4 +1567,175 @@ def test_no_change_self_not_in_disliked():
 
     assert len(surveys_result.records[0].disliked_students) == 2
     assert len(surveys_result.records[1].disliked_students) == 2
-    assert len(surveys_result.records[2].disliked_students) == 1
+
+def test_remove_students_not_in_roster_from_survey():
+    '''
+    Tests if a student not found in the roster is removed from survey.
+    '''
+    roster = []
+    roster = load.read_roster("./tests/test_files/example_roster_2.csv")
+    result = []
+
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False)                   
+    ]
+
+    result = load.remove_students_not_in_roster_from_survey(survey, roster)
+
+    assert len(result) == 4
+    assert result[0].student_id == "asurite1"
+    assert result[1].student_id == "asurite2"
+    assert result[2].student_id == "asurite3"
+    assert result[3].student_id == "asurite4"
+
+def test_remove_students_not_in_roster_from_survey_2():
+    '''
+    Tests when the roster matches the survey data.
+    '''
+
+    roster = []
+    roster = load.read_roster("./tests/test_files/example_roster_2.csv")
+    result = []
+
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False)                 
+    ]
+
+    result = load.remove_students_not_in_roster_from_survey(survey, roster)
+
+    assert len(result) == 4
+    assert result[0].student_id == "asurite1"
+    assert result[1].student_id == "asurite2"
+    assert result[2].student_id == "asurite3"
+    assert result[3].student_id == "asurite4"
+
+def test_remove_students_not_in_roster_from_survey_3():
+    '''
+    Tests if more than 1 student not found in the roster is removed from survey.
+    '''
+
+    roster = []
+    roster = load.read_roster("./tests/test_files/example_roster_3.csv")
+    result = []
+
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite6', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite7', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite8', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite9', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite10', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite11', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite12', availability={
+                            '1': []}, provided_availability=False),                      
+    ]
+
+    result = load.remove_students_not_in_roster_from_survey(survey, roster)
+
+    assert len(result) == 8
+    assert result[0].student_id == "asurite1"
+    assert result[1].student_id == "asurite2"
+    assert result[2].student_id == "asurite3"
+    assert result[3].student_id == "asurite4"
+    assert result[4].student_id == "asurite5"
+    assert result[5].student_id == "asurite6"
+    assert result[6].student_id == "asurite7"
+    assert result[7].student_id == "asurite8"
+
+def test_match_survey_to_roster():
+    '''
+    tests resulting data is matched to roster after running through the function.
+    This should remove and add any students not in the roster.
+    - asserts that the length of the resulting data is the same as the roster
+    - asserts that the resulting students are the same as the roster
+    '''
+    roster = ['asurite1', 'asurite2', 'asurite3', 'asurite4', 'asurite7']
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite6', availability={
+                            '1': []}, provided_availability=False)
+    ]
+    
+    results = load.match_survey_to_roster(survey, roster, avail_field=['1'])
+    
+    assert len(results) == 5
+    assert set(roster) == set(student.student_id for student in results)
+    
+
+def test_match_survey_to_roster_empty_roster():
+    '''
+    tests resulting data is matched to roster after running through the function
+    '''
+    roster = []
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite6', availability={
+                            '1': []}, provided_availability=False)
+    ]
+
+    results = load.match_survey_to_roster(survey, roster, avail_field=['1'])
+
+    assert len(results) == 0
+
+
+def test_match_survey_to_roster_empty_survey():
+    '''
+    tests resulting data is matched to roster after running through the function
+    '''
+    roster = ['asurite1', 'asurite2', 'asurite3', 'asurite4', 'asurite7']
+    survey = []
+
+    results = load.match_survey_to_roster(survey, roster, avail_field=['1'])
+
+    assert len(results) == 5
+
+    
