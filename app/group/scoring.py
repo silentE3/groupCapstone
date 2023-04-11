@@ -97,11 +97,15 @@ def score_individual_group(group: models.GroupRecord, variables: models.GroupSet
 
     if use_alternative_scoring:
         variables.num_students_no_pref_pairs = 0  # ensure it starts at 0
+        num_students_pref_pair_not_possible: int = 0
         for student in group.members:
             if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
                 variables.num_students_no_pref_pairs += 1
+            elif not student.pref_pairing_possible:
+                num_students_pref_pair_not_possible += 1
         variables.num_additional_pref_pairs = variables.num_preferred_pairs - \
-            (len(group.members) - variables.num_students_no_pref_pairs)
+            (len(group.members) - variables.num_students_no_pref_pairs -
+             num_students_pref_pair_not_possible)
         return scoring_alternative.score_groups(variables)
     # "else"
     return score_groups(variables)

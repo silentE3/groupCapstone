@@ -168,13 +168,14 @@ def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models
                     future.cancel()
                 return best_solution_found
 
+        use_alternative_scoring: bool = config_data['prioritize_preferred_over_availability']
         for future in as_completed(futures):
             grouper = future.result()
             if (no_finished_runs or
                 (best_solution_found.best_solution_score <= grouper.best_solution_score) or
                 (best_solution_found.best_solution_score == grouper.best_solution_score) and
-                    (scoring.standard_dev_groups(best_solution_found.best_solution_found, best_solution_found.scoring_vars) >=
-                        scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars))):
+                    (scoring.standard_dev_groups(best_solution_found.best_solution_found, best_solution_found.scoring_vars, use_alternative_scoring) >=
+                        scoring.standard_dev_groups(grouper.best_solution_found, grouper.scoring_vars, use_alternative_scoring))):
                 best_solution_found = grouper
             no_finished_runs = False
     return best_solution_found
