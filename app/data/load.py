@@ -433,3 +433,61 @@ def read_report_survey_data(report_filename: str, field_mappings: models.SurveyF
     # load and return the survey data from the io buffer
     text_buffer.seek(0)
     return read_survey_from_io(field_mappings, text_buffer)
+
+def remove_students_not_in_roster_from_survey(survey_data: list[models.SurveyRecord], roster: list[str]) -> list[models.SurveyRecord]:
+    '''
+    Removes students from the survey if they are not in the roster.
+    '''
+    current_list : list[models.SurveyRecord]
+    current_list = survey_data
+    roster_list = roster
+    non_roster_ids = []
+    
+    #This part focuses on finding and listing all the ids not found in the roster.
+    for index, val in enumerate(current_list, start=1):
+        print(index)
+        check = False
+        for index2, val2 in enumerate(roster_list, start=1):
+            if val2 == val.student_id:
+                print(index2)
+                check = True
+                break
+
+        if check is False:
+            non_roster_ids.append(val)
+
+    #This part focuses on removing all the ids not found in the roster.
+    for index, val in enumerate(non_roster_ids, start=1):
+        current_list.remove(val)
+
+    return current_list
+
+
+def match_survey_to_roster(survey_data: list[models.SurveyRecord], roster: list[str], avail_field: list[str]) -> list[models.SurveyRecord]:
+    '''
+    This function handles removing or adding any students that are not in the roster.
+    - If a student is in the roster but not in the survey, they will be added to the survey with a wildcard availability.
+    - If a student is in the survey but not in the roster, they will be removed from the survey.
+    '''
+
+    matched_survey_records: list[models.SurveyRecord] = []
+
+    # add only students that are in the roster
+    for student_id in survey_data:
+        if any(student_id.student_id == id for id in roster):
+            matched_survey_records.append(student_id)
+
+    # add missing students from the roster
+    for student_id in roster:
+        if not any(student_id == student.student_id for student in survey_data):
+            record = models.SurveyRecord(
+                student_id=student_id,
+            )
+            # This code will use the function that adds availiability to all time slots.
+            record.availability = wildcard_availability(avail_field)
+            record.provided_survey_data = False
+            record.provided_availability = False
+            record.has_matching_availability = False
+            matched_survey_records.append(record)
+
+    return matched_survey_records
