@@ -6,6 +6,51 @@ import click
 from app import models
 
 
+def get_num_groups(survey_data: list, target_group_size_in: int, target_plus_one_allowed: bool, target_minus_one_allowed: bool) -> int:
+    '''
+    Function for determining the number of groups that the students
+        will be seperated into when adhering to the target group size
+        to the extent possible.
+
+    Returns -1 if it is not possible to adhere to the target group size +/- the
+         configurable margins (e.g. target = 6 with a +/-1 margin and 8 total students)
+    '''
+    target_group_size: int = target_group_size_in
+
+    # protection from invalid group size input
+    if len(survey_data) == 0:
+        return 0
+    if target_group_size <= 0:
+        if target_plus_one_allowed and (target_group_size + 1) > 0:
+            target_group_size = 1
+        else:
+            return -1
+
+    # Calculate the number of groups that best adheres to target group
+    # size, while considering the configured margins
+    num_groups: int = 0
+    if ((target_minus_one_allowed and target_plus_one_allowed) or
+            (not target_minus_one_allowed and not target_plus_one_allowed)):
+        # standard rounding
+        num_groups = round(len(survey_data) / target_group_size)
+    elif target_minus_one_allowed:
+        num_groups = -(-len(survey_data) // target_group_size)  # round down
+    else:
+        num_groups = len(survey_data) // target_group_size  # round up
+    num_groups = max(num_groups, 1)  # make sure at least one group
+
+    # make sure it is possible to adhere to the target group size +/- 1
+    max_group_size: int = target_group_size_in + \
+        1 if target_plus_one_allowed else target_group_size_in
+    min_group_size: int = target_group_size_in - \
+        1 if target_minus_one_allowed else target_group_size_in
+    if not ((min_group_size * num_groups <= len(survey_data)) and
+            ((max_group_size * num_groups >= len(survey_data)))):
+        return -1  # not possible to adhere to the target group size +/- the configured margins
+
+    return num_groups
+
+
 def get_min_max_num_groups(survey_data: list, target_group_size: int, target_plus_one_allowed: bool, target_minus_one_allowed: bool) -> list[int]:
     '''
     Function for determining the number of groups that the
