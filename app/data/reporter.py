@@ -474,6 +474,7 @@ class ReportFormatter():
             xlsx.Cell('Number of Groups Without Overlapping Time Slot'))
         headers.append(xlsx.Cell('Preferred Pairings'))
         headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
+        headers.append(xlsx.Cell('"Additional" Overlapping Time Slots'))
         if self.report_config['show_scores']:
             headers.append(xlsx.Cell('Score'))
             headers.append(xlsx.Cell('Standard Deviation of Groups'))

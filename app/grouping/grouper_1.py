@@ -1,5 +1,5 @@
 '''
-module for a grouping algorithm implementation that creates groups via a constructive,
+module for a grouping algorithm implementation that creates groups via a constructive, 
     heuristic approach with local backtracking.
 '''
 
@@ -15,6 +15,15 @@ class Grouper1:
     '''
     This class is used to create groups via a constructive, heuristic approach with local backtracking.
     '''
+    survey_data: list[models.SurveyRecord]
+    config_data: models.Configuration
+    cur_sol_score: float
+    scoring_vars: models.GroupSetData
+    groups: list[models.GroupRecord]
+    best_solution_found: list[models.GroupRecord]
+    best_solution_score: float
+    num_groups: int
+    console_printer: printer.GroupingConsolePrinter
 
     def __init__(self, survey_data: list[models.SurveyRecord], config_data: models.Configuration,
                  num_groups: int, console_printer: printer.GroupingConsolePrinter):
