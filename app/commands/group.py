@@ -91,12 +91,12 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         reporter.write_report(best_solutions, survey_data,
                               config_data, report_filename)
 
-    except ValueError as ve:
-        print(f"ValueError: {ve}\n**Check the paths to the input files, if those are ok, then check them for errors**")
+    except ValueError as value_error:
+        print(f"ValueError: {value_error}\n**Check the paths to the input files, if those are ok, then check them for errors**")
         sys.exit(1)
 
-    except AttributeError as ae:
-        print(f"AttributeError: {ae}\n**Check the input files for errors**")
+    except AttributeError as attribute_error:
+        print(f"AttributeError: {attribute_error}\n**Check the input files for errors**")
         sys.exit(1)
 
 
