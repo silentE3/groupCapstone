@@ -6,7 +6,7 @@ from random import randint
 from typing import Optional
 from app import models
 from app.data import load
-from app.group import validate, scoring
+from app.group import validate, scoring, scoring_alternative
 from app.grouping import printer
 
 
@@ -28,7 +28,9 @@ class Grouper2:
         self.num_students: int = len(self.students)
         for idx in range(self.group_count):
             self.groups.append(models.GroupRecord(f"group_{idx+1}"))
+        self.use_alternative_scoring: bool = config["prioritize_preferred_over_availability"]
         self.console_printer: printer.GroupingConsolePrinter = console_printer
+        self.scoring_vars: models.GroupSetData
 
     def group_students(self) -> list[models.GroupRecord]:
         """
@@ -42,7 +44,6 @@ class Grouper2:
         self.balance_groups()
         self.console_printer.print('optimizing groups for best solution')
         self.optimize_groups()
-        # self.console_printer.print(f'group size={self.group_count}, score={self.grade_groups()}')
 
         # Clear any final print statement in preparation for it to be overwritten
         self.console_printer.print("")
@@ -50,7 +51,9 @@ class Grouper2:
 
     def prepare_students_for_grouping(self):
         '''
-        ensures the survey data is ready to be grouped
+        ensures the survey data is ready to be grouped by checking to see how the students with no survey data will be
+        grouped and if the config specifies that they should be grouped together or distributed evenly, then they are
+        locked into groups
         '''
 
         if self.config['no_survey_group_method'] == models.NoSurveyGroupMethodConsts.STANDARD_GROUPING:
@@ -128,7 +131,7 @@ class Grouper2:
                     if member.lock_in_group:
                         continue
                     # if the member meets the given hard reqs, add them to the targeted undersized group
-                    if meets_hard_requirement(member, group, self.target_group_size):
+                    if meets_hard_requirement(member, group, self.target_group_size, self.use_alternative_scoring):
                         other_group.members.remove(member)
                         group.members.append(member)
 
@@ -218,6 +221,20 @@ class Grouper2:
             # subtract one to get "additional"
             max(validate.availability_overlap_count(group) - 1, 0) for group in self.groups)
 
+        if self.use_alternative_scoring:
+            self.scoring_vars = models.GroupSetData("solution_2",
+                                               self.target_group_size,
+                                               len((self.config["field_mappings"])[
+                                                   "preferred_students_field_names"]),
+                                               self.num_students,
+                                               len((self.config["field_mappings"])[
+                                                   "availability_field_names"]),
+                                               num_groups_no_avail,
+                                               num_pairings_disliked,
+                                               num_pairings_liked,
+                                               num_additional_overlap)
+            validate.calc_alternative_scoring_vars(self)
+            return scoring_alternative.score_groups(self.scoring_vars)
         scoring_vars = models.GroupSetData("solution_2",
                                            self.target_group_size,
                                            len((self.config["field_mappings"])[
@@ -238,13 +255,13 @@ class Grouper2:
         This ensures population of the groups before getting hung up in a cycle of finding best case scenarios.
         """
         for group in self.groups:
-            if meets_hard_requirement(student, group, self.target_group_size):
+            if meets_hard_requirement(student, group, self.target_group_size, self.use_alternative_scoring):
                 group.members.append(student)
                 return
 
         # if finding a scenario with the target group size isn't feasible, attempt to just append them
         for group in self.groups:
-            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin_upper):
+            if meets_hard_requirement(student, group, self.target_group_size+self.target_group_margin_upper, self.use_alternative_scoring):
                 group.members.append(student)
                 return
 
@@ -373,10 +390,10 @@ class Grouper2:
                                            self.num_students,
                                            len((self.config["field_mappings"])[
                                                "availability_field_names"]))
-        return scoring.score_individual_group(group, scoring_vars)
+        return scoring.score_individual_group(group, scoring_vars, self.use_alternative_scoring)
 
 
-def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int):
+def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int, use_alternative_scoring: bool):
     '''
     checks if the basic hard requirements are met including the group size, availability, and dislikes
     '''
@@ -385,10 +402,13 @@ def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupReco
         return False
 
     group_copy = copy.deepcopy(group)
+    meets_preferred = validate.user_likes_group(student, group_copy)
     group_copy.members.append(student)
     meets_dislikes = validate.meets_dislike_requirement(group_copy)
     meets_avail = validate.meets_group_availability_requirement(group_copy)
     group_size = len(group_copy.members)
+    if use_alternative_scoring and len(student.preferred_students) > 0:
+        return meets_dislikes and meets_avail and group_size <= max_group_size and meets_preferred
 
     return meets_dislikes and meets_avail and group_size <= max_group_size
 
@@ -426,4 +446,3 @@ def rank_students(students: list[models.SurveyRecord]):
             students) - total_dislike_incompatible_students(student, students)
 
     students.sort(reverse=True)
-    

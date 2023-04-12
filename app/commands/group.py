@@ -90,7 +90,13 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
         click.echo(f'Writing report to: {report_filename}')
         reporter.write_report(best_solutions, survey_data,
                               config_data, report_filename)
-    except (ValueError, AttributeError):
+
+    except ValueError as value_error:
+        print(f"ValueError: {value_error}\n**Check the paths to the input files, if those are ok, then check them for errors**")
+        sys.exit(1)
+
+    except AttributeError as attribute_error:
+        print(f"AttributeError: {attribute_error}\n**Check the input files for errors**")
         sys.exit(1)
 
 

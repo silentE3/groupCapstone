@@ -109,6 +109,14 @@ def read_report_config(report_filename: str) -> Configuration:
 
 
 def __check_config_validity(config_data: Configuration):
+
+    '''
+    __check_config_validity() helps determin how students who did not fill out a survey will be distributed across groups, STANDARD is
+    just the same way it was being hadles, no particular attention paid to the students with no survey data,
+    DISTRIBUTE_EVENLY will distribute the students with no survey data evenly across the groups, GROUP_TOGETHER will
+    put all the students with no survey data in the same group
+    '''
+
     valid_no_survey_group_methods = [NoSurveyGroupMethodConsts.STANDARD_GROUPING,
                                      NoSurveyGroupMethodConsts.DISTRIBUTE_EVENLY, NoSurveyGroupMethodConsts.GROUP_TOGETHER]
     if "no_survey_group_method" not in config_data:
