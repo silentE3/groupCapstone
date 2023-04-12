@@ -543,3 +543,18 @@ def max_num_groups_possible_scoring(target_group_size: int, num_students: int) -
         return trunc(num_students / target_group_size)
     # "else"
     return trunc(num_students / (target_group_size - 1))
+
+def calc_alternative_scoring_vars(grouping):
+    num_students_pref_pair_not_possible: int = 0
+    grouping.scoring_vars.num_students_no_pref_pairs = 0  # reset before computing
+    for group in grouping.groups:
+        for student in group.members:
+            if student.pref_pairing_possible and len(user_likes_group(student, group)) == 0:
+                grouping.scoring_vars.num_students_no_pref_pairs += 1
+            elif not student.pref_pairing_possible:
+                num_students_pref_pair_not_possible += 1
+
+    grouping.scoring_vars.num_additional_pref_pairs = grouping.scoring_vars.num_preferred_pairs - \
+                                                      ((sum(len(group.members) for group in grouping.groups)) -  # num students
+                                                       grouping.scoring_vars.num_students_no_pref_pairs -
+                                                       num_students_pref_pair_not_possible)

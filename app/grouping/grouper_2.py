@@ -233,7 +233,7 @@ class Grouper2:
                                                num_pairings_disliked,
                                                num_pairings_liked,
                                                num_additional_overlap)
-            self.__calc_alternative_scoring_vars()
+            validate.calc_alternative_scoring_vars(self)
             return scoring_alternative.score_groups(self.scoring_vars)
         scoring_vars = models.GroupSetData("solution_2",
                                            self.target_group_size,
@@ -391,22 +391,6 @@ class Grouper2:
                                            len((self.config["field_mappings"])[
                                                "availability_field_names"]))
         return scoring.score_individual_group(group, scoring_vars, self.use_alternative_scoring)
-
-
-    def __calc_alternative_scoring_vars(self):
-        num_students_pref_pair_not_possible: int = 0
-        self.scoring_vars.num_students_no_pref_pairs = 0  # reset before computing
-        for group in self.groups:
-            for student in group.members:
-                if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
-                    self.scoring_vars.num_students_no_pref_pairs += 1
-                elif not student.pref_pairing_possible:
-                    num_students_pref_pair_not_possible += 1
-
-        self.scoring_vars.num_additional_pref_pairs = self.scoring_vars.num_preferred_pairs - \
-            ((sum(len(group.members) for group in self.groups)) -  # num students
-                self.scoring_vars.num_students_no_pref_pairs -
-                num_students_pref_pair_not_possible)
 
 
 def meets_hard_requirement(student: models.SurveyRecord, group: models.GroupRecord, max_group_size: int, use_alternative_scoring: bool):

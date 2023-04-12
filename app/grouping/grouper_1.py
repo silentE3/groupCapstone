@@ -317,7 +317,7 @@ class Grouper1:
                                 num_additional_pref_pairs=0  # "don't care" unless alternative scoring
                                 )
         if self.use_alternative_scoring:
-            self.__calc_alternative_scoring_vars()
+            validate.calc_alternative_scoring_vars(self)
             self.cur_sol_score = scoring_alternative.score_groups(
                 self.scoring_vars)
         else:
@@ -600,7 +600,7 @@ class Grouper1:
 
                 new_sol_score: float
                 if self.use_alternative_scoring:
-                    self.__calc_alternative_scoring_vars()
+                    validate.calc_alternative_scoring_vars(self)
                     new_sol_score = scoring_alternative.score_groups(
                         self.scoring_vars)
                 else:
@@ -736,18 +736,3 @@ class Grouper1:
                 max_dislike_pairs = disliked_pairs
                 group_max_disliked_pairs = group
         return group_max_disliked_pairs
-
-    def __calc_alternative_scoring_vars(self):
-        num_students_pref_pair_not_possible: int = 0
-        self.scoring_vars.num_students_no_pref_pairs = 0  # reset before computing
-        for group in self.groups:
-            for student in group.members:
-                if student.pref_pairing_possible and len(validate.user_likes_group(student, group)) == 0:
-                    self.scoring_vars.num_students_no_pref_pairs += 1
-                elif not student.pref_pairing_possible:
-                    num_students_pref_pair_not_possible += 1
-
-        self.scoring_vars.num_additional_pref_pairs = self.scoring_vars.num_preferred_pairs - \
-            ((sum(len(group.members) for group in self.groups)) -  # num students
-                self.scoring_vars.num_students_no_pref_pairs -
-                num_students_pref_pair_not_possible)
