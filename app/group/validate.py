@@ -545,6 +545,10 @@ def max_num_groups_possible_scoring(target_group_size: int, num_students: int) -
     return trunc(num_students / (target_group_size - 1))
 
 def calc_alternative_scoring_vars(grouping):
+    '''
+    This function calculates the following scoring variables for the alternative scoring method: prioritizing preferred pairs
+    '''
+
     num_students_pref_pair_not_possible: int = 0
     grouping.scoring_vars.num_students_no_pref_pairs = 0  # reset before computing
     for group in grouping.groups:
