@@ -1,10 +1,12 @@
 '''
-module for a grouping algorithm implementation that creates groups via a constructive, 
+module for a grouping algorithm implementation that creates groups via a constructive,
     heuristic approach with local backtracking.
 '''
 
 from copy import deepcopy
+from multiprocessing.synchronize import Event
 import random as rnd
+from typing import Optional
 from app import models
 from app.group import validate
 from app.group import scoring, scoring_alternative
@@ -38,7 +40,7 @@ class Grouper1:
         self.use_alternative_scoring: bool = config_data["prioritize_preferred_over_availability"]
         self.console_printer: printer.GroupingConsolePrinter = console_printer
 
-    def create_groups(self) -> object:
+    def create_groups(self, cancel_event: Optional[Event] = None) -> object:
         '''
         Method for grouping students via a constructive, heuristic approach with local
             backtracking, as follows:
@@ -61,7 +63,9 @@ class Grouper1:
                     in an attempt to improve the solution.
                 First, an attempt to eliminate disliked pairings is made by swapping students that
                     are part of such pairings into other groups.
-                Second, an attempt to eliminate groups without an overlapping time slot is made by
+                If alternative prioritization is selected, then an attempt to maximize the number
+                    of students with at least one preferred pairing is made next.
+                Then an attempt to eliminate groups without an overlapping time slot is made by
                     swapping key students into other groups.
                 NOTE: At each backtracking step, considered swaps are only performed if they
                     are found to improve or at least not decrease the solution's score.
@@ -79,14 +83,17 @@ class Grouper1:
 
         # "Step 5": Repeat Steps 1-4 "grouping_passes" number of times (specified in the config)
         for grouping_pass in range(max(self.config_data["grouping_passes"], 1)):
+            if cancel_event and cancel_event.is_set():
+                return self
             self.groups = []
+
             # Steps 1 thru 4
-            self.__start_grouping(grouping_pass, self.num_groups)
+            self.__start_grouping(grouping_pass, self.num_groups, cancel_event)
 
         ### Step 6: Perform Local Backtracking, Phase 2 ###
         # Attempt to increase the number of preferred pairings and "additional" overlapping
         #   availability by swapping students between groups.
-        self.__backtracking_phase_2()
+        self.__backtracking_phase_2(cancel_event)
 
         # Save and return the current solution as the best solution found
         self.best_solution_found = self.groups
@@ -98,7 +105,7 @@ class Grouper1:
 
         return self
 
-    def __start_grouping(self, grouping_pass: int, num_groups: int):
+    def __start_grouping(self, grouping_pass: int, num_groups: int, cancel_event: Optional[Event] = None):
         '''
         This method performs steps 1 thru 4 of the grouping algorithm.
         Step 1: Pre-process Student List
@@ -117,7 +124,10 @@ class Grouper1:
         self.__construct_initial_groups(preprocessed_data, num_groups)
 
         ### Step 3: Perform Local Backtracking, Phase 1 ###
-        self.__backtracking_phase_1(grouping_pass)
+        self.__backtracking_phase_1(grouping_pass, cancel_event)
+
+        if cancel_event and cancel_event.is_set():
+            return
 
         ### Step 4: Save the Current "Optimal" Solution ###
         # Check if the current solution (groups) score better than the saved best solution
@@ -285,7 +295,7 @@ class Grouper1:
             if self.__group_at_max_size(group_added_to, non_stand_mod):
                 count_groups_max_size += 1
 
-    def __backtracking_phase_1(self, grouping_pass: int):
+    def __backtracking_phase_1(self, grouping_pass: int, cancel_event: Optional[Event] = None):
         '''
         This private/helper method performs the first local backtracking phase of the grouping alg:
             First, an attempt to eliminate disliked pairings is made by swapping students that are
@@ -296,35 +306,34 @@ class Grouper1:
                 are found to improve or at least not decrease the solution's score.
         '''
         # Calculate the current solution score
-        self.scoring_vars = \
-            models.GroupSetData("solution_1",
-                                self.config_data["target_group_size"],
+        self.scoring_vars = models.GroupSetData("solution_1",
+                                                self.config_data["target_group_size"],
 
-                                len((self.config_data["field_mappings"])[
-                                    "preferred_students_field_names"]),
+                                                len((self.config_data["field_mappings"])[
+                                                    "preferred_students_field_names"]),
 
-                                sum(len(group.members)
-                                    for group in self.groups),
+                                                sum(len(group.members)
+                                                    for group in self.groups),
 
-                                len((self.config_data["field_mappings"])[
-                                    "availability_field_names"]),
+                                                len((self.config_data["field_mappings"])[
+                                                    "availability_field_names"]),
 
-                                validate.total_groups_no_availability(
-                                    self.groups),
+                                                validate.total_groups_no_availability(
+                                                    self.groups),
 
-                                validate.total_disliked_pairings(self.groups),
+                                                validate.total_disliked_pairings(self.groups),
 
-                                validate.total_liked_pairings(self.groups),
+                                                validate.total_liked_pairings(self.groups),
 
-                                sum(
-                                    # subtract one to get "additional"
-                                    max(validate.availability_overlap_count(
-                                        group) - 1, 0)
-                                    for group in self.groups),
+                                                sum(
+                                                    # subtract one to get "additional"
+                                                    max(validate.availability_overlap_count(
+                                                        group) - 1, 0)
+                                                    for group in self.groups),
 
-                                num_students_no_pref_pairs=0,  # "don't care" unless alternative scoring
-                                num_additional_pref_pairs=0  # "don't care" unless alternative scoring
-                                )
+                                                num_students_no_pref_pairs=0,  # "don't care" unless alternative scoring
+                                                num_additional_pref_pairs=0  # "don't care" unless alternative scoring
+                                                )
         if self.use_alternative_scoring:
             validate.calc_alternative_scoring_vars(self)
             self.cur_sol_score = scoring_alternative.score_groups(
@@ -334,19 +343,19 @@ class Grouper1:
 
         # Attempt to eliminate disliked pairings by swapping students that are part of such
         # pairings into other groups.
-        self.__eliminate_dislikes(grouping_pass)
+        self.__eliminate_dislikes(grouping_pass, cancel_event)
 
         # If each student having at least one preferred pairing is prioritized above each group having
         # at least one overlapping time slot, then attempt to eliminate students without a preferred
         # pairing by swapping key students into other groups.
         if self.config_data["prioritize_preferred_over_availability"]:
-            self.__eliminate_missing_pref_pairing(grouping_pass)
+            self.__eliminate_missing_pref_pairing(grouping_pass, cancel_event)
 
         # Attempt to eliminate groups without an overlapping time slot by swapping key students
         #   into other groups.
-        self.__eliminate_missing_overlap(grouping_pass)
+        self.__eliminate_missing_overlap(grouping_pass, cancel_event)
 
-    def __eliminate_dislikes(self, grouping_pass: int):
+    def __eliminate_dislikes(self, grouping_pass: int, cancel_event: Optional[Event] = None):
         '''
         This private/helper method attempts to eliminate any disliked pairings by swapping students
             that are part of such pairings into other groups.
@@ -363,6 +372,9 @@ class Grouper1:
         while ((validate.total_disliked_pairings(self.groups) > 0) and
                 (loop_count < max((self.config_data["grouping_passes"]*10), 100)) and
                 (student_swapped and no_improvement_count < 10)):
+
+            if cancel_event and cancel_event.is_set():
+                return
 
             loop_count += 1
             self.console_printer.print("Loop " + str(grouping_pass + 1) +
@@ -406,7 +418,7 @@ class Grouper1:
                         student_swapped = True
                         break
 
-    def __eliminate_missing_pref_pairing(self, grouping_pass: int):
+    def __eliminate_missing_pref_pairing(self, grouping_pass: int, cancel_event: Optional[Event] = None):
         '''
         This private/helper method attempts to match each student that could potentially have at least one
             preferred pairing with at at least one of their preferred students (without increasing the
@@ -424,6 +436,9 @@ class Grouper1:
         while ((validate.total_students_no_preferred_pair(self.groups) > 0) and
                 (loop_count < max((self.config_data["grouping_passes"]*10), 100)) and
                 (student_swapped and no_improvement_count < 10)):
+
+            if cancel_event and cancel_event.is_set():
+                return
 
             loop_count += 1
             self.console_printer.print("Loop " + str(grouping_pass + 1) +
@@ -453,7 +468,7 @@ class Grouper1:
             # loop didn't produce an improvement
             no_improvement_count += 1
 
-    def __eliminate_missing_overlap(self, grouping_pass: int):
+    def __eliminate_missing_overlap(self, grouping_pass: int, cancel_event: Optional[Event] = None):
         '''
         This private/helper method attempts to eliminate any groups without an overlapping time
             slot by swapping key students into other groups.
@@ -470,6 +485,9 @@ class Grouper1:
         while ((validate.total_groups_no_availability(self.groups) > 0) and
                 (loop_count < max((self.config_data["grouping_passes"]*10), 100)) and
                 (student_swapped and no_improvement_count < 10)):
+
+            if cancel_event and cancel_event.is_set():
+                return
 
             loop_count += 1
             self.console_printer.print("Loop " + str(grouping_pass + 1) +
@@ -519,7 +537,7 @@ class Grouper1:
             # loop didn't produce an improvement
             no_improvement_count += 1
 
-    def __backtracking_phase_2(self):
+    def __backtracking_phase_2(self, cancel_event: Optional[Event] = None):
         '''
         This private/helper method performs the second backtracking phase of the grouping alg:
             Attempt to increase the number of preferred pairings and "additional" overlapping
@@ -536,6 +554,9 @@ class Grouper1:
         #   progress is being made (student_swapped):
         # Continue to attempt to find improvement swaps.
         while (loop_count < max((self.config_data["grouping_passes"]*10), 100) and student_swapped):
+
+            if cancel_event and cancel_event.is_set():
+                return
 
             loop_count += 1
             self.console_printer.print("Preferred Pairings & Availability Improvement " +
