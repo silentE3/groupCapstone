@@ -37,7 +37,9 @@ def test_group_quality_2():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_16.csv', '--configfile', './tests/test_files/configs/config_16.json', '--reportfile', './tests/test_files/survey_results/test_16_report.xlsx'])
+                             './tests/test_files/survey_results/Example_Survey_Results_16.csv',
+        '--configfile', './tests/test_files/configs/config_16.json',
+        '--reportfile', './tests/test_files/survey_results/test_16_report.xlsx'])
     assert response.exit_code == 0
 
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
@@ -57,7 +59,9 @@ def test_group_quality_3():
     [group sizes of 4 or 5]
     '''
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_19.csv', '--configfile', './tests/test_files/configs/config_19.json', '--reportfile', './tests/test_files/survey_results/test_19_report.xlsx'])
+                             './tests/test_files/survey_results/Example_Survey_Results_19.csv',
+        '--configfile', './tests/test_files/configs/config_19.json',
+        '--reportfile', './tests/test_files/survey_results/test_19_report.xlsx'])
     assert response.exit_code == 0
 
     expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
@@ -72,3 +76,19 @@ def test_group_quality_3():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
+
+def test_group_quality_10():
+    '''
+    This test invokes the group command and verifies that it is writing to a .xlsx file of the name that is expected
+    according to our code that determines the name of the report file based on the name of the survey file provided at
+    input. To pass, the group command must create the output file with the correct name, and inform the user with a
+    message.
+    '''
+
+    response = runner.invoke(group.group, ['tests/test_files/survey_results/Example_Survey_Results_1.csv',
+                                           '--configfile', 'tests/test_files/configs/config_1.json'])
+    assert response.exit_code == 0
+    assert os.path.exists('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
+    assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
+    os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
+
