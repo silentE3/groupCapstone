@@ -3,12 +3,11 @@ group contains all the commands for reading in the .csv data files and generatin
 Also includes reading in the configuration file.
 '''
 from pathlib import Path
-from concurrent.futures import as_completed, wait
-from multiprocessing import synchronize, Event
+from concurrent.futures import as_completed, wait, ProcessPoolExecutor, Future
+from multiprocessing import synchronize, Event, current_process
 from multiprocessing.managers import BaseManager
+import signal
 import sys
-from time import sleep
-from pebble import ProcessPool, ProcessFuture
 import click
 from app import config, core, models
 from app.data import load, reporter
@@ -17,14 +16,11 @@ from app.grouping.grouper_1 import Grouper1
 from app.grouping import grouper_2, printer
 
 
-class MyManager(BaseManager):
+class GroupingManager(BaseManager):
     '''
     A custom version of the BaseManager class so that we can register
-     the necessary shared class(es).
+     the necessary shared class(es) for the grouping process.
     '''
-
-
-grouping_cancel_event: synchronize.Event = Event()
 
 
 @click.command("group")
@@ -92,7 +88,8 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
                               config_data, report_filename)
 
     except ValueError as value_error:
-        print(f"ValueError: {value_error}\n**Check the paths to the input files, if those are ok, then check them for errors**")
+        print(
+            f"ValueError: {value_error}\n**Check the paths to the input files, if those are ok, then check them for errors**")
         sys.exit(1)
 
     except AttributeError as attribute_error:
@@ -101,51 +98,65 @@ def group(surveyfile: str, configfile: str, reportfile: str, allstudentsfile: st
 
 
 def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Configuration, min_max_num_groups: list[int]) -> list[list[models.GroupRecord]]:
-    MyManager.register('GroupingConsolePrinter',
-                       printer.GroupingConsolePrinter)
-    with MyManager() as grouping_manager:
-        # pylint: disable=no-member
-        grouping_console_printer = grouping_manager.GroupingConsolePrinter()
+    GroupingManager.register('GroupingConsolePrinter',
+                             printer.GroupingConsolePrinter)
+    GroupingManager.register('Event',
+                             Event)
 
-        with ProcessPool(max_workers=2) as executor:
-            futures: list[ProcessFuture] = []
+    #pylint: disable=no-member
+    with GroupingManager() as grouping_manager:
+        managed_grouping_vars: models.ManagedGroupingVars = models.ManagedGroupingVars(
+            grouping_manager.Event(), grouping_manager.GroupingConsolePrinter())
+
+        futures: list[Future] = []
+
+        # Allow keyboard interrupt to cleanly cancel the grouping process while
+        # grouping processes are in progress
+
+        def interrupt_handler(_, __):
+            if not current_process().name == 'MainProcess':
+                return
+            managed_grouping_vars.grouping_console_printer.print('Cancelling grouping...')
+            managed_grouping_vars.grouping_cancel_event.set()
+
+            _, not_done = wait(futures, timeout=0)
+
+            counter: int = 0
+            while not_done:
+                managed_grouping_vars.grouping_console_printer.print(
+                    "Working on cancelling the grouping process cleanly... " + str(counter))
+                _, not_done = wait(not_done, timeout=1)
+                counter += 1
+
+            managed_grouping_vars.grouping_console_printer.print("Grouping process cancelled successfully.")
+            print("\n")
+            sys.exit(1)
+        signal.signal(signal.SIGINT, interrupt_handler)
+
+        with ProcessPoolExecutor(max_workers=2) as executor:
 
             ########## Launch "first" grouping algorithm ##########
             # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
             best_solution_grouper_1: Grouper1 = Grouper1(
-                survey_data.records, config_data, 0, grouping_console_printer)
+                survey_data.records, config_data, 0, managed_grouping_vars.grouping_console_printer)
             futures.append(
-                executor.schedule(__run_grouping_alg_1, args=[survey_data.records,
-                                                              config_data, min_max_num_groups[0],
-                                                              min_max_num_groups[1],
-                                                              grouping_console_printer]))
+                executor.submit(__run_grouping_alg_1, survey_data.records,
+                                config_data, min_max_num_groups[0],
+                                min_max_num_groups[1],
+                                managed_grouping_vars))
 
             ########## Launch "second" grouping algorithm ##########
             # Run the grouping algorithm for all possible number of groups while keeping only the best solution found
             best_solution_grouper_2: list[models.GroupRecord] = []
             futures.append(
-                executor.schedule(__run_grouping_alg_2, args=[survey_data.records,
-                                                              config_data, min_max_num_groups[0],
-                                                              min_max_num_groups[1],
-                                                              grouping_console_printer]))
+                executor.submit(__run_grouping_alg_2, survey_data.records,
+                                config_data, min_max_num_groups[0],
+                                min_max_num_groups[1], managed_grouping_vars))
 
             _, not_done = wait(futures, timeout=0)
 
-            # Allow keyboard interrupt to cleanly cancel the grouping process while
-            # grouping processes are in progress
-            try:
-                while not_done:
-                    _, not_done = wait(not_done, timeout=1)
-
-            except KeyboardInterrupt as exc:
-                click.echo('\nCancelling grouping...')
-                grouping_cancel_event.set()
-
-                sleep(1)
-                for future in futures:
-                    future.cancel()
-
-                raise exc
+            while not_done:
+                _, not_done = wait(not_done, timeout=1)
 
             for future in as_completed(futures):
                 if isinstance(future.result(), Grouper1):
@@ -158,29 +169,27 @@ def __run_grouping_algs(survey_data: models.SurveyData, config_data: models.Conf
 
 
 def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models.Configuration,
-                         min_num_groups: int, max_num_groups: int, grouping_console_printer) -> Grouper1:
+                         min_num_groups: int, max_num_groups: int, managed_grouping_vars: models.ManagedGroupingVars) -> Grouper1:
 
     best_solution_found: Grouper1 = Grouper1(
-        records, config_data, 0, grouping_console_printer)
+        records, config_data, 0, managed_grouping_vars.grouping_console_printer)
 
     # Use multiprocessing to execute the grouping in parallel when there are multiple options for
     # the number of groups.
     no_finished_runs: bool = True
-    with ProcessPool() as executor:
-        futures: list[ProcessFuture] = []
+    with ProcessPoolExecutor() as executor:
+        futures: list[Future] = []
         for num_groups in range(min_num_groups, max_num_groups + 1):
             grouper = Grouper1(records, config_data,
-                               num_groups, grouping_console_printer)
+                               num_groups, managed_grouping_vars.grouping_console_printer)
             futures.append(
-                executor.schedule(grouper.create_groups))
+                executor.submit(grouper.create_groups, managed_grouping_vars.grouping_cancel_event))
 
         _, not_done = wait(futures, timeout=0)
 
-        # Allow keyboard interrupt to cleanly cancel the grouping process while
-        # grouping processes are in progress
         while not_done:
             _, not_done = wait(not_done, timeout=1)
-            if grouping_cancel_event.is_set():
+            if managed_grouping_vars.grouping_cancel_event.is_set():
                 for future in futures:
                     future.cancel()
                 return best_solution_found
@@ -199,23 +208,23 @@ def __run_grouping_alg_1(records: list[models.SurveyRecord], config_data: models
 
 
 def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models.Configuration,
-                         min_num_groups: int, max_num_groups: int, grouping_console_printer) -> list[models.GroupRecord]:
+                         min_num_groups: int, max_num_groups: int, managed_grouping_vars: models.ManagedGroupingVars) -> list[models.GroupRecord]:
 
     # Additional pre-processing: rank students based on their availability and num of people they are compatible with
     grouper_2.rank_students(records)
     best_solution_found: list[models.GroupRecord] = []
     best_score: float = 0
-    with ProcessPool() as executor:
-        exec_results = {executor.schedule(run_grouper_2, args=[records, config_data, num_groups, grouping_console_printer]):
+    with ProcessPoolExecutor() as executor:
+        exec_results = {executor.submit(run_grouper_2, records, config_data, num_groups,
+                                        managed_grouping_vars.grouping_console_printer,
+                                        managed_grouping_vars.grouping_cancel_event):
                         num_groups for num_groups in range(min_num_groups, max_num_groups + 1)}
 
         _, not_done = wait(exec_results, timeout=0)
 
-        # Allow keyboard interrupt to cleanly cancel the grouping process while
-        # grouping processes are in progress
         while not_done:
             _, not_done = wait(not_done, timeout=1)
-            if grouping_cancel_event.is_set():
+            if managed_grouping_vars.grouping_cancel_event.is_set():
                 for future in exec_results:
                     future.cancel()
                 return best_solution_found
@@ -230,7 +239,7 @@ def __run_grouping_alg_2(records: list[models.SurveyRecord], config_data: models
         return best_solution_found
 
 
-def run_grouper_2(records, config_data, num_groups, grouping_console_printer):
+def run_grouper_2(records, config_data, num_groups, grouping_console_printer, cancel_event: synchronize.Event):
     '''
     runs grouper 2 with the given number of groups
     '''
@@ -238,7 +247,7 @@ def run_grouper_2(records, config_data, num_groups, grouping_console_printer):
         'running grouper 2 with ' + str(num_groups) + ' groups')
     grouper2 = grouper_2.Grouper2(
         records, config_data, num_groups, grouping_console_printer)
-    grouper2.group_students()
+    grouper2.group_students(cancel_event)
     return grouper2
 
 

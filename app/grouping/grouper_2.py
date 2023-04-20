@@ -2,6 +2,7 @@
 module for an additional grouping algorithm implementation
 """
 import copy
+from multiprocessing.synchronize import Event
 from random import randint
 from typing import Optional
 from app import models
@@ -32,18 +33,20 @@ class Grouper2:
         self.console_printer: printer.GroupingConsolePrinter = console_printer
         self.scoring_vars: models.GroupSetData
 
-    def group_students(self) -> list[models.GroupRecord]:
+    def group_students(self, cancel_event: Optional[Event] = None) -> list[models.GroupRecord]:
         """
         initiates the grouping process
         """
         self.prepare_students_for_grouping()
         while len(self.students) > 0:
+            if cancel_event and cancel_event.is_set():
+                return self.groups
             student = self.students.pop()
             self.add_student_to_group(student)
         self.console_printer.print('balancing groups that need more members')
-        self.balance_groups()
+        self.balance_groups(cancel_event)
         self.console_printer.print('optimizing groups for best solution')
-        self.optimize_groups()
+        self.optimize_groups(cancel_event)
 
         # Clear any final print statement in preparation for it to be overwritten
         self.console_printer.print("")
@@ -107,11 +110,13 @@ class Grouper2:
                     break
             member_count += 1
 
-    def balance_groups(self):
+    def balance_groups(self, cancel_event: Optional[Event] = None):
         '''
         balances groups
         '''
         for group in self.groups:
+            if cancel_event and cancel_event.is_set():
+                return
             if len(group.members) < self.target_group_size - self.target_group_margin_lower:
                 self.console_printer.print(
                     f'balancing group: {group.group_id} with size {len(group.members)}')
@@ -172,7 +177,7 @@ class Grouper2:
                     group.members.append(member)
                     break
 
-    def optimize_groups(self):
+    def optimize_groups(self, cancel_event: Optional[Event] = None):
         '''
         creates grouping optimizations by swapping users
         if 5 operations result in the same score, it will end with the assumption that it has done the best it will do
@@ -184,6 +189,8 @@ class Grouper2:
         dup_score_count = 0
         # loop through the specified # of grouping passes
         for group_pass in range(self.grouping_passes):
+            if cancel_event and cancel_event.is_set():
+                return
             # track previous scores
             if prev_score == self.grade_groups():
                 dup_score_count += 1
@@ -223,16 +230,16 @@ class Grouper2:
 
         if self.use_alternative_scoring:
             self.scoring_vars = models.GroupSetData("solution_2",
-                                               self.target_group_size,
-                                               len((self.config["field_mappings"])[
-                                                   "preferred_students_field_names"]),
-                                               self.num_students,
-                                               len((self.config["field_mappings"])[
-                                                   "availability_field_names"]),
-                                               num_groups_no_avail,
-                                               num_pairings_disliked,
-                                               num_pairings_liked,
-                                               num_additional_overlap)
+                                                    self.target_group_size,
+                                                    len((self.config["field_mappings"])[
+                                                        "preferred_students_field_names"]),
+                                                    self.num_students,
+                                                    len((self.config["field_mappings"])[
+                                                        "availability_field_names"]),
+                                                    num_groups_no_avail,
+                                                    num_pairings_disliked,
+                                                    num_pairings_liked,
+                                                    num_additional_overlap)
             validate.calc_alternative_scoring_vars(self)
             return scoring_alternative.score_groups(self.scoring_vars)
         scoring_vars = models.GroupSetData("solution_2",
