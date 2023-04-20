@@ -72,3 +72,10 @@ def test_group_quality_3():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
+
+def test_group_quality_5():
+    '''
+    Test of grouping 10 students with a target group size of 7 and a tolerance of +/-.
+    This should end in error.
+    '''
+    
