@@ -4,8 +4,9 @@ import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
 from tests.test_utils.helper_functions import verify_all_students
-import pytest
 from app.data import load
+from app import models
+import pytest
 
 
 runner = CliRunner()
@@ -80,6 +81,68 @@ def test_group_quality_3():
 
     os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
 
+def test_load_missing_students_1_quality_15():
+    '''
+    Tests the add missing student function with 2 missing students.
+    '''
+    result = []
+
+    ids = []
+    ids.append("asurite1")
+    ids.append("asurite2")
+    ids.append("asurite3")
+    ids.append("asurite4")
+    ids.append("asurite5")
+    ids.append("asurite6")
+
+    survey = []
+    student1 = models.SurveyRecord("asurite1")
+    student2 = models.SurveyRecord("asurite2")
+    student3 = models.SurveyRecord("asurite3")
+    student4 = models.SurveyRecord("asurite4")
+    survey.append(student1)
+    survey.append(student2)
+    survey.append(student3)
+    survey.append(student4)
+
+    fields = [
+        "0 to 3 AM",
+        "3 to 6 AM",
+        "6 to 9 AM",
+        "9 to 12 PM",
+        "12 to 3 PM",
+        "3 to 6 PM",
+        "6 to 9 PM",
+        "9 to 12 AM"
+    ]
+
+    result = load.add_missing_students(survey, ids, fields)
+
+    assert len(result) == 6
+    assert result[4].availability == {
+        "0 to 3 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "12 to 3 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    assert result[5].availability == {
+        "0 to 3 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "12 to 3 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "3 to 6 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "6 to 9 PM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'],
+        "9 to 12 AM": ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']
+    }
+    assert not result[4].provided_survey_data
+    assert not result[5].provided_survey_data
+    
+=======
 def test_read_survey_wrong_file_type_quality_13():
     """
     tests that loading a survey file that isn't the right type of file will raise an exception
@@ -220,21 +283,6 @@ def test_group_quality_10():
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
     os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
 
-def test_group_quality_10():
-    '''
-    This test invokes the group command and verifies that it is writing to a .xlsx file of the name that is expected
-    according to our code that determines the name of the report file based on the name of the survey file provided at
-    input. To pass, the group command must create the output file with the correct name, and inform the user with a
-    message.
-    '''
-
-    response = runner.invoke(group.group, ['tests/test_files/survey_results/Example_Survey_Results_1.csv',
-                                           '--configfile', 'tests/test_files/configs/config_1.json'])
-    assert response.exit_code == 0
-    assert os.path.exists('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
-    assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
-    os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
-
 def test_group_quality_11():
 
     '''
@@ -247,3 +295,4 @@ def test_group_quality_11():
     assert response.exit_code == 0
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_3_report.xlsx" not in response.output
     assert "Error: No student surveys found in the input datafile." in response.output
+
