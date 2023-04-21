@@ -4,6 +4,7 @@ import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
 from tests.test_utils.helper_functions import verify_all_students
+from app.data import load
 
 runner = CliRunner()
 
@@ -77,6 +78,117 @@ def test_group_quality_3():
 
     os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
 
+def test_read_survey_raw_quality_12():
+    """
+    tests that loading the raw records of a survey file reads the right number of rows 
+    and the first row is the header
+    """
+    rows = []
+    with open('./tests/test_files/survey_results/Example_Survey_Results_1_full.csv', 'r') as file:
+        rows.extend(load.read_survey_raw(file))
+    assert len(rows) == 4
+    assert rows[0][0] == 'Timestamp'
+
+    assert rows[1][0] == '2022/10/17 6:31:58 PM EST'
+    assert rows[2][0] == '2022/10/17 6:31:58 PM EST'
+    assert rows[3][0] == "2022/10/17 6:31:58 PM EST"
+
+    assert rows[1][1] == 'jsmith1@asu.edu'    
+    assert rows[2][1] == 'jdoe2@asu.edu'
+    assert rows[3][1] == 'mmuster3@asu.edu'
+
+    assert rows[1][2] == ' "jsmith1"'    
+    assert rows[2][2] == '   "jdoe2"'
+    assert rows[3][2] == 'mmuster3'
+
+    assert rows[1][3] == 'John Smith'    
+    assert rows[2][3] == 'Jane Doe'
+    assert rows[3][3] == 'Max Munster'
+
+    assert rows[1][4] == 'jsmith_1'    
+    assert rows[2][4] == 'jdoe_2'
+    assert rows[3][4] == 'mmuster_3'
+
+    assert rows[1][5] == 'johnsmith@gmail.com'    
+    assert rows[2][5] == 'janedoe@gmail.com'
+    assert rows[3][5] == 'maxmustermann@gmail.com'
+
+    assert rows[1][6] == 'UTC +1'    
+    assert rows[2][6] == 'UTC +2'
+    assert rows[3][6] == 'UTC +3'
+
+    assert rows[1][7] == 'Sunday;Thursday;Friday'    
+    assert rows[2][7] == ''
+    assert rows[3][7] == ''
+
+    assert rows[1][8] == 'Monday'    
+    assert rows[2][8] == ''
+    assert rows[3][8] == ''
+
+    assert rows[1][9] == ''    
+    assert rows[2][9] == ''
+    assert rows[3][9] == ''
+
+    assert rows[1][10] == ''    
+    assert rows[2][10] == ''
+    assert rows[3][10] == ''
+
+    assert rows[1][11] == ''    
+    assert rows[2][11] == 'Tuesday'
+    assert rows[3][11] == ''
+
+    assert rows[1][12] == ''    
+    assert rows[2][12] == 'Wednesday'
+    assert rows[3][12] == ''
+
+    assert rows[1][13] == ''    
+    assert rows[2][13] == ''
+    assert rows[3][13] == 'Thursday'
+
+    assert rows[1][14] == ''    
+    assert rows[2][14] == ''
+    assert rows[3][14] == 'Friday'
+
+    assert rows[1][15] == '5'    
+    assert rows[2][15] == '4'
+    assert rows[3][15] == '3'
+
+    assert rows[1][16] == '2'    
+    assert rows[2][16] == '3'
+    assert rows[3][16] == '4'
+
+    assert rows[1][17] == 'jdoe2 - Jane Doe'    
+    assert rows[2][17] == 'mmuster3 - Max Mustermann'
+    assert rows[3][17] == 'jsmith1 - John Smith'
+
+    assert rows[1][18] == ''    
+    assert rows[2][18] == 'jschmo4 - Joe Schmo'
+    assert rows[3][18] == 'bwillia5 - Billy Williams'
+
+    assert rows[1][19] == ''    
+    assert rows[2][19] == ''
+    assert rows[3][19] == ''
+
+    assert rows[1][20] == ''    
+    assert rows[2][20] == ''
+    assert rows[3][20] == ''
+
+    assert rows[1][21] == ''    
+    assert rows[2][21] == ''
+    assert rows[3][21] == ''
+
+    assert rows[1][22] == 'mmuster3 - Max Mustermann'    
+    assert rows[2][22] == 'jsmith1 - John Smith'
+    assert rows[3][22] == 'jdoe2 - Jane Doe'
+
+    assert rows[1][23] == 'jschmo4 - Joe Schmo'    
+    assert rows[2][23] == 'bwillia5 - Billy Williams'
+    assert rows[3][23] == ''
+ 
+    assert rows[1][24] == ''    
+    assert rows[2][24] == ''
+    assert rows[3][24] == ''    
+
 def test_group_quality_10():
     '''
     This test invokes the group command and verifies that it is writing to a .xlsx file of the name that is expected
@@ -91,8 +203,6 @@ def test_group_quality_10():
     assert os.path.exists('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
     os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
-
-
 
 def test_group_quality_10():
     '''
@@ -121,3 +231,4 @@ def test_group_quality_11():
     assert response.exit_code == 0
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_3_report.xlsx" not in response.output
     assert "Error: No student surveys found in the input datafile." in response.output
+
