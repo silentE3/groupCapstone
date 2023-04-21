@@ -92,3 +92,32 @@ def test_group_quality_10():
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
     os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
 
+
+
+def test_group_quality_10():
+    '''
+    This test invokes the group command and verifies that it is writing to a .xlsx file of the name that is expected
+    according to our code that determines the name of the report file based on the name of the survey file provided at
+    input. To pass, the group command must create the output file with the correct name, and inform the user with a
+    message.
+    '''
+
+    response = runner.invoke(group.group, ['tests/test_files/survey_results/Example_Survey_Results_1.csv',
+                                           '--configfile', 'tests/test_files/configs/config_1.json'])
+    assert response.exit_code == 0
+    assert os.path.exists('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
+    assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx" in response.output
+    os.remove('tests/test_files/survey_results/Example_Survey_Results_1_report.xlsx')
+
+def test_group_quality_11():
+
+    '''
+    This test passes a survey file to the group command that has no students in it. It passes if there are no groups in
+    the report, and there is a message displayed to the user telling them there was an error with the survey supplied.
+    '''
+
+    response = runner.invoke(group.group, ['tests/test_files/survey_results/Example_Survey_Results_3.csv',
+                                           '--configfile', 'tests/test_files/configs/config_3.json'])
+    assert response.exit_code == 0
+    assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_3_report.xlsx" not in response.output
+    assert "Error: No student surveys found in the input datafile." in response.output
