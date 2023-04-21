@@ -78,4 +78,16 @@ def test_group_quality_5():
     Test of grouping 10 students with a target group size of 7 and a tolerance of +/-.
     This should end in error.
     '''
-    
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_10.csv', '--configfile', './tests/test_files/configs/config_10.json', '--reportfile', './tests/test_files/survey_results/test_10_report.xlsx'])
+    assert response.exit_code == 0
+
+    expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
+                         'ulexington4', 'usaratoga5', 'jakagi6',
+                         'jkaga7', 'jzuikaku8', 'jshokaku9', 'jhiryu10']
+    verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 3,
+                  4, expected_students)
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" in response.output
+
+    os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
