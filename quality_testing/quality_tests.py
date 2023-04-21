@@ -4,7 +4,9 @@ import math
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
 from tests.test_utils.helper_functions import verify_all_students
+import pytest
 from app.data import load
+
 
 runner = CliRunner()
 
@@ -77,6 +79,20 @@ def test_group_quality_3():
     assert "Error:" not in response.output
 
     os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
+
+def test_read_survey_wrong_file_type_quality_13():
+    """
+    tests that loading a survey file that isn't the right type of file will raise an exception
+    """
+
+    response = runner.invoke(group.group, [
+                             './tests/test_files/reports/Example_Report_1.xlsx', 
+                             '--configfile', 
+                             './tests/test_files/configs/config_19.json', 
+                             '--reportfile', 
+                             './tests/test_files/survey_results/test_19_report.xlsx'])
+
+    assert response.exit_code != 0
 
 def test_read_survey_raw_quality_12():
     """
@@ -231,4 +247,3 @@ def test_group_quality_11():
     assert response.exit_code == 0
     assert "Writing report to: tests/test_files/survey_results/Example_Survey_Results_3_report.xlsx" not in response.output
     assert "Error: No student surveys found in the input datafile." in response.output
-
