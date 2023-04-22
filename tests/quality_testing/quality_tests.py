@@ -6,7 +6,7 @@ request.  Some of the quality tests were alredy part of our testing regime, and 
 import os
 from click.testing import CliRunner
 from app.data import load
-from app import models
+from app import config, models
 from app.commands import group
 from tests.test_utils.helper_functions import verify_groups
 from tests.test_utils.helper_functions import verify_all_students
@@ -73,7 +73,9 @@ def test_group_size_t04():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_18.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
+                             './tests/test_files/survey_results/Example_Survey_Results_18.csv',
+                             '--configfile', './tests/test_files/configs/config_18.json',
+                             '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
     assert response.exit_code == 0
 
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
@@ -98,7 +100,7 @@ def test_complete_solution_t06():
                                                     '-c', './tests/test_files/configs/config_100.json'])
     expected_min_num_groups = 17
     expected_max_num_groups = 20
-    expected_students = [(lambda x: f"asurite{x}")(x) for x in range(1, 101)]
+    expected_students = list(f'asurite{x}' for x in range(100))
 
     assert complete_solution.exit_code == 0
 
@@ -326,20 +328,51 @@ def test_load_missing_students_t15():
     assert not result[5].provided_survey_data
 
 
-# run the quality tests
-tests = [test_group_sizing_t02,
-         test_group_sizing_t03,
-         test_group_size_t04,
-         test_complete_solution_t06,
-         test_report_filename_t10,
-         test_group_empty_survey_t11,
-         test_read_survey_raw_quality_t12,
-         test_read_survey_wrong_file_type_quality_t13,
-         test_load_missing_students_t15]
-for test in tests:
-    try:
-        test()
-    except AssertionError:
-        print("FAIL  --  " + test.__name__)
-    else:
-        print("\tPASS  --  " + test.__name__)
+# # run the quality tests
+# tests = [test_group_sizing_t02,
+#          test_group_sizing_t03,
+#          test_group_size_t04,
+#          test_complete_solution_t06,
+#          test_report_filename_t10,
+#          test_group_empty_survey_t11,
+#          test_read_survey_raw_quality_t12,
+#          test_read_survey_wrong_file_type_quality_t13,
+#          test_load_missing_students_t15]
+# for test in tests:
+#     try:
+#         test()
+#     except AssertionError:
+#         print("FAIL  --  " + test.__name__)
+#     else:
+#         print("\tPASS  --  " + test.__name__)
+
+
+def test_config_field_names_16():
+    '''
+    T-16: Tests the condition where a subset of field names in the data do not exist in the config. 
+    This should ignore any fields that are not defined in the config file.
+    '''
+    conf = config.read_json('./tests/test_files/configs/test_16_config.json')    
+    
+    survey = load.read_survey(conf['field_mappings'], './tests/test_files/survey_results/quality_test_17.csv')
+    
+    # check the survey to see if the fields that are not defined in the config file are ignored
+    for record in survey.records:
+        assert list(record.availability.keys()) == conf['field_mappings']['availability_field_names']
+        assert len(record.disliked_students) <= len(conf['field_mappings']['disliked_students_field_names'])
+        assert len(record.preferred_students) <= len(conf['field_mappings']['preferred_students_field_names'])
+        
+    
+def test_config_field_names_t17():
+    '''
+    T-17: Test the condition where field names in config do not exist in the data
+    '''
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/quality_test_17.csv',
+                             '--configfile', './tests/test_files/configs/invalid_config.json',
+                             '--reportfile', './tests/test_files/survey_results/test_17_report.xlsx'])
+    assert response.exit_code != 0
+
+    # Verify "Error:" is included in the output
+    assert "Error" in response.output
+    
