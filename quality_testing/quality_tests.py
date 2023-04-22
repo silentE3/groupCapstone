@@ -85,7 +85,7 @@ def test_group_quality_5():
     expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
                          'ulexington4', 'usaratoga5', 'jakagi6',
                          'jkaga7', 'jzuikaku8', 'jshokaku9', 'jhiryu10']
-    verify_groups('./tests/test_files/survey_results/test_19_report.xlsx', 3,
+    verify_groups('./tests/test_files/survey_results/test_10_report.xlsx', 3,
                   4, expected_students)
     # Verify "Error:" is NOT included in the output
     assert "Error:" in response.output
