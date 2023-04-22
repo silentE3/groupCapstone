@@ -328,41 +328,22 @@ def test_load_missing_students_t15():
     assert not result[5].provided_survey_data
 
 
-# # run the quality tests
-# tests = [test_group_sizing_t02,
-#          test_group_sizing_t03,
-#          test_group_size_t04,
-#          test_complete_solution_t06,
-#          test_report_filename_t10,
-#          test_group_empty_survey_t11,
-#          test_read_survey_raw_quality_t12,
-#          test_read_survey_wrong_file_type_quality_t13,
-#          test_load_missing_students_t15]
-# for test in tests:
-#     try:
-#         test()
-#     except AssertionError:
-#         print("FAIL  --  " + test.__name__)
-#     else:
-#         print("\tPASS  --  " + test.__name__)
-
-
-def test_config_field_names_16():
+def test_config_field_names_t16():
     '''
     T-16: Tests the condition where a subset of field names in the data do not exist in the config. 
     This should ignore any fields that are not defined in the config file.
     '''
-    conf = config.read_json('./tests/test_files/configs/test_16_config.json')    
-    
+    conf = config.read_json('./tests/test_files/configs/test_16_config.json')
+
     survey = load.read_survey(conf['field_mappings'], './tests/test_files/survey_results/quality_test_17.csv')
-    
+
     # check the survey to see if the fields that are not defined in the config file are ignored
     for record in survey.records:
         assert list(record.availability.keys()) == conf['field_mappings']['availability_field_names']
         assert len(record.disliked_students) <= len(conf['field_mappings']['disliked_students_field_names'])
         assert len(record.preferred_students) <= len(conf['field_mappings']['preferred_students_field_names'])
-        
-    
+
+
 def test_config_field_names_t17():
     '''
     T-17: Test the condition where field names in config do not exist in the data
@@ -375,4 +356,24 @@ def test_config_field_names_t17():
 
     # Verify "Error:" is included in the output
     assert "Error" in response.output
-    
+
+
+# run the quality tests
+tests = [test_group_sizing_t02,
+         test_group_sizing_t03,
+         test_group_size_t04,
+         test_complete_solution_t06,
+         test_report_filename_t10,
+         test_group_empty_survey_t11,
+         test_read_survey_raw_quality_t12,
+         test_read_survey_wrong_file_type_quality_t13,
+         test_load_missing_students_t15,
+         test_config_field_names_t16,
+         test_config_field_names_t17]
+for test in tests:
+    try:
+        test()
+    except AssertionError:
+        print("FAIL  --  " + test.__name__)
+    else:
+        print("\tPASS  --  " + test.__name__)
