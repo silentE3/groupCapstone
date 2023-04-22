@@ -13,7 +13,6 @@ pytest-mock = "*"
 xlsxwriter = "*"
 pyinstaller = "*"
 openpyxl = "*"
-pebble = "*"
 
 [dev-packages]
 yapf = "*"

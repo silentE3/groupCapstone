@@ -701,6 +701,8 @@ def test_read_survey_raw():
     assert len(rows) == 4
     assert rows[0][0] == 'Timestamp'
 
+    assert rows[1][0] == '2022/10/17 6:31:58 PM EST'
+
 
 def test_read_survey_raw_wrongfile_type():
     """

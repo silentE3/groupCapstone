@@ -2,7 +2,9 @@
 '''module that holds the model definitions in the application'''
 from dataclasses import dataclass, field
 import datetime as dt
+from multiprocessing import synchronize
 from typing import TypedDict, Optional, ClassVar
+from app.grouping import printer
 
 
 @dataclass
@@ -57,6 +59,7 @@ class Configuration(TypedDict):
     output_student_email: bool
     output_student_login: bool
     prioritize_preferred_over_availability: bool
+
 
 @dataclass
 class SurveyRecord:
@@ -186,3 +189,13 @@ class AvailabilityMap:
 
     availability_slots: dict[str, list[str]]
     group_availability: list[GroupAvailabilityMap]
+
+
+@dataclass
+class ManagedGroupingVars:
+    '''
+    data structure that holds the necessary inter-process managed
+    variables related to the grouping process
+    '''
+    grouping_cancel_event: synchronize.Event
+    grouping_console_printer: printer.GroupingConsolePrinter
