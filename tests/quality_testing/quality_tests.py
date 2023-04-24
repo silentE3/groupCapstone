@@ -9,7 +9,7 @@ from click.testing import CliRunner
 from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 from app.data import load
-from app import models
+from app import models, config
 from app.commands import group, report as report_imp
 from tests.test_utils.helper_functions import verify_groups
 from tests.test_utils.helper_functions import verify_all_students
@@ -216,6 +216,33 @@ def test_deterministic_scoring_t07():
     # The scores for the solutions output by the program are compared against the ‘swapped scores’. The
     # expected result is that the error between these values is less than 0.01%
     __compare_scores(swapped_scores, __get_scores(report))
+
+    os.remove('tests/test_files/survey_results/dataset-35_students_report.xlsx')
+
+
+def test_input_file_t09():
+    '''
+    This test verifies that the grouping process uses the specified input file.
+    '''
+
+    # invoke the group command with a specified survey file that is valid
+    runner.invoke(group.group, ['./tests/test_files/survey_results/dataset-35_students.csv',
+                                '-c', './tests/test_files/configs/config-35_students.json'])
+    assert os.path.exists('tests/test_files/survey_results/dataset-35_students_report.xlsx')
+    if not os.path.exists:
+        return
+    config_data = config.read_json('./tests/test_files/configs/config-35_students.json')
+
+    # read the "raw" (csv) survey data
+    survey_data_raw = load.read_survey(config_data['field_mappings'],
+                                       './tests/test_files/survey_results/dataset-35_students.csv')
+
+    # read the survey data from the xlsx file that was output by the group command
+    survey_data_from_report = load.read_report_survey_data(
+        'tests/test_files/survey_results/dataset-35_students_report.xlsx', config_data['field_mappings'])
+
+    # Verify that the raw data read in matches what was read in from the report file
+    assert survey_data_raw == survey_data_from_report
 
     os.remove('tests/test_files/survey_results/dataset-35_students_report.xlsx')
 
