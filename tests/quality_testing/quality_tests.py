@@ -347,6 +347,7 @@ def test_load_missing_students_t15():
 tests = [test_group_sizing_t02,
          test_group_sizing_t03,
          test_group_size_t04,
+         test_group_quality_5,
          test_complete_solution_t06,
          test_report_filename_t10,
          test_group_empty_survey_t11,
