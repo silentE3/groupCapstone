@@ -34,14 +34,3 @@ def test_group_stress_t08():
     assert response.exit_code == 0
     assert os.path.exists('tests/test_files/survey_results/dataset-300_students_report.xlsx')
     os.remove('tests/test_files/survey_results/dataset-300_students_report.xlsx')
-
-
-# run the quality tests
-tests = [test_group_stress_t08]
-for test in tests:
-    try:
-        test()
-    except AssertionError:
-        print("FAIL  --  " + test.__name__)
-    else:
-        print("PASS  --  " + test.__name__)
