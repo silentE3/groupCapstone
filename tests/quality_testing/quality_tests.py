@@ -90,22 +90,21 @@ def test_group_size_t04():
 
     os.remove('./tests/test_files/survey_results/test_18_report.xlsx')
 
-def test_group_quality_5():
+
+def test_group_sizing_invalid_t05():
     '''
-    Test of grouping 10 students with a target group size of 7 and a tolerance of +/-.
-    This should end in error.
+    Test of grouping 10 students with a target group size of 7 and a tolerance of +/-1.
+
+    The expected outcome is an error since it is not possible to adhere to these group
+    sizing constraints.
     '''
     response = runner.invoke(group.group, [
                              './tests/test_files/survey_results/Example_Survey_Results_10.csv', '--configfile', './tests/test_files/configs/config_10.json', '--reportfile', './tests/test_files/survey_results/test_10_report.xlsx'])
     assert response.exit_code == 0
 
-    expected_students = ['uenterprise2', 'uhornet3', 'uyorktown1',
-                         'ulexington4', 'usaratoga5', 'jakagi6',
-                         'jkaga7', 'jzuikaku8', 'jshokaku9', 'jhiryu10']
-    # Verify "Error:" is NOT included in the output
+    # Verify "Error:" IS included in the output
     assert "Error:" in response.output
-
-    os.remove('./tests/test_files/survey_results/test_19_report.xlsx')
+    assert not os.path.exists('./tests/test_files/survey_results/test_10_report.xlsx')
 
 
 def test_complete_solution_t06():
@@ -379,7 +378,7 @@ def test_config_field_names_t17():
 tests = [test_group_sizing_t02,
          test_group_sizing_t03,
          test_group_size_t04,
-         test_group_quality_5,
+         test_group_sizing_invalid_t05,
          test_complete_solution_t06,
          test_report_filename_t10,
          test_group_empty_survey_t11,
