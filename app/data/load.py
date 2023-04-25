@@ -214,18 +214,32 @@ def check_survey_field_headers(field_mapping: models.SurveyFieldMapping, fields)
     if field_mapping['student_id_field_name'] not in fields:
         __logger.error(__field_map_error_msg(field_mapping['student_id_field_name']))
         valid_headers = False
-    for field in field_mapping['preferred_students_field_names']:
-        if field not in fields:
-            __logger.error(__field_map_error_msg(field))
-            valid_headers = False
-    for field in field_mapping['disliked_students_field_names']:
-        if field not in fields:
-            __logger.error(__field_map_error_msg(field))
-            valid_headers = False
-    for field in field_mapping['availability_field_names']:
-        if field not in fields:
-            __logger.error(__field_map_error_msg(field))
-            valid_headers = False
+    if field_mapping.get('preferred_students_field_names') is None:
+        __logger.error("key preferred_students_field_names not found in field mapping.")
+        valid_headers = False
+
+    else:
+        for field in field_mapping['preferred_students_field_names']:
+            if field not in fields:
+                __logger.error(__field_map_error_msg(field))
+                valid_headers = False
+
+    if field_mapping.get('disliked_students_field_names') is None:
+        __logger.error("disliked_students_field_names not found in field mapping")
+        valid_headers = False
+    else:
+        for field in field_mapping['disliked_students_field_names']:
+            if field not in fields:
+                __logger.error(__field_map_error_msg(field))
+                valid_headers = False
+    if field_mapping.get('availability_field_names') is None:
+        __logger.error("availability_field_names not found in field mapping")
+        valid_headers = False
+    else:
+        for field in field_mapping['availability_field_names']:
+            if field not in fields:
+                __logger.error(__field_map_error_msg(field))
+                valid_headers = False
 
     if field_mapping.get('submission_timestamp_field_name') and field_mapping['submission_timestamp_field_name'] not in fields:
         __logger.error(__field_map_error_msg(field_mapping['submission_timestamp_field_name']))
