@@ -1,10 +1,11 @@
 '''
-These tests were created for the quality plan created for the project.  They will not run every time there is a pull 
+These tests were created for the quality plan created for the project.  They will not run every time there is a pull
 request.  Some of the quality tests were alredy part of our testing regime, and those will remain in the tests package.
 '''
 
 import os
 from click.testing import CliRunner
+from openpyxl import load_workbook, Workbook
 from app.data import load
 from app import config, models
 from app.commands import group
@@ -157,7 +158,7 @@ def test_group_empty_survey_t11():
 
 def test_read_survey_raw_quality_t12():
     """
-    tests that loading the raw records of a survey file reads the right number of rows 
+    tests that loading the raw records of a survey file reads the right number of rows
     and the first row is the header
     """
     rows = []
@@ -282,6 +283,50 @@ def test_read_survey_wrong_file_type_quality_t13():
     assert response.exit_code != 0
 
 
+def test_read_roster_t14():
+    '''
+    This test verifies that every student listed in the roster is included in the
+    grouping process, regardless of whether they are included in the survey data.
+    '''
+
+    # NOTE: The survey data only includes asurites 1 through 5, whereas the
+    # roster (allstudentsfile) includes asurites 1 through 8.
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_T14.csv',
+                             '--configfile', './tests/test_files/configs/config_T14.json',
+                             '--allstudentsfile', './tests/test_files/example_roster_3.csv'])
+
+    assert response.exit_code == 0
+
+    expected_students = ['asurite1',
+                         'asurite2',
+                         'asurite3',
+                         'asurite4',
+                         'asurite5',
+                         'asurite6',
+                         'asurite7',
+                         'asurite8']
+
+    # Verify all of the expected students have been grouped
+    report_wb: Workbook = load_workbook('tests/test_files/survey_results/Example_Survey_Results_T14_report.xlsx')
+    individual_sheets = [report_wb["individual_report_1"], report_wb["individual_report_2"]]
+    for individual_sheet in individual_sheets:
+        row_num: int = 2
+        for col_num, cell in enumerate(individual_sheet[1]):  # first row
+            if cell.value is None:
+                continue
+            if str.strip(cell.value) == "Student Id":
+                while (individual_sheet[row_num][col_num].value) is not None:  # second row value
+                    assert individual_sheet[row_num][col_num].value in expected_students
+                    row_num += 1
+        assert row_num-2 == len(expected_students)  # minus 2 b/c started at 2
+
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('./tests/test_files/survey_results/Example_Survey_Results_T14_report.xlsx')
+
+
 def test_load_missing_students_t15():
     '''
     Tests the add missing student function with 2 missing students.
@@ -384,6 +429,7 @@ tests = [test_group_sizing_t02,
          test_group_empty_survey_t11,
          test_read_survey_raw_quality_t12,
          test_read_survey_wrong_file_type_quality_t13,
+         test_read_roster_t14,
          test_load_missing_students_t15,
          test_config_field_names_t16,
          test_config_field_names_t17]
