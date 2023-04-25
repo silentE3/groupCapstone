@@ -5,14 +5,14 @@ request.  Some of the quality tests were alredy part of our testing regime, and 
 
 import math
 import os
-from click.testing import CliRunner
 from openpyxl import load_workbook, Workbook
 from openpyxl.worksheet.worksheet import Worksheet
-from app.data import load
-from app import models, config
-from app.commands import group, report as report_imp
-from tests.test_utils.helper_functions import verify_groups
+from click.testing import CliRunner
 from tests.test_utils.helper_functions import verify_all_students
+from tests.test_utils.helper_functions import verify_groups
+from app import config, models
+from app.commands import group, report as report_imp
+from app.data import load
 
 
 runner = CliRunner()
@@ -76,7 +76,9 @@ def test_group_sizing_t04():
     '''
 
     response = runner.invoke(group.group, [
-                             './tests/test_files/survey_results/Example_Survey_Results_18.csv', '--configfile', './tests/test_files/configs/config_18.json', '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
+                             './tests/test_files/survey_results/Example_Survey_Results_18.csv',
+                             '--configfile', './tests/test_files/configs/config_18.json',
+                             '--reportfile', './tests/test_files/survey_results/test_18_report.xlsx'])
     assert response.exit_code == 0
 
     expected_students = ['adumble4', 'triddle8', 'dmalfoy7',
@@ -92,6 +94,22 @@ def test_group_sizing_t04():
     os.remove('./tests/test_files/survey_results/test_18_report.xlsx')
 
 
+def test_group_sizing_invalid_t05():
+    '''
+    Test of grouping 10 students with a target group size of 7 and a tolerance of +/-1.
+
+    The expected outcome is an error since it is not possible to adhere to these group
+    sizing constraints.
+    '''
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_10.csv', '--configfile', './tests/test_files/configs/config_10.json', '--reportfile', './tests/test_files/survey_results/test_10_report.xlsx'])
+    assert response.exit_code == 0
+
+    # Verify "Error:" IS included in the output
+    assert "Error:" in response.output
+    assert not os.path.exists('./tests/test_files/survey_results/test_10_report.xlsx')
+
+
 def test_complete_solution_t06():
     '''
     This test is to verify that when a surveyfile containing 100 students is provided to the program, with a target
@@ -101,7 +119,7 @@ def test_complete_solution_t06():
                                                     '-c', './tests/test_files/configs/config_100.json'])
     expected_min_num_groups = 17
     expected_max_num_groups = 20
-    expected_students = [(lambda x: f"asurite{x}")(x) for x in range(1, 101)]
+    expected_students = list(f'asurite{x}' for x in range(100))
 
     assert complete_solution.exit_code == 0
 
@@ -403,6 +421,50 @@ def test_read_survey_wrong_file_type_quality_t13():
     assert response.exit_code != 0
 
 
+def test_read_roster_t14():
+    '''
+    This test verifies that every student listed in the roster is included in the
+    grouping process, regardless of whether they are included in the survey data.
+    '''
+
+    # NOTE: The survey data only includes asurites 1 through 5, whereas the
+    # roster (allstudentsfile) includes asurites 1 through 8.
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/Example_Survey_Results_T14.csv',
+                             '--configfile', './tests/test_files/configs/config_T14.json',
+                             '--allstudentsfile', './tests/test_files/example_roster_3.csv'])
+
+    assert response.exit_code == 0
+
+    expected_students = ['asurite1',
+                         'asurite2',
+                         'asurite3',
+                         'asurite4',
+                         'asurite5',
+                         'asurite6',
+                         'asurite7',
+                         'asurite8']
+
+    # Verify all of the expected students have been grouped
+    report_wb: Workbook = load_workbook('tests/test_files/survey_results/Example_Survey_Results_T14_report.xlsx')
+    individual_sheets = [report_wb["individual_report_1"], report_wb["individual_report_2"]]
+    for individual_sheet in individual_sheets:
+        row_num: int = 2
+        for col_num, cell in enumerate(individual_sheet[1]):  # first row
+            if cell.value is None:
+                continue
+            if str.strip(cell.value) == "Student Id":
+                while (individual_sheet[row_num][col_num].value) is not None:  # second row value
+                    assert individual_sheet[row_num][col_num].value in expected_students
+                    row_num += 1
+        assert row_num-2 == len(expected_students)  # minus 2 b/c started at 2
+
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove('./tests/test_files/survey_results/Example_Survey_Results_T14_report.xlsx')
+
+
 def test_load_missing_students_t15():
     '''
     Tests the add missing student function with 2 missing students.
@@ -463,3 +525,33 @@ def test_load_missing_students_t15():
     }
     assert not result[4].provided_survey_data
     assert not result[5].provided_survey_data
+
+
+def test_config_field_names_t16():
+    '''
+    T-16: Tests the condition where a subset of field names in the data do not exist in the config. 
+    This should ignore any fields that are not defined in the config file.
+    '''
+    conf = config.read_json('./tests/test_files/configs/test_16_config.json')
+
+    survey = load.read_survey(conf['field_mappings'], './tests/test_files/survey_results/quality_test_17.csv')
+
+    # check the survey to see if the fields that are not defined in the config file are ignored
+    for record in survey.records:
+        assert list(record.availability.keys()) == conf['field_mappings']['availability_field_names']
+        assert len(record.disliked_students) <= len(conf['field_mappings']['disliked_students_field_names'])
+        assert len(record.preferred_students) <= len(conf['field_mappings']['preferred_students_field_names'])
+
+
+def test_config_field_names_t17():
+    '''
+    T-17: Test the condition where field names in config do not exist in the data
+    '''
+    response = runner.invoke(group.group, [
+                             './tests/test_files/survey_results/quality_test_17.csv',
+                             '--configfile', './tests/test_files/configs/invalid_config.json',
+                             '--reportfile', './tests/test_files/survey_results/test_17_report.xlsx'])
+    assert response.exit_code != 0
+
+    # Verify "Error:" is included in the output
+    assert "Error" in response.output
