@@ -263,6 +263,41 @@ def test_read_survey_wrong_file_type_quality_t13():
 
     assert response.exit_code != 0
 
+def test_read_roster_t14():
+    '''
+    Tests reading a roster of students with every student being added to the list from the csv file.
+    '''
+    roster = load.read_roster("./tests/test_files/example_roster_3.csv")
+    survey = [
+        models.SurveyRecord('asurite1', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite2', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite3', availability={
+                            '1': ['sunday']}, provided_availability=True),
+        models.SurveyRecord('asurite4', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite5', availability={
+                            '1': []}, provided_availability=False),
+        models.SurveyRecord('asurite6', availability={
+                            '1': []}, provided_availability=False)
+    ]
+
+    results = load.match_survey_to_roster(survey, roster, avail_field=['1'])
+
+    assert len(results) == 8
+
+    assert results[0] == 'asurite1'
+    assert results[1] == 'asurite2'
+    assert results[2] == 'asurite3'
+    assert results[3] == 'asurite4'
+    assert results[4] == 'asurite5'
+    assert results[5] == 'asurite6'
+    assert results[6] == 'asurite7'
+    assert results[7] == 'asurite8'
+
+
+
 
 def test_load_missing_students_t15():
     '''
@@ -335,6 +370,7 @@ tests = [test_group_sizing_t02,
          test_group_empty_survey_t11,
          test_read_survey_raw_quality_t12,
          test_read_survey_wrong_file_type_quality_t13,
+         test_read_roster_t14,
          test_load_missing_students_t15]
 for test in tests:
     try:
