@@ -27,7 +27,7 @@ def test_group_stress_t08():
 
     start_time_ms: int = math.ceil(time.time_ns() / NS_TO_MS_DIVISOR)
     response = runner.invoke(group.group, ['tests/test_files/survey_results/dataset-300_students.csv',
-                                           '--configfile', 'tests/test_files/configs/config-300_students.json'], pty=True)
+                                           '--configfile', 'tests/test_files/configs/config-300_students.json'])
     execution_time_ms: int = math.ceil(time.time_ns() / NS_TO_MS_DIVISOR) - start_time_ms
     print('\nExecution time (ms): ' + str(execution_time_ms) + '\n')
     assert execution_time_ms < TIME_LIMIT_MS
