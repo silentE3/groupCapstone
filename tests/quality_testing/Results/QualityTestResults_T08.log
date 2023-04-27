@@ -1,0 +1,13 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.6, pytest-7.2.2, pluggy-1.0.0 -- /home/kenzie816/.local/share/virtualenvs/team-58-IUulJ7XT/bin/python
+cachedir: .pytest_cache
+rootdir: /home/kenzie816/Documents/SER_401/PROJECT/team-58
+plugins: mock-3.10.0, cov-4.0.0
+collecting ... collected 1 item
+
+tests/quality_testing/quality_test_t08.py::test_group_stress_t08 
+Execution time (ms): 3198665
+
+PASSED
+
+======================== 1 passed in 3199.01s (0:53:19) ========================

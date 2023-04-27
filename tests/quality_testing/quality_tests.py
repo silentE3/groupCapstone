@@ -17,11 +17,37 @@ from app.data import load
 
 runner = CliRunner()
 
+def test_group_sizing_t01():
+    '''
+    Test of grouping 12 students with a target group size of 4 (divides evenly), without any +/- margin. 
+
+    The expected outcome is that the tool provides solutions consisting of 3 groups of 4 students.
+    '''
+
+    response = runner.invoke(group.group, [
+        './tests/test_files/survey_results/test_group_1.csv', '--configfile', './tests/test_files/configs/test_group_1_config.json'])
+    assert response.exit_code == 0
+
+    expected_min_num_groups = 3
+    expected_max_num_groups = 3
+    expected_students = ['jsmith1', 'jdoe2',
+                         'mmuster3', 'jschmo4', 'bwillia5', 'mbrown6', 'charles7', 'carl8', 'elee9', 'cred10', 'bobbylee11', 'jrogan12']
+
+    verify_groups('./tests/test_files/survey_results/test_group_1_report.xlsx', expected_min_num_groups,
+                  expected_max_num_groups, expected_students)
+
+    # Verify "Error:" is NOT included in the output
+    assert "Error:" not in response.output
+
+    os.remove(
+        './tests/test_files/survey_results/test_group_1_report.xlsx')
+
 
 def test_group_sizing_t02():
     '''
     Test of grouping 16 students with a target group size of 3 (does not divide evenly,
     but still possible to maintain +1, [group sizes of 3 or 4]).
+    
     '''
 
     response = runner.invoke(group.group, [
