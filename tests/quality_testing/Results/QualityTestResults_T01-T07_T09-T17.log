@@ -1,0 +1,25 @@
+============================= test session starts ==============================
+platform linux -- Python 3.10.6, pytest-7.2.2, pluggy-1.0.0 -- /home/kenzie816/.local/share/virtualenvs/team-58-IUulJ7XT/bin/python
+cachedir: .pytest_cache
+rootdir: /home/kenzie816/Documents/SER_401/PROJECT/team-58
+plugins: mock-3.10.0, cov-4.0.0
+collecting ... collected 16 items
+
+tests/quality_testing/quality_tests.py::test_group_sizing_t01 PASSED     [  6%]
+tests/quality_testing/quality_tests.py::test_group_sizing_t02 PASSED     [ 12%]
+tests/quality_testing/quality_tests.py::test_group_sizing_t03 PASSED     [ 18%]
+tests/quality_testing/quality_tests.py::test_group_sizing_t04 PASSED     [ 25%]
+tests/quality_testing/quality_tests.py::test_group_sizing_invalid_t05 PASSED [ 31%]
+tests/quality_testing/quality_tests.py::test_complete_solution_t06 PASSED [ 37%]
+tests/quality_testing/quality_tests.py::test_deterministic_scoring_t07 PASSED [ 43%]
+tests/quality_testing/quality_tests.py::test_input_file_t09 PASSED       [ 50%]
+tests/quality_testing/quality_tests.py::test_report_filename_t10 PASSED  [ 56%]
+tests/quality_testing/quality_tests.py::test_group_empty_survey_t11 PASSED [ 62%]
+tests/quality_testing/quality_tests.py::test_read_survey_raw_quality_t12 PASSED [ 68%]
+tests/quality_testing/quality_tests.py::test_read_survey_wrong_file_type_quality_t13 PASSED [ 75%]
+tests/quality_testing/quality_tests.py::test_read_roster_t14 PASSED      [ 81%]
+tests/quality_testing/quality_tests.py::test_load_missing_students_t15 PASSED [ 87%]
+tests/quality_testing/quality_tests.py::test_config_field_names_t16 PASSED [ 93%]
+tests/quality_testing/quality_tests.py::test_config_field_names_t17 PASSED [100%]
+
+======================== 16 passed in 238.74s (0:03:58) ========================
